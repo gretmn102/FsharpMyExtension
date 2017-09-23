@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net45</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="FsharpMyExtension.fs" />
+	<Compile Include="Library1.fs" />
+    <Compile Include="List.fs" />
+    <Compile Include="Either.fs" />
+    <Compile Include="Unpoint.fs" />
+    <Compile Include="LZ.fs" />
+    <Compile Include="ListZipperC.fs" />
+    <Compile Include="Queue.fs" />
+    <Compile Include="Combinatorics.fs" />
+    <Compile Include="Tree.fs" />
+    <Compile Include="Map.fs" />
+    <Compile Include="Option.fs" />
+    <Compile Include="LazyList.fs" />
+    <Compile Include="Seq.fs" />
+    <Compile Include="String.fs" />
+    <Compile Include="HtmlNode.fs" />
+    <Compile Include="ParserPrimitives.fs" />
+    <Compile Include="ParserString.fs" />
+    <Compile Include="ParserHtmlNode.fs" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

@@ -1,0 +1,1 @@
+#r "../../../packages/Fuchu/lib/Fuchu.dll" 
