@@ -10,7 +10,7 @@ let tail = function
     | Cons (_, t) -> t.Force() 
     | Empty -> failwith "empty list"
 
-let single a = Cons (a, lazy ( Empty )) 
+let single a = Cons (a, lazy ( Empty ))
 
 let cons (a : 'a) (l : LazyList<'a>) = Cons (a, lazy ( l )) 
 
@@ -21,7 +21,6 @@ let rec map f = function
 let rec iter f = function
     | Empty -> () 
     | Cons (a, t) -> f a; iter f (t.Force())
-
 
 let rec take nr = function
     | Empty -> Empty 

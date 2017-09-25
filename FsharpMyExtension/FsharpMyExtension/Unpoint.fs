@@ -3,53 +3,53 @@
 //#if INTERACTIVE
 //#load "Library1.fs"
 //#endif
-module ByteUnderstand =
-    open FsharpMyExtension.FSharpExt
-    open FsharpMyExtension
-    open FsharpMyExtension.List
+// module ByteUnderstand =
+//     open FsharpMyExtension.FSharpExt
+//     open FsharpMyExtension
+//     open FsharpMyExtension.List
     
-    let x = 10
-    let s = System.SByte.MaxValue
-    let toBits (x:byte) =
-        let capacity = 8
-        let s = System.Convert.ToString(x, 2) |> Array.ofSeq
-        let xs = Array.create capacity '0'
-        Array.blit s 0 xs (capacity - s.Length) s.Length
-        xs |> System.String.Concat
+//     let x = 10
+//     let s = System.SByte.MaxValue
+//     let toBits (x:byte) =
+//         let capacity = 8
+//         let s = System.Convert.ToString(x, 2) |> Array.ofSeq
+//         let xs = Array.create capacity '0'
+//         Array.blit s 0 xs (capacity - s.Length) s.Length
+//         xs |> System.String.Concat
     
-    let n = 10uy
-    let before = toBits n
-    let after = n <<< 1 |> toBits
-    (n ^^^ (1uy <<< 0)) |> toBits |> printfn "%s"
+//     let n = 10uy
+//     let before = toBits n
+//     let after = n <<< 1 |> toBits
+//     (n ^^^ (1uy <<< 0)) |> toBits |> printfn "%s"
 
-    let inline check reg bit = (reg >>> bit) &&& LanguagePrimitives.GenericOne
-    assert
-        let n = 14uy
-        toBits n = (List.init 8 (check n >> string) |> List.rev |> String.concat "")
-    let inline bitIsSet reg bit = check reg bit = LanguagePrimitives.GenericOne
-        //(reg &&& (LanguagePrimitives.GenericOne <<< bit )) // <> LanguagePrimitives.GenericZero
+//     let inline check reg bit = (reg >>> bit) &&& LanguagePrimitives.GenericOne
+//     assert
+//         let n = 14uy
+//         toBits n = (List.init 8 (check n >> string) |> List.rev |> String.concat "")
+//     let inline bitIsSet reg bit = check reg bit = LanguagePrimitives.GenericOne
+//         //(reg &&& (LanguagePrimitives.GenericOne <<< bit )) // <> LanguagePrimitives.GenericZero
         
 
-    (*if BitIsSet(cod[znak], 0) OFF_a; else ON_a;
-    if BitIsSet(cod[znak], 1) OFF_b; else ON_b;
-    if BitIsSet(cod[znak], 2) OFF_c; else ON_c;
-    if BitIsSet(cod[znak], 3) OFF_d; else ON_d;
-    if BitIsSet(cod[znak], 4) OFF_e; else ON_e;
-    if BitIsSet(cod[znak], 5) OFF_f; else ON_f;
-    if BitIsSet(cod[znak], 6) OFF_g; else ON_g;*)
-    let cod = [|64uy; 121uy; 36uy; 48uy; 25uy; 18uy; 2uy; 120uy; 0uy; 16uy; 8uy; 3uy; 70uy; 33uy; 6uy; 14uy; 127uy|]
-    cod |> Array.map toBits
-    cod |> Array.map (fun x -> bitIsSet x 2)
-    //Seq.unfold (fun st -> )
-    let next = (+) '\001'
-    let xs = Seq.unfold (fun st -> Some(st, next st)) 'A' |> Seq.mapi (uncurry id)
+//     (*if BitIsSet(cod[znak], 0) OFF_a; else ON_a;
+//     if BitIsSet(cod[znak], 1) OFF_b; else ON_b;
+//     if BitIsSet(cod[znak], 2) OFF_c; else ON_c;
+//     if BitIsSet(cod[znak], 3) OFF_d; else ON_d;
+//     if BitIsSet(cod[znak], 4) OFF_e; else ON_e;
+//     if BitIsSet(cod[znak], 5) OFF_f; else ON_f;
+//     if BitIsSet(cod[znak], 6) OFF_g; else ON_g;*)
+//     let cod = [|64uy; 121uy; 36uy; 48uy; 25uy; 18uy; 2uy; 120uy; 0uy; 16uy; 8uy; 3uy; 70uy; 33uy; 6uy; 14uy; 127uy|]
+//     cod |> Array.map toBits
+//     cod |> Array.map (fun x -> bitIsSet x 2)
+//     //Seq.unfold (fun st -> )
+//     let next = (+) '\001'
+//     let xs = Seq.unfold (fun st -> Some(st, next st)) 'A' |> Seq.mapi (uncurry id)
     
-    let f (i, c) =
-        let interp = function true -> "-" | _ -> "+"
-        cod |> Seq.map (fun x -> Seq.take 7 xs |> Seq.map (mapFst (bitIsSet x >> interp) >> curry (sprintf "%s%c")) ) |> Seq.map (String.concat " ")
+//     let f (i, c) =
+//         let interp = function true -> "-" | _ -> "+"
+//         cod |> Seq.map (fun x -> Seq.take 7 xs |> Seq.map (mapFst (bitIsSet x >> interp) >> curry (sprintf "%s%c")) ) |> Seq.map (String.concat " ")
         
-        List.init (Array.length cod) (bitIsSet (Array.get cod i)) |> List.map (interp >> flip (sprintf "%s%c") c)
-    xs |> Seq.map f |> Seq.take 7 |> List.ofSeq |> List.trans |> List.map (String.concat " ")
+//         List.init (Array.length cod) (bitIsSet (Array.get cod i)) |> List.map (interp >> flip (sprintf "%s%c") c)
+//     xs |> Seq.map f |> Seq.take 7 |> List.ofSeq |> List.trans |> List.map (String.concat " ")
 
 module Unpoint =
     open FsharpMyExtension.FSharpExt
@@ -126,7 +126,7 @@ module Unpoint =
     assert (print <| App(Lambda("x", Var "y"), Var "z") = "(fun x -> y) z")
     assert (print <| App(App(Var "x", Var "y"), Var "z") = "x y z")
 
-    print <| App(App(Lambda("x", App(Var "x", Var "z")), Var "x'"), Lambda("x", App(Var "x", Var "z")))
+    //print <| App(App(Lambda("x", App(Var "x", Var "z")), Var "x'"), Lambda("x", App(Var "x", Var "z")))
     let rec pars = function
         | Quotations.Patterns.Lambda(v, l) -> Lambda(v.Name, pars l)
         | Quotations.Patterns.Call(_, fn, args) ->
@@ -136,7 +136,7 @@ module Unpoint =
         | Quotations.Patterns.Var v -> Var v.Name
         | Quotations.Patterns.Application(x, y) -> App(pars x, pars y)
         | x -> failwithf "unknown %A" x
-    pars <@ fun f n -> f * (2 + 3) * (fun x -> x * 2) (f + n) @> |> print
+    //pars <@ fun f n -> f * (2 + 3) * (fun x -> x * 2) (f + n) @> |> print
     let contain elem =
         let rec fn curr =
             match curr with

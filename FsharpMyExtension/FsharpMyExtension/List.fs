@@ -2,10 +2,11 @@
 
 [<RequireQualifiedAccess>]
 module List =
+    open FsharpMyExtension.FSharpExt
     let cons x xs = x::xs
     let consFlip xs x = x::xs
     
-    [<System.ObsoleteAttribute("use 'List.splitAt'")>]
+    [<System.ObsoleteAttribute("use 'List.splitAt' in Fsharp.Core 4.0")>]
     let trunc n xs = 
         let rec f n acc = function
             | [] -> acc, []
@@ -20,17 +21,89 @@ module List =
         trunc 5 [1..4] = ([1..4], [])
     assert
         trunc 0 [1..10] = ([], [1..10])
-
-    let truncWhile p xs = 
-        let rec f acc = function
-            | [] -> acc, []
-            | h::t as xs ->
-                if p h then f (h::acc) t
-                else acc, xs
-        let (h, t) = f [] xs in List.rev h, t
-    assert
-        truncWhile (fun x -> x % 2 = 0) [2; 4; 6; 7; 8; 9] = ([2;4;6], [7; 8; 9])
     
+    /// takeWhile = truncWhile ?
+    [<System.ObsoleteAttribute("use 'takeWhileRest'")>]
+    let truncWhile p xs = 
+        failwith "use 'takeWhileRest'"
+    //     let rec f acc = function
+    //         | [] -> acc, []
+    //         | h::t as xs ->
+    //             if p h then f (h::acc) t
+    //             else acc, xs
+    //     let (h, t) = f [] xs in List.rev h, t
+    // assert
+    //     truncWhile (fun x -> x % 2 = 0) [2; 4; 6; 7; 8; 9] = ([2;4;6], [7; 8; 9])
+    [<System.ObsoleteAttribute("use 'takeWhileRest'")>]
+    /// takeWhile = truncWhile ?
+    let takeWhile p =
+        failwith "use 'takeWhileRest'"
+    //     let rec f acc = function
+    //         | [] -> List.rev acc, []
+    //         | h::t as xs ->
+    //             if p h then f <| h::acc <| t
+    //             else List.rev acc, xs
+    //     f []
+    // assert
+    //     takeWhile (fun x -> x % 2 = 0) [2; 4; 6; 7; 8; 9] = ([2;4;6], [7; 8; 9])
+    // assert
+    //     takeWhile (flip (%) 2 >> (=) 0) [2;4;5;6] = ([2;4], [5;6])
+    // assert
+    //     takeWhile (konst id true) [] = ([],[])
+    // assert
+    //     takeWhile (flip (%) 2 >> (=) 0) [3;4;5;6] = ([], [3;4;5;6])
+
+    ///**Description**
+    /// * takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2;4;6], [7;8;9])
+    ///**Parameters**
+    ///  * `p` - parameter of type `'a -> bool`
+    ///
+    ///**Output Type**
+    ///  * `'a list -> 'a list * 'a list`
+    ///
+    ///**Exceptions**
+    /// ?
+    let takeWhileRest p =
+        let takeWhileRest p =
+            let rec f acc = function
+                | [] -> List.rev acc, []
+                | h::t as xs ->
+                    if p h then f <| h::acc <| t
+                    else List.rev acc, xs
+            f []
+        /// faster then `takeWhileRest`?
+        let takeWhileRest2 pred =
+            let finished = ref true
+            List.partition (pred >> fun r -> !finished && (finished := r; r))
+        // assert
+        //     let sw f =
+        //         let s = System.Diagnostics.Stopwatch()
+        //         s.Start()
+        //         f() |> ignore
+        //         s.Stop()
+        //         s.Elapsed
+
+        //     let p = ((>) (10000000 / 3))
+        //     let xs = [1..10000000]
+        //     takeWhileRest p xs = takeWhileRest2 p xs
+        //     ((fun () -> takeWhileRest p xs) |> sw) - ((fun () -> takeWhileRest2 p xs) |> sw)
+            
+        //     true
+        takeWhileRest2 p
+    assert
+        takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2; 4; 6], [1; 2; 4])
+    
+
+    ///**Description**
+    /// * `truncList` 2 [1..5] -> [[1; 2]; [3; 4]; [5]]
+    /// * `truncList` 3 [1..8] -> [[1; 2; 3]; [4; 5; 6]; [7; 8]]
+    ///**Parameters**
+    ///  * `n` - parameter of type `int`
+    ///  * `xs` - parameter of type `'a list`
+    ///
+    ///**Output Type**
+    ///  * `'a list list`
+    [<System.ObsoleteAttribute("use 'List.chunkBySize' in Fsharp.Core 4.0, and 'n' must be >0")>]
     let truncList n xs = 
         let rec f acc = function
             | [] -> acc
@@ -45,69 +118,33 @@ module List =
         truncList 5 [1..4] = [[1..4]]
     assert
         truncList 0 [1..10] = [[1..10]]
-
-    let transpose L = 
-        let f1 x = List.map (function | hd::tl -> Some hd, tl | [] -> None, []) x
-    
-        let f2 x = 
-            List.foldBack (fun x (ls, Ls) ->
-                                match x with
-                                | Some a, l -> Some a :: ls, l :: Ls
-                                | None, l -> None :: ls, l :: Ls) x ([], [])
-        let res = ref []
-        let f3 (l, ls) = res := l :: !res; f1 ls
-    
-        let l1 = f1 L
-        let rec f l = 
-            if l |> List.exists (function _, x -> List.length x <> 0) then f (f3 (f2 l)) else l
-        in f l1 |> ignore
-        !res |> List.rev
-            (*
-        let l2 = f2 l1
-        let l3 = f3 l2
-        let l4 = f2 l3
-        let l5 = f3 l4
-        let l6 = f2 l5
-        let l7 = f3 l6
-        let l8 = f2 l7
-        let l9 = f3 l8
-        let l10 = f2 l9
-        //!res |> List.rev
-        *)
-
-    open FsharpMyExtension.FSharpExt
-    let trans xss = 
-        let ss = function 
-            | []::_ -> [], []
-            | xss -> List.foldBack (fun x (xs, yss) -> match x with (h::t) -> h::xs, t::yss | _ -> failwith "The lists had different lengths") xss ([], [])
-        ss xss |> Seq.unfold (function [], _ -> None | (xs, yss) -> Some(xs, ss yss)) |> List.ofSeq
-//    let rec trans = function
-//        | [xs] -> xs |> List.map (fun x -> [x])
-//        | xs::xss -> List.map2 (fun x y -> x::y) xs (trans xss)
-//        | _ -> failwith "в списке пустой список"
     assert
-        let xss = truncList 3 [1..9]
-        let s () = 
-            let f f ini = List.fold (fun st x ini -> f x st ini) ini [1..3]
-            let f f x0 x1 x2 s = fun ini -> f x0 (fun ini -> f x1 (fun ini -> f x2 s ini) ini) ini
-            let f f s = fun ini -> f 1 (fun ini -> f 2 (fun ini -> f 3 s ini) ini) ini
-            let ss = (fun ini -> (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) 1 (fun ini -> (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) 2 (fun ini -> (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) 3 snd ini) ini) ini) (2, [])
-            let ss = if 2 > 0 then (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) 2 (fun ini -> (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) 3 snd ini) (2-1, 1::[]) else []
-            let fold xs = Seq.unfold (function h::t -> Some((h,t), t) | [] -> None) xs |> List.ofSeq
-            
-            let f fn ini = List.foldBack (fun st x ini -> fn st x ini) <| fold [1..10] <| ini
-            let s = f (fun x f (i, xs) -> match x with (_, [_]) -> printfn "sdf"; begin if i then f(true, x::xs) else f(false, x::xs) end | _ -> f(i,x::xs)) id (true, [])
-            let ini = (2,[])
-            let next = fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs
-            
-            //(2, []) |> f (fun x f (i, xs) -> if i > 0 then f(i-1, x::xs) else xs) snd
-            ()
-        trans xss = [[1; 4; 7]; [2; 5; 8]; [3; 6; 9]]
-    
-    let trans2 xss = 
-        let ss xss = List.foldBack (fun x (xs, yss) -> match x with (h::t) -> Some h::xs, t::yss | [] -> None::xs, []::yss) xss ([], [])
-        ss xss |> Seq.unfold (function xs, _ when List.forall Option.isNone xs -> None | (xs, yss) -> Some(xs, ss yss)) |> List.ofSeq
+        List.allPairs [1..10] [[1..5]; [1..10]]
+        |> List.tryPick (fun ((n, xs) as x) ->
+            (curry List.chunkBySize x, curry truncList x) |> cond (curry (<>)) (comma x >> Some) (k None))
+        |> Option.isNone
 
+    ///**Description**
+    /// * transpose lists
+    /// [[Some 1; Some 1;  Some 1]
+    /// [Some 2; Some 2;  Some 2]
+    /// [Some 3; Some 3;  Some 3]
+    /// [None;   Some 4;  Some 4]
+    /// [None;   Some 5;  Some 5]
+    /// [None;   Some 6;  None  ]
+    /// [None;   Some 7;  None  ]
+    /// [None;   Some 8;  None  ]
+    /// [None;   Some 9;  None  ]
+    /// [None;   Some 10; None  ]]
+    ///**Parameters**
+    ///  * `xss` - parameter of type `'a list list`
+    ///
+    ///**Output Type**
+    ///  * `'a option list list`
+    let transposeOpt xss =
+        let ss xss =
+            List.foldBack (fun x (xs, yss) -> match x with (h::t) -> Some h::xs, t::yss | [] -> None::xs, []::yss) xss ([], [])
+        ss xss |> List.unfold (function xs, _ when List.forall Option.isNone xs -> None | (xs, yss) -> Some(xs, ss yss))    
     assert
         let input = 
             [[1; 2; 3];
@@ -124,9 +161,52 @@ module List =
              [None;   Some 8;  None  ]
              [None;   Some 9;  None  ]
              [None;   Some 10; None  ]]
-        let actual = trans2 input |> List.ofSeq
+
+        let actual = transposeOpt input
         actual = expepected
+    [<System.ObsoleteAttribute("use 'transposeOpt'")>]
+
+    let transpose (L:'a list list) : ('a option list list) = 
+        failwith "use 'transposeOpt'"
+        // let f1 x = List.map (function | hd::tl -> Some hd, tl | [] -> None, []) x
     
+        // let f2 x = 
+        //     List.foldBack (fun x (ls, Ls) ->
+        //                         match x with
+        //                         | Some a, l -> Some a :: ls, l :: Ls
+        //                         | None, l -> None :: ls, l :: Ls) x ([], [])
+        // let res = ref []
+        // let f3 (l, ls) = res := l :: !res; f1 ls
+    
+        // let l1 = f1 L
+        // let rec f l = 
+        //     if l |> List.exists (function _, x -> not (List.isEmpty x)) then f (f3 (f2 l)) else l
+        // in f l1 |> ignore
+        // !res |> List.rev
+
+    ///**Description**
+    ///  * transpose matrix
+    ///  * `[[1; 2; 3]; [4; 5; 6]; [7; 8; 9]]` -> `[[1; 4; 7]; [2; 5; 8]; [3; 6; 9]]`
+    ///  * `[[1; 2]; [3; 4]; [5; 6]]` -> `[[1; 3; 5]; [2; 4; 6]]`
+    ///**Parameters**
+    ///  * `xss` - parameter of type `'a list list`
+    ///**Output Type**
+    ///  * `'a list list`
+    ///**Exceptions**
+    ///  * System.ArgumentException: Throw then the lists tail of `xss` has different lengths.
+    ///  * trans [[1;2]; [3;4;5]] -> [[1; 3]; [2; 4]]
+    ///  * but trans [[1;2]; [3]] -> Exception
+    let trans xss = 
+        let ss = function 
+            | []::_ -> [], []
+            | xss -> List.foldBack (fun x (xs, yss) -> match x with (h::t) -> h::xs, t::yss | _ -> raise (System.ArgumentException("The lists had different lengths")) ) xss ([], [])
+        ss xss |> List.unfold (function [], _ -> None | (xs, yss) -> Some(xs, ss yss))
+    assert
+        let xss = List.chunkBySize 2 [1..6]
+        trans xss = [[1; 2]; [3; 4]; [5; 6]]
+    
+    [<System.ObsoleteAttribute("use 'transposeOpt'")>]
+    let trans2 xss = failwith "use 'transposeOpt'"
     let shuffle cards =
         let rnd = new System.Random()
         let ranOf (l:System.Collections.Generic.List<'a>) =
@@ -142,19 +222,8 @@ module List =
             else acc
         f []
 
-    let takeWhile p =
-        let rec takeFirst acc = function
-            | [] -> List.rev acc, []
-            | h::t as xs -> if p h then takeFirst <| h::acc <| t else List.rev acc, xs
-        takeFirst []
-    assert
-        takeWhile (flip (%) 2 >> (=) 0) [2;4;5;6] = ([2;4], [5;6])
-    assert
-        takeWhile (konst id true) [] = ([],[])
-    assert
-        takeWhile (flip (%) 2 >> (=) 0) [3;4;5;6] = ([], [3;4;5;6])
-
-    let unfold fn (ini:'State) = Seq.unfold fn ini |> List.ofSeq
+    // [<System.ObsoleteAttribute("use 'List.unfold' in Fsharp.Core 4.0")>]
+    // let unfold fn (ini:'State) = Seq.unfold fn ini |> List.ofSeq
 
     let travOpt xs =
         let rec f acc = function
@@ -167,3 +236,32 @@ module List =
         [ yield Some 1; yield None; yield Some 3 ] |> travOpt = None
 
 
+// module T =
+//     (*type List<'a> =
+//         | Cons of 'a * List<'a>
+//         | Nil
+//     let (>!) x xs = Cons(x, xs) *)
+//     let rec foldBack f st = function
+//         | x :: xs -> foldBack f (f x st) xs
+//         | [] -> st
+    
+    
+//     //((a + b) + c)
+//     List.rev [1..10] |> foldBack (fun x st -> x::st) []
+//     let rec fold f st = function
+//         | x::xs -> f x (lazy(fold f st xs))
+//         | [] -> st
+//     let rec fold' fn st =
+//         let rec f st = function
+//             | x::xs -> fn x  (lazy(f st xs))
+//             | [] -> st
+//         f st
+//     let i = ref 0
+//     let fn step ini (xs:'T list) n = fold step ini xs n
+//     let take n xs = fn (fun x st -> function 0 -> [] | n -> x :: (st.Value (n - 1))) (fun _ -> []) xs n
+//     take 20000 [1..20000]
+//     Seq.unfold (fun (xs, ys) -> ys |> function h::t -> Some((h, t), t) | [] -> None ) ([], [1..10])
+    
+//     i
+
+//     let s = ""

@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FsharpMyExtension.fs" />
-	<Compile Include="Library1.fs" />
+    <Compile Include="Library1.fs" />
     <Compile Include="List.fs" />
     <Compile Include="Either.fs" />
     <Compile Include="Unpoint.fs" />
@@ -20,10 +20,12 @@
     <Compile Include="Seq.fs" />
     <Compile Include="String.fs" />
     <Compile Include="HtmlNode.fs" />
+    <Compile Include="ParserPrimitives2.fs" />
     <Compile Include="ParserPrimitives.fs" />
     <Compile Include="ParserString.fs" />
     <Compile Include="ParserHtmlNode.fs" />
     <None Include="App.config" />
+    <Compile Include="TestParser.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

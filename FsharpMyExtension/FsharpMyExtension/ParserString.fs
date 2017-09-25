@@ -1,13 +1,19 @@
 ﻿namespace Parser
 
 module ParserString =
+    // #if INTERACTIVE
+    // #load "ParserPrimitives.fs"
+    // //#load "List.fs"
+    // //#load "Either.fs"
+    // #endif
     open FsharpMyExtension.Either
     open FsharpMyExtension.List
     open FsharpMyExtension.FSharpExt
     open FsharpMyExtension.String
 
-    open Primitives
+    open Parser.Primitives
 
+    //
     let pchar c = satisfy ((=) c) (sprintf "%c") (string c)
 
     let manySatisfy (f:char->_) = many (satisfy f (fun _ -> null) null) |>> System.String.Concat
