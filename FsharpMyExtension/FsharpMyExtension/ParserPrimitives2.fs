@@ -15,6 +15,7 @@ module Primitives2 =
     //let head { State = s; Head = h } = h s
     //let tail { State = s; Tail = t } = t s
     //let isEmpty { State = s; IsEmpty = f } = f s
+
     type T<'Elem> =
         | Back of 'Elem list * string
         | NotBack of string
@@ -26,9 +27,10 @@ module Primitives2 =
 
     // Pars<'Elem, Pars<'Elem, 'State>> -> Pars<'Elem, 'State>
     // ('Elem list -> Result<'Elem, Pars<'Elem, 'State>>) -> ('Elem list -> Result<'Elem, 'State>)
+    
     let notChange lab = Left(false, [NotBack lab] )
     //let cat (x: Pars<'Elem, Result<_, 'State>>) = x >> Either.concat
-    let pzero : Pars<_,_> = let fn xs = (xs, Left(false, [NotBack ""])) in fn
+    let pzero : Pars<_,_> = let fn xs = (xs, notChange "") in fn
     let (>>=) (p: Pars<'Elem,'State>) (f:'State->Pars<'Elem,'State2>) : Pars<'Elem,'State2> =
         p >> fun (xs, x) -> //x |> Either.either (fun y -> xs, Left y ) (flip f xs)
             x |> Either.either (fun y -> xs, Left y )
@@ -42,7 +44,7 @@ module Primitives2 =
                     match x with
                     | Back _ as x -> x
                     | NotBack m -> Back(ys, m)
-                xs, Left(false, [ f (List.head x) ])
+                xs, Left(false, Back(ys, "back") :: x (* [ f (List.head x) ] *))
             | _ -> ys, x
         fn
     let trav (x: Pars<_, Result<_, 'State>>) : Pars<'Elem, 'State>  =
@@ -58,13 +60,13 @@ module Primitives2 =
                 | _ -> notChange lab)
             //|> flip comma xs
         in fn
-    let steamEmpty (f:Pars<'Elem,_>) lab =
+    let steamEmpty (f: Pars<_,_>) lab =
         let fn = function
             | [] -> [], notChange lab
             | xs -> f xs in fn : Pars<'Elem,_>
     
     let praw : Pars<'Elem,'Elem> =
-        let fn xs = xs |> steamEmpty (on List.tail (List.head >> Right)) "stream is empty"
+        let fn xs = xs |> steamEmpty (on List.tail (List.head >> Right)) "expected any element, but stream is empty"
         fn
     let satisfy f note : Pars<'Elem, 'Elem> =
         let fn xs =
@@ -73,7 +75,7 @@ module Primitives2 =
                     cond (snd >> f)
                         (mapSnd Right)
                         (k (xs, notChange note)))
-                    (on List.tail List.head) ) "stream is empty"
+                    (on List.tail List.head) ) (sprintf "expected '%s', but stream is empty" note)
         fn
 
     let (<?>) (p:Pars<'Elem,_>) label : Pars<'Elem,_> =
@@ -89,8 +91,10 @@ module Primitives2 =
             xs, Left(false, List.concat [x; y])))
         fn : Pars<'Elem,'State> 
     let (>>.) p1 p2 = p1 >>= k p2
+    let (>>?) p1 p2 = attempt (p1 >>. p2)
     let (>>%) p x = p >>= k (preturn x)
     let (.>>) p1 p2 = p1 >>= (>>%) p2
+    let (.>>?) p1 p2 = attempt (p1 .>> p2)
     let (.>>.) p1 p2 = p1 >>= fun x -> p2 >>= fun y -> preturn (x, y)
     let (|>>) p f = p >>= (f >> preturn)
     let pipe2 p1 p2 f = p1 >>= fun a -> p2 >>= fun b -> preturn (f a b)
@@ -100,15 +104,27 @@ module Primitives2 =
     let rec many (p:Pars<'Elem,'State>) : Pars<'Elem,'State list> = 
         //(p >>= fun x -> many p |>> fun xs -> x::xs ) <|> preturn []
         let rec fn acc xs = 
-            match p xs with
-            | xs, Right x -> fn (x::acc) xs
-            | _, Left(false, _) ->
-                xs, Right(List.rev acc)
-            | xs, (Left(true, ys) as x) ->
-                xs, Left(true, ys)
+            let (xs, r) = p xs
+(*             r |> Either.either (
+                    cond fst Left (k (Right(List.rev acc))) >> comma xs
+                    // (if change then Left(true, ys) else Right(List.rev acc)) |> comma xs
+                    )
+                (fun x -> fn (x::acc) xs) *)
+                
+            match r with
+            | Right x -> fn (x::acc) xs
+            // | _, Left(false, _) ->
+            //     xs, Right(List.rev acc)
+            // | xs, (Left(true, ys) as x) ->
+            //     xs, Left(true, ys)
+            | Left(changed, ys) ->
+                if changed then Left(true, ys)
+                else Right(List.rev acc)
+                |> fun x -> xs, x
         fn []
     let many1 p = pipe2 p (many p) (fun hd tl -> hd::tl)
-    let sepBy p sep = pipe2 p (many (sep >>. p) ) (fun hd tl -> hd::tl) <|> (preturn [])
+    let sepBy p sep =
+        pipe2 p (many (attempt(sep >>. p)) ) (fun hd tl -> hd::tl) <|> (preturn [])
 
     let run s (p:Pars<_,_>) = List.ofSeq s |> p
 
