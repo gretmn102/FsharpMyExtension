@@ -1,23 +1,34 @@
 ﻿namespace FsharpMyExtension.Either
-//#if INTERACTIVE
-//#load "library1.fs"
-//#load "list.fs"
-//#endif
 open FsharpMyExtension.List
 
 type Either<'a,'b> = Left of 'a | Right of 'b
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Either =
+    let empty = Right
+
     let map fn = function
         | Right x -> Right <| fn x
         | Left x -> Left x
+
     let fold fn state = function
         | Right x -> fn state x
         | _ -> state
     let bind fn = function
         | Right x -> fn x
         | Left x -> Left x
+    let liftA2 fn x y = 
+        //x |> bind (fun x -> map (fn x) y)
+        match x, y with
+        | Right x, Right y -> fn x y |> Right
+        | Left x, _ -> Left x
+        | _, Left x -> Left x        
+    let (<*>) (f : Either<'a, ('b -> 'c)>) xs =
+        //bind (fun x -> map x xs) f
+        match f, xs with
+        | Right x, Right y -> Right <| x y
+        | Left x, _ -> Left x
+        | _, Left x -> Left x
     /// Case analysis for the Either type. If the value is Left a, apply the first function to a; if it is Right b, apply the second function to b.
     let either f g = function
         | Right x -> g x
@@ -28,7 +39,7 @@ module Either =
     let ofOption s = function None -> Left s | Some x -> Right x
     
     //let travEitherPseudo f xs = either (Left >> Seq.singleton) (Seq.map <| bind f) xs
-    /// не похоже на sequenceA ибо f (t (f x)) -> t (f x). И результат не равен: "fmap concat . sequenceA"
+    /// не похоже на sequenceA ибо f<t, f<x>> -> t<f<x>>. И результат не равен: "fmap concat . sequenceA"
     let seqEitherPseudo xs = either (Left >> Seq.singleton) id xs
     assert
         [
@@ -46,34 +57,45 @@ module Either =
 
     let getOrDef x = function Right x -> x | _ -> x
     let getOrDef' fn = function Right x -> x | Left x -> fn x
-
+    let get = function Right x -> x | Left x -> failwithf "try get right, but '%A'" x
     let isRight = function Right _ -> true | _ -> false
     let isLeft = function Left _ -> true | _ -> false
     let concat x = bind id x
 
 [<RequireQualifiedAccess>]
 module List =
-    [<System.ObsoleteAttribute("Renaming in seqEither", true)>]
-    let travEither xs =
-        xs |> List.takeWhile Either.isRight
-        |> function
-            | xs, [] ->
-                List.map (Either.getOrDef' (fun _ -> failwith "" )) xs |> Right | _, Left x::_ -> Left x
-            | _ -> failwith ""
-    
-    let seqEither xs =
-        xs |> List.takeWhile Either.isRight
-        |> function
-            | xs, [] ->
-                List.map (Either.getOrDef' (fun _ -> failwith "" )) xs |> Right | _, Left x::_ -> Left x
-            | _ -> failwith ""        
+    let travEither (fn: 'a -> Either<'b,'c>) (xs:'a list) : Either<'b, 'c list> =
+        let rec f acc = function
+            | x::xs ->
+                fn x // |> Either.bind (fun x -> f (x::acc) xs) // хуже работает
+                |> function
+                    | Right x -> f (x::acc) xs
+                    | Left x -> Left x
+            | [] -> Right acc
+        f [] xs
 
+    let seqEither xs =
+        // travEither id xs // дольше?
+        xs |> List.takeWhileRest Either.isRight
+        |> function
+            | xs, [] -> List.map Either.get xs |> Right
+            | _, Left x::_ -> Left x
+            | _ -> failwith ""
+    // assert
+    //     let xs : list<Either<unit, _>> = List.init 500000 Right
+    //     travEither id xs |> ignore
+    //     seqEither xs |> ignore
+    //     true
+    // let seqEither f = List.map f >> seqEither
+    // let ss xs = s id xs
 [<RequireQualifiedAccess>]
 module Seq =
     let travEither fn (xs : _ seq) =
         let rec f acc (xs:System.Collections.Generic.IEnumerator<_>) = 
             if xs.MoveNext() then
-                xs.Current |> fn |> Either.bind (fun x -> f (x :: acc) xs)
+                xs.Current |> fn |> function
+                    | Right x -> f (x :: acc) xs
+                    | Left x -> Left x
             else List.rev acc |> Right
         f [] <| xs.GetEnumerator()
 

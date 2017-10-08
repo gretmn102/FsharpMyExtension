@@ -75,16 +75,6 @@ module FSharpExt =
     let (^<) = (<<)
     let (^|) = (<|)
 
-    (*open Fuchu
-    [<Tests>]
-    let simpleTest = 
-        testCase "A simple test" <| 
-            fun _ ->
-                //Assert.Equal("2+3", 4, 2+3)
-                (10, "20") |> function (a, b) as x -> Assert.Equal("comma a b = (a, b)", x, comma a b) *)
-    
-    
-
 open FSharpExt
 
 module Show =
@@ -129,7 +119,7 @@ module Show =
         show (s (showChar 'a') << s (showChar 'b')) = "(a)(b)"
 
     let join s (xs: ShowS list) = 
-        let join s = cond List.isEmpty (k empty) (List.reduce (fun x y -> x << s << y))
+        let join s = cond List.isEmpty (k empty) (List.reduce (fun x y -> x << (s << y)))
         join (showString s) xs : ShowS
         
     assert

@@ -1,7 +1,9 @@
 #r @"C:\Users\User\.nuget\packages\fparsec\1.0.3\lib\net40-client\FParsecCS.dll"
 #r @"C:\Users\User\.nuget\packages\fparsec\1.0.3\lib\net40-client\FParsec.dll"
 #r @"C:\Users\User\.nuget\packages\htmlagilitypack\1.5.5\lib\Net45\HtmlAgilityPack.dll"
+#r @"C:\Users\User\.nuget\packages\fuchu\1.0.3\lib\Fuchu.dll"
 #r @"E:\Project\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension\bin\Debug\net45\FsharpMyExtension.dll"
+
 
 #load @"e:\Project\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension.fs"
 #load @"e:\Project\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension\Library1.fs"

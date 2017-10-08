@@ -73,16 +73,11 @@ Target "Test" (fun _ ->
     |> Seq.iter (fun p ->
         let dir = System.IO.Path.GetDirectoryName p
         let dir = System.IO.Path.Combine(dir, @"bin\debug\net45\test.exe")
-        printfn "%A" dir
         if System.IO.File.Exists dir then
-            printfn "%A" "yes"
-            // let dotnetExePath = buildDir + "test.exe"
-            // System.IO.Path.GetDirectoryName @"e:\Project\FsharpMyExtension\Test\Test\bin\Debug\net45\Test.exe"
             let result =
                 ExecProcess (fun info ->
                     info.FileName <- dir) TimeSpan.MaxValue
             if result <> 0 then failwith "tests failed"
-            // runDotnet dir "build"
     )
 )
 

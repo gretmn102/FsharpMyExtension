@@ -15,12 +15,12 @@ module List =
                 else f (n - 1) (h::acc) t
         if n < 0 then failwith "n must be greater 0"
         let (h, t) = f n [] xs in List.rev h, t
-    assert
-        trunc 5 [1..10] = ([1..5], [6..10])
-    assert
-        trunc 5 [1..4] = ([1..4], [])
-    assert
-        trunc 0 [1..10] = ([], [1..10])
+    // assert
+    //     trunc 5 [1..10] = ([1..5], [6..10])
+    // assert
+    //     trunc 5 [1..4] = ([1..4], [])
+    // assert
+    //     trunc 0 [1..10] = ([], [1..10])
     
     /// takeWhile = truncWhile ?
     [<System.ObsoleteAttribute("use 'takeWhileRest'")>]
@@ -54,7 +54,7 @@ module List =
     //     takeWhile (flip (%) 2 >> (=) 0) [3;4;5;6] = ([], [3;4;5;6])
 
     ///**Description**
-    /// * takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2;4;6], [7;8;9])
+    /// * `takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2;4;6], [7;8;9])`
     ///**Parameters**
     ///  * `p` - parameter of type `'a -> bool`
     ///
@@ -107,22 +107,22 @@ module List =
     let truncList n xs = 
         let rec f acc = function
             | [] -> acc
-            | xs -> let (h, t) = trunc n xs in f (h::acc) t
+            | xs -> let (h, t) = List.splitAt n xs in f (h::acc) t
         if n = 0 then [xs]
         else f [] xs |> List.rev
-    assert
-        truncList 3 [1..10] = [[1; 2; 3]; [4; 5; 6]; [7; 8; 9]; [10]]
-    assert
-        truncList 3 [1..9] = [[1; 2; 3]; [4; 5; 6]; [7; 8; 9];]
-    assert
-        truncList 5 [1..4] = [[1..4]]
-    assert
-        truncList 0 [1..10] = [[1..10]]
-    assert
-        List.allPairs [1..10] [[1..5]; [1..10]]
-        |> List.tryPick (fun ((n, xs) as x) ->
-            (curry List.chunkBySize x, curry truncList x) |> cond (curry (<>)) (comma x >> Some) (k None))
-        |> Option.isNone
+    // assert
+    //     truncList 3 [1..10] = [[1; 2; 3]; [4; 5; 6]; [7; 8; 9]; [10]]
+    // assert
+    //     truncList 3 [1..9] = [[1; 2; 3]; [4; 5; 6]; [7; 8; 9];]
+    // assert
+    //     truncList 5 [1..4] = [[1..4]]
+    // assert
+    //     truncList 0 [1..10] = [[1..10]]
+    // assert
+    //     List.allPairs [1..10] [[1..5]; [1..10]]
+    //     |> List.tryPick (fun ((n, xs) as x) ->
+    //         (curry List.chunkBySize x, curry truncList x) |> cond (curry (<>)) (comma x >> Some) (k None))
+    //     |> Option.isNone
 
     ///**Description**
     /// * transpose lists
@@ -208,7 +208,7 @@ module List =
     [<System.ObsoleteAttribute("use 'transposeOpt'")>]
     let trans2 xss = failwith "use 'transposeOpt'"
     let shuffle cards =
-        let rnd = new System.Random()
+        let rnd = System.Random()
         let ranOf (l:System.Collections.Generic.List<'a>) =
             let n = Seq.length l
             let r = rnd.Next(0, n)
@@ -224,7 +224,7 @@ module List =
 
     // [<System.ObsoleteAttribute("use 'List.unfold' in Fsharp.Core 4.0")>]
     // let unfold fn (ini:'State) = Seq.unfold fn ini |> List.ofSeq
-
+    
     let travOpt xs =
         let rec f acc = function
             | x :: t -> x |> Option.bind (fun x -> f <| x :: acc <| t)
@@ -234,6 +234,89 @@ module List =
         List.init 10 Some |> travOpt = Some [0..9]
     assert
         [ yield Some 1; yield None; yield Some 3 ] |> travOpt = None
+
+    let groupBySeq f = function
+        | x::xs ->
+            List.fold (fun (prev, xs) x ->
+                match xs with
+                | h::t -> 
+                    if f prev x then x, (x::h)::t
+                    else x, [x]::(List.rev h)::t
+                | [] -> failwith "")
+                (x, [[x]]) xs
+            |> snd |> function
+                | x::xs -> List.rev x::xs |> List.rev
+                | [] -> failwith "something wrong"//function [x] -> [List.rev x] | xs -> List.rev xs
+        | [] -> []
+    // assert
+    //     [] = groupBySeq (=) []
+    // assert
+    //     [[1]] = groupBySeq (=) [1]
+    // assert
+    //     groupBySeq (=) [1;2;1;1;3;3;4;4;5] = [[1]; [2]; [1; 1]; [3; 3]; [4; 4]; [5]]
+    // assert
+    //     let xs = [1,1; 2,1; 3,1]
+    //     groupBySeq (fun x y -> snd x = snd y) xs = [xs]
+    // assert
+    //     groupBySeq (=) [1; 1; 2;3;3] = [[1; 1]; [2]; [3; 3]]
+    // assert
+    //     groupBySeq (fun x y -> snd x = snd y) [ 1,1; 2,1; 3,2; 4,2 ] = [ [1,1; 2,1;]; [3,2; 4,2] ]
+    module Alt =
+        let span fn xs =
+            let rec f = function
+                | x::xs' as xs ->
+                    if fn x then
+                        let ys,zs = f xs' in x::ys, zs
+                    else [], xs
+                | [] as xs -> xs, xs
+            f xs
+        // clear, but not safe
+        let groupBySeq2 fn xs =
+            let rec f acc = function
+                | x::xs ->
+                    let xs, ys = span (fn x) xs
+                    f ((x::xs)::acc) ys
+                | [] -> acc
+            f [] xs |> List.rev
+        let rec groupBy eq = function
+            | x::xs ->
+                let (ys, zs) = span (eq x) xs
+                (x::ys) :: groupBy eq zs
+            | [] -> []
+        // span (fun x -> true) [1..2000]
+        // let xs = [1,1; 2,1; 3,1]
+        
+        // groupBy (fun x y -> snd x = snd y) xs = [xs]
+        let timer f = 
+            let s = System.Diagnostics.Stopwatch()
+            s.Start()
+            f() |> ignore
+            s.Stop()
+            s.Elapsed
+        let f() = 
+            let xs = List.init 10000 (List.replicate 5000)
+            timer (fun () -> xs |> groupBySeq2 (=)), timer (fun () -> xs |> groupBySeq (=))
+
+    
+    // let xs = List.init 5000 (List.replicate 2)
+    // xs |> groupBySeq2 (=)
+    // xs |> groupBySeq (=)
+    let rec fold' f st = function
+        | x::xs -> f x (lazy (fold' f st xs))
+        | [] -> st
+    ///**Description**
+    /// [1..3] -> [1;2;3;1;2;3;1...]
+    ///**Parameters**
+    ///  * `xs` - parameter of type `list<'a>`
+    /// Why not `seq` in input? Because `seq` - potential infinity structure and
+    /// it `list` cache structure.
+    ///**Output Type**
+    ///  * `seq<'a>`
+    ///**Exceptions**
+    /// System.ArgumentException: Thrown when the list is empty.
+    let circle (xs: _ list) =
+        if List.isEmpty xs then raise (System.ArgumentException "The input list was empty.")
+        seq { while true do for x in xs do yield x }
 
 
 // module T =
@@ -262,6 +345,26 @@ module List =
 //     take 20000 [1..20000]
 //     Seq.unfold (fun (xs, ys) -> ys |> function h::t -> Some((h, t), t) | [] -> None ) ([], [1..10])
     
-//     i
 
-//     let s = ""
+    ///**Description**
+    /// Цель: преобразовать элементы в строковое значение так, чтобы
+    /// после сортировки полученных строковых значений, последовательность
+    /// была такой же как у исходного списка.
+    /// Решение: в начале каждого элемента нумерацию в стиле:
+    /// "01, 02,..., 10, 11,..." и прибавить к этому по-умолчанию `sprintf "_A"`.
+    ///**Parameters**
+    ///  * `fn` - parameter of type `('a -> string) option`
+    ///  * `xs` - parameter of type `seq<'a>`
+    ///**Output Type**
+    ///  * `seq<'a * string>`
+    let numerate fn xs =
+        let print = defaultArg fn (sprintf "_%A")
+        let takeNull n =
+            Seq.replicate n '0'
+            |> System.String.Concat
+        let capacityNum = 
+            List.length xs - 1 |> fun x -> x.ToString() |> String.length
+        xs
+        |> List.mapi (fun i num ->
+            let str = i.ToString()
+            num, sprintf "%s%s%s" (takeNull (capacityNum - str.Length)) str (print num))

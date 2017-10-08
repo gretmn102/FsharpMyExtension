@@ -4,12 +4,13 @@
 //#endif
 open FsharpMyExtension.FSharpExt
 type Tree<'a> = Node of 'a * Tree<'a> list
-module Tree = 
-    let visualize print inputTree = 
+module Tree =
+    let singleton x = Node(x, [])
+    let visualize print inputTree =
         let prefMid = seq { yield "├─"; while true do yield "│ " }
         let prefEnd = seq { yield "└─"; while true do yield "  " }
         let prefNone = seq { while true do yield "" }
- 
+
         let inline c2 x y = Seq.map2 (+) x y
 
         let rec visualize (Node(label:'a, children:Tree<'a> list)) pre =
@@ -29,9 +30,9 @@ module Tree =
         System.String.Join("\n", visualize inputTree prefNone)
 
     assert
-        let dummy = 
+        let dummy =
             Node ("root",
-                    [Node ("a", 
+                    [Node ("a",
                             [Node ("a1",
                                     [Node ("a11", []);
                                     Node ("a12", []) ]) ]);
@@ -43,7 +44,7 @@ module Tree =
     let leafs inputTree =
         let rec f acc = function
             | Node(x, []) -> x::acc
-            | Node(x, xs) -> 
+            | Node(x, xs) ->
                 List.foldBack (fun x state -> f state x) xs acc
         f [] inputTree
 
@@ -55,7 +56,7 @@ module Tree =
     let notleafs inputTree =
         let rec f acc = function
             | Node(x, []) -> acc
-            | Node(x, xs) -> 
+            | Node(x, xs) ->
                 x :: List.foldBack (fun x state -> f state x) xs acc
         f [] inputTree
     assert
@@ -67,11 +68,10 @@ module Tree =
             | Node(x, []) -> Node(func x, [])
             | Node(x, xs) -> Node(func x, List.map f xs)
         f inputTree
-
     let cutLeaf inputTree =
         let rec f = function
             | Node(x, []) -> failwithf "%A leaf is root tree" <| Node(x, [])
-            | Node(x, xs) -> 
+            | Node(x, xs) ->
                 Node(x, List.choose(function Node(_, []) -> None | x -> f x |> Some) xs)
         f inputTree
     assert
@@ -80,26 +80,26 @@ module Tree =
         let x = cutLeaf tr
         x |> visualize (sprintf "%s") |> printfn "%s"
         x = Node ("b",[Node ("c",[]); Node ("d",[])])
-    
-    /// <summary> распаковать в вид [[1;2]; [1;3]...] </summary>
+
+    /// распаковать в вид [[1;2]; [1;3]...]
     let rec unpack pairs =
         let f = function
             | Node(e, []) -> [[e]]
             | Node(e, L) -> List.map (fun x -> e::x) (unpack L)
-        List.map f pairs |> List.concat
+        List.collect f pairs // List.map f pairs |> List.concat
     /// <summary>Запаковать [[1..3]; [2; 3]] в [Node (1,[Node (2,[Node (3,[])])]); Node (2,[Node (3,[])])] </summary>
     let rec pack = function
         | [] -> []
-        | l -> 
-            let f = List.filter (List.length >> (<>) 0) >> Seq.groupBy List.head >> Seq.map (mapSnd (Seq.map List.tail >> List.ofSeq))
-            //let f2 (k, v) = Node(k, pack v)
-            Seq.map (mapSnd pack >> Node) (f l) |> List.ofSeq
+        | xs ->
+            let f =
+                List.filter (List.length >> (<>) 0)
+                >> Seq.groupBy List.head
+                >> Seq.map (mapSnd (Seq.map List.tail >> List.ofSeq))
+            Seq.map (mapSnd pack >> Node) (f xs) |> List.ofSeq
     assert
         let xs = [[1..3]; [2..5]; [4..10]]
         pack xs |> unpack = xs
 
-    
-    
     module group =
         type 'a Val = Val of 'a | Ref of int
         let rec find = function
@@ -110,28 +110,49 @@ module Tree =
                 | Node(name, xs) & curr -> if curr = rep then Node(Ref i, []) else Node(name, List.map f xs)
             f tree
 
-        let group tree = 
+        let group tree =
             let rec f i acc tree = find tree |> function Some finded -> replaces i finded tree |> (fun x -> f (i + 1) ((i,finded)::acc) x) | None -> acc
             f 0 [] (map Val tree)
 
     module group2 =
         type 'a Val = Val of 'a | Ref of int * 'a
-        let getVal = function Val x -> x | x -> failwithf "expected Val _, but actual: %A" x
+        let getVal = function Val x -> x | x -> failwithf "expected `Val _`, but actual: `%A`" x
+        /// Оно ищет Node в котором узлы пусты
         let rec find = function
             | Node(_, []) -> None
-            | Node(_, xs) & curr -> if List.forall (function Node(_, []) -> true | _ -> false) xs then Some curr else List.tryPick find xs
+            | Node(_, xs) & curr ->
+                let isEmpty = function Node(_, []) -> true | _ -> false
+                if List.forall isEmpty xs then Some curr
+                else List.tryPick find xs
         let replaces i rep tree =
             let rec f = function
-                | Node(name, xs) & curr -> if curr = rep then Node(Ref i, []) else Node(name, List.map f xs)
+                | Node(name, xs) & curr ->
+                    if curr = rep then Node(Ref i, [])
+                    else Node(name, List.map f xs)
             f tree
 
-        let group tree = 
-            let iter xs i = List.foldBack (fun x (st, i) -> match getValue x with Val x -> (i, x)::st, i + 1 | Ref(x, y) -> (x,y)::st, i ) xs ([], i)
+        type 'a Leaf = (int * 'a) * (int * 'a)
+        type 'a Graph = 'a Leaf list
+        let group tree : 'a Graph =
+            let iter xs i =
+                List.foldBack (fun x (st, i) ->
+                    match getValue x with
+                    | Val x -> (i, x)::st, i + 1
+                    | Ref(x, y) -> (x,y)::st, i ) xs ([], i)
             let rec f i acc tree =
-                find tree |> function Some finded -> ((i, getValue finded |> getVal) |> fun curr -> replaces curr finded tree |> (fun x -> finded |> getBranch |> fun xs -> iter xs (i+1) |> fun (xs,i) -> f i ((curr, xs)::acc) x)) | None -> acc
-            f 0 [] (map Val tree)
-            |> List.map (fun (x,xs) -> xs |> List.map (fun y -> x, y)  ) |> List.concat
-        let toTgf xs =
+                find tree |> function
+                    | Some finded ->
+                        (i, getValue finded |> getVal)
+                        |> fun curr ->
+                        replaces curr finded tree |> fun x ->
+                        finded |> getBranch |> fun xs ->
+                        iter xs (i+1) |> fun (xs,i) -> f i ((curr, xs)::acc) x
+                    | None -> acc
+            // f 0 [] (map Val tree) |> List.map (fun (x,xs) -> xs |> List.map (fun y -> x, y)  ) |> List.concat
+            List.collect (fun (x,xs) -> xs |> List.map (fun y -> x, y)) (f 0 [] (map Val tree))
+
+        let toTgf (xs : 'a Graph) =
             let f xs = xs |> Seq.map (fun (x, y) -> sprintf "%d %A" x y) |> String.concat "\n"
-            xs |> List.fold (fun (xs, st) (x, y) -> (fst x, fst y) :: xs, st |> Set.add x |> Set.add y ) ([], Set.empty)
+            xs |> List.fold (fun (xs, st) (x, y) ->
+                (fst x, fst y) :: xs, st |> Set.add x |> Set.add y ) ([], Set.empty)
             |> fun (nodes, def) -> sprintf "%s\n#\n%s" (f def) (f nodes)
