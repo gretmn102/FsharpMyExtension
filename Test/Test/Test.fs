@@ -18,25 +18,43 @@ module ParserXpath =
     [<Tests>]
     let test3 =
         testList "xpath parse" [
-            testCase "only name tag without attributes" <| fun () ->
-                let k = run "a" Parser.XPathPar.Parser.name |> Either.isRight
-                Assert.Equal("some", true, k)
             testCase "empty req" <| fun () ->
                 let k = run "" Parser.XPathPar.Parser.name |> Either.isRight
                 Assert.Equal("some", false, not k)
-            testCase "*[@att='value'][@*='value'][@*]" <| fun () ->
-                let xpath = "*[@att='value'][@*='value'][@*]"
-                let exp = Right({ Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)];}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
-
-                Assert.Equal("some", exp, act)
+            testCase "only name tag without attributes" <| fun () ->
+                let k = run "a" Parser.XPathPar.Parser.name |> Either.isRight
+                Assert.Equal("some", true, k)
             testCase "a[@href]" <| fun () ->
                 let xpath = "a[@href]"
                 let act = run xpath Parser.XPathPar.Parser.res
                 Assert.Equal(sprintf "%A" act, true, Either.isRight act)
+            testCase "*[@att='value'][@*='value'][@*]" <| fun () ->
+                let xpath = "*[@att='value'][@*='value'][@*]"
+                let exp = Right({ Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)]; Text = None}, [])
+                let act = run xpath Parser.XPathPar.Parser.res
+                Assert.Equal("some", exp, act)
+
+            testCase "any tag with some text: *[text()='some text in node']" <| fun () ->
+                let xpath = "*[text()='some text in node']"
+                let exp = Right({ Name = None; Att = []; Text = Some "some text in node"}, [])
+                let act = run xpath Parser.XPathPar.Parser.res
+                Assert.Equal("", exp, act)
+            testCase "*[@att='value'][text()='some text in node']" <| fun () ->
+                let xpath = "*[@att='value'][text()='some text in node']"
+                let exp = Right({ Name = None; Att = [(Some "att", Some "value");]; Text = Some "some text in node"}, [])
+                let act = run xpath Parser.XPathPar.Parser.res
+                Assert.Equal("", exp, act)
+            testCase "text between attributes: *[@att='value'][text()='some text in node'][@att2='val']" <| fun () ->
+                let xpath = "*[@att='value'][text()='some text in node'][@att2='val']"
+                let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
+                let act = run xpath Parser.XPathPar.Parser.res
+                Assert.Equal("", exp, act)
+            testCase "two text: *[text()='some text in node'][text()='txt2']" <| fun () ->
+                let xpath = "*[text()='some text in node'][text()='txt2']"
+                //let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
+                let act = run xpath Parser.XPathPar.Parser.res
+                Assert.Equal("", true, Either.isLeft act)
                ]
-
-
 module ParserStringTest =
     open Parser
     open Parser.ParserString

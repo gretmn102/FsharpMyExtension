@@ -4,7 +4,7 @@ module XPathPar =
     open Primitives
     open FsharpMyExtension.Either
 
-    type Req = { Name:string option; Att:(string option * string option) list }
+    type Req = { Name:string option; Att:(string option * string option) list; Text:string option }
 
     let exec r (node:HtmlAgilityPack.HtmlNode) =
         let bind next = function
@@ -19,9 +19,20 @@ module XPathPar =
                     | Some name, Some v -> match att.Item name with null -> false | x -> x.Value = v
                     | None, Some v -> att |> Seq.exists (fun x -> x.Value = v)
                     | None, None -> true
-    
-        bind (fun () -> List.forall fn r.Att) (Option.map ((=) node.Name) r.Name)
-
+        
+        Option.map ((=) node.Name) r.Name
+        |> bind (fun () ->
+            if List.forall fn r.Att then
+                match r.Text with
+                | None -> true
+                | Some txt -> 
+                    let xs = node.ChildNodes
+                    if xs.Count = 0 then
+                        match xs.[0] with
+                        | :? HtmlAgilityPack.HtmlTextNode as x -> x.InnerText = txt
+                        | _ -> false
+                    else false
+            else false)
 
     module Parser =
         open ParserString
@@ -31,14 +42,23 @@ module XPathPar =
         //manyChars (p)
         
         let name = (pchar '*' >>% None) <|> (manySatisfy (isNoneOf " []=") |>> Some)
+        let val' = 
+            let v = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''
+            v
+        let opt x = (x |>> Some) <|> (preturn None)
         let patt = 
-            let v = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar ''' |>> Some
-            pchar '@' >>. name >>= fun name -> v <|> (preturn None) |>> fun att -> name,att
-
+            pchar '@' >>. name >>= fun name -> opt val' |>> fun att -> name,att
+        let ptext = pstring "text()" >>. val'
+        let attempt x = x
         let res =
+            let patts = many (attempt (pchar '[' >>. patt) .>> pchar ']')
             name >>= fun name ->
-            many (pchar '[' >>. patt .>> pchar ']') .>> pend (sprintf "%A") |>> fun att ->
-            { Name = name; Att = att }
+            pipe2 patts (pipe2 (opt (attempt (pchar '[' >>. ptext) .>> pchar ']')) patts comma )
+                (fun x (txt, y) -> 
+                    let atts = match y with [] -> x | y -> x @ y
+                    { Name = name; Att = atts; Text = txt }) .>> pend (sprintf "%A")
+            // patts patt .>> pend (sprintf "%A") |>> fun att ->
+            // { Name = name; Att = att; Text = None }
 
     let parse xs = 
         run xs Parser.res |> Either.map (fst >> exec)
