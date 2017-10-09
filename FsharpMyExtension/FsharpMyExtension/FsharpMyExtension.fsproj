@@ -7,9 +7,11 @@
   <ItemGroup>
     <Compile Include="Some/FsharpMyExtension.fs" />
     <Compile Include="Library1.fs" />
-    <Compile Include="Containers\List.fs" />
-    <Compile Include="Containers\List1.fs" />
-    <Compile Include="Containers\Either.fs" />
+    <Compile Include="Containers/List.fs" />
+    <Compile Include="Containers/List1.fs" />
+    <Compile Include="Containers/Either.fs" />
+    <Compile Include="Containers/Option.fs" />
+    <Compile Include="Containers/LazyList.fs" />
     <Compile Include="Unpoint.fs" />
     <Compile Include="LZ.fs" />
     <Compile Include="ListZipperC.fs" />
@@ -17,19 +19,17 @@
     <Compile Include="Combinatorics.fs" />
     <Compile Include="Tree.fs" />
     <Compile Include="Map.fs" />
-    <Compile Include="Containers\Option.fs" />
-    <Compile Include="Containers\LazyList.fs" />
     <Compile Include="Seq.fs" />
     <Compile Include="String.fs" />
     <Compile Include="HtmlNode.fs" />
-    <Compile Include="Parser\ParserPrimitives2.fs" />
-    <Compile Include="Parser\ParserPrimitives.fs" />
-    <Compile Include="Parser\ParserString.fs" />
-    <Compile Include="Parser\ParserHtmlNode.fs" />
-    <!-- <Compile Include="Parser\TestParser.fs" /> -->
+    <Compile Include="Parser/ParserPrimitives2.fs" />
+    <Compile Include="Parser/ParserPrimitives.fs" />
+    <Compile Include="Parser/ParserString.fs" />
+    <Compile Include="Parser/ParserHtmlNode.fs" />
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
     <None Include="App.config" />
+    <Compile Include="WebDownloader.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
