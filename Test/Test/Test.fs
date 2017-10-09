@@ -16,7 +16,21 @@ module ParserXpath =
     open Parser.XPathPar
 
     [<Tests>]
-    let test3 =
+    let ExecTest =
+        testList "ExecTest" [
+            testCase "base case" <| fun () ->
+                let txt = "some text"
+                let nod = HtmlAgilityPack.HtmlNode.CreateNode (sprintf "<a>%s</a>" txt)
+                let p : HtmlAgilityPack.HtmlNode -> _ = Parser.XPathPar.exec { Name = None; Att = []; Text = Some txt }
+                
+                Assert.Equal("'*[text()='%s']' = '<a>%s</a>'", true, p nod)
+            testCase "" <| fun () ->
+
+                Assert.Equal("", true, true)
+       ]
+
+    [<Tests>]
+    let parserTest =
         testList "xpath parse" [
             testCase "empty req" <| fun () ->
                 let k = run "" Parser.XPathPar.Parser.name |> Either.isRight

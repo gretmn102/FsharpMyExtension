@@ -27,7 +27,7 @@ module XPathPar =
                 | None -> true
                 | Some txt -> 
                     let xs = node.ChildNodes
-                    if xs.Count = 0 then
+                    if xs.Count = 1 then
                         match xs.[0] with
                         | :? HtmlAgilityPack.HtmlTextNode as x -> x.InnerText = txt
                         | _ -> false
