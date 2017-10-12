@@ -22,3 +22,31 @@ module Reflection =
                 |> Array.map (fun x -> x.Name)
             prop, fns
         else raise <| System.ArgumentException "this is not module"
+
+    /// Enumeration values of union. All values must be empty type.
+    let unionEnum<'T> =
+        let xs = Reflection.FSharpType.GetUnionCases typeof<'T>
+        xs |> Array.map (fun x ->
+            if x.GetFields() |> Array.isEmpty |> not then
+                failwithf "%A must be empty" x.Name
+            else Reflection.FSharpValue.MakeUnion(x,[||]) |> unbox<'T>)
+    let recordInitS<'T> =
+        let xs = Reflection.FSharpType.GetRecordFields typeof<'T>
+        xs |> Array.map (fun x -> sprintf "    %s = failwith \"Not implemented\"" x.Name)
+        |> String.concat "\n" |> sprintf "{\n%s\n}"
+    // recordInitS<Сharacteristics>
+    let inline recordInit<'T> f =
+        let t = typedefof< 'T>
+        let xs = Reflection.FSharpType.GetRecordFields t
+        let ys = Array.init (Array.length xs) f
+        Reflection.FSharpValue.MakeRecord(t, ys)
+        |> unbox< 'T>
+    // recordInit<Сharacteristics> (fun i -> box (float32 i))
+    /// Init all unions in Map with GenericZero<'Typ>
+    let inline initUnionMap< ^Union, ^Typ when ^Typ : (static member Zero : ^Typ) and ^Union : comparison > =
+        let z = LanguagePrimitives.GenericZero< 'Typ>
+        // (^Typ:(get_Zero))
+        //let z = failwith ""
+        unionEnum<'Union>
+        |> Array.map (fun x -> x, z)
+        |> Map.ofArray
