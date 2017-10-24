@@ -12,9 +12,9 @@
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Containers/Option.fs" />
     <Compile Include="Containers/LazyList.fs" />
+    <Compile Include="Containers/LZ.fs" />
+    <Compile Include="Containers/ListZipperC.fs" />
     <Compile Include="Unpoint.fs" />
-    <Compile Include="LZ.fs" />
-    <Compile Include="ListZipperC.fs" />
     <Compile Include="Queue.fs" />
     <Compile Include="Combinatorics.fs" />
     <Compile Include="Tree.fs" />
@@ -28,8 +28,11 @@
     <Compile Include="Parser/ParserHtmlNode.fs" />
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
+    <Compile Include="XmlBuilder.fs" />
     <None Include="App.config" />
     <Compile Include="WebDownloader.fs" />
+    <Compile Include="Numeric.fs" />
+    <Compile Include="Json.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

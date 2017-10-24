@@ -12,11 +12,23 @@ module ListZ =
         
     let next lst = //(Lz(xs, x, ys)) =
         match lst.Left with
-        | h::t -> Some <|  { Left = t; Current = h; Right = lst.Current::lst.Right; Index = lst.Index + 1 } // Lz(t, h, x::ys)
+        | h::t -> 
+            {
+                Left = t
+                Current = h
+                Right = lst.Current::lst.Right
+                Index = lst.Index + 1
+            } |> Some
         | [] -> None //failwith "left list is empty"
     let prev lst =
         match lst.Right with
-        | h::t -> Some <| { Left = lst.Current::lst.Left; Current = h; Right = t; Index = lst.Index - 1 } //Lz(x::xs, h, t)
+        | h::t ->
+            {
+                Left = lst.Current::lst.Left
+                Current = h
+                Right = t
+                Index = lst.Index - 1 }
+            |> Some 
         | [] -> None //failwith "right list is empty"
 
     assert (ofList [1..10] |> next |> Option.get |> next |> Option.get |> toList = [1..10])
@@ -32,21 +44,29 @@ module ListZ =
     let removeR lz =
         match next lz with
         //| Some ({Left=x; Current=ys; Right=_::t; Index=i} as lz) ->
-        | Some ({Right=_::t; Index=i} as lz) ->
-            Some <| {lz with Right=t; Index = i - 1} // Lz(x, ys, t)
+        | Some ({ Right=_::t; Index=i } as lz) ->
+            Some <| { lz with Right=t; Index = i - 1 } // Lz(x, ys, t)
         | _ -> None
 
     let set x (lz:ListZ<_>) = { lz with Current = x }
     let hole lst = lst.Current
     let update f (lz:ListZ<_>) = { lz with Current = f lz.Current }
     
-    let rec toStart lz = match prev lz with Some x -> toStart x | None -> lz
-    let rec toEnd lz = match next lz with Some x -> toEnd x | None -> lz
+    let rec toStart lz =
+        match prev lz with
+        | Some x -> toStart x
+        | None -> lz
+    let rec toEnd lz =
+        match next lz with
+        | Some x -> toEnd x
+        | None -> lz
     
     let rec seqf fn n lz = 
         if n = 0 then Some lz
         else
-            match fn lz with Some lz -> seqf fn (n-1) lz | None -> None
+            match fn lz with
+            | Some lz -> seqf fn (n-1) lz
+            | None -> None
     let nexts n lz = seqf next n lz
     let prevs n lz = seqf prev n lz
 
@@ -81,11 +101,22 @@ module ListZ =
                               Current = 8;
                               Right = [7; 6; 5; 4; 3; 2; 1];}
         nth 5 xs = None
-    let map fn lz = { Left = List.map fn lz.Left; Current = fn lz.Current; Right = List.map fn lz.Right; Index = lz.Index }
+    let map fn lz = {
+        Left = List.map fn lz.Left
+        Current = fn lz.Current
+        Right = List.map fn lz.Right
+        Index = lz.Index
+        }
     assert
         map ((+) 1) <| ofList [1..10] = {Index = 0; Left = [3..11]; Current = 2; Right = [];}
-    let insertAfter x (lst:ListZ<_>) = { lst with Current = x; Right = lst.Current::lst.Right; Index = lst.Index + 1 }
-    let insertBefore x (lst:ListZ<_>) = { lst with Current = x; Left = lst.Current::lst.Left; Index = lst.Index - 1 }
+    let insertAfter x (lst:ListZ<_>) =
+        { lst with Current = x
+                   Right = lst.Current::lst.Right
+                   Index = lst.Index + 1 }
+    let insertBefore x (lst:ListZ<_>) =
+        { lst with Current = x
+                   Left = lst.Current::lst.Left
+                   Index = lst.Index - 1 }
     assert
         assert
             insertAfter 2 <| ofList (1::[3..10]) = {Index = 1; Left = [3..10]; Current = 2; Right = [1];}
@@ -120,7 +151,7 @@ module ListZ =
 //                | None -> inserterBefore n 
 //        if n > 0 then toStart lz
 //        else toEnd lz
-
+    
     let nthDef n x lz = 
         match nth n lz with
         | Some x -> x
