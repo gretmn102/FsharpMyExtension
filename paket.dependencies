@@ -6,3 +6,4 @@ nuget FParsec
 nuget FSharp.Core
 nuget FuChu
 nuget HtmlAgilityPack
+nuget Newtonsoft.Json

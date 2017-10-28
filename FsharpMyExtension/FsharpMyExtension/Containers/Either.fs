@@ -10,6 +10,11 @@ module Either =
     let map fn = function
         | Right x -> Right <| fn x
         | Left x -> Left x
+    /// either (f >> Left) (g >> Right)
+    let mapBoth f g = function
+        | Right x -> Right(g x)
+        | Left x -> Left(f x)
+    let mapLeft f = function Left x -> Left(f x) | Right x -> Right x
 
     let fold fn state = function
         | Right x -> fn state x
@@ -33,10 +38,11 @@ module Either =
     let either f g = function
         | Right x -> g x
         | Left x -> f x
-    /// either (f >> Left) (g >> Right)
+    [<System.ObsoleteAttribute("use `mapBoth`", true)>]
     let eitherE f g = either (f >> Left) (g >> Right)
 
     let ofOption s = function None -> Left s | Some x -> Right x
+    let ofOptionWith s = function None -> Left(s()) | Some x -> Right x
     
     //let travEitherPseudo f xs = either (Left >> Seq.singleton) (Seq.map <| bind f) xs
     /// не похоже на sequenceA ибо f<t, f<x>> -> t<f<x>>. И результат не равен: "fmap concat . sequenceA"
@@ -54,10 +60,11 @@ module Either =
             Left "error" |> collect (Seq.singleton << Right) |> List.ofSeq = [Left "error"]
             Right () |> collect (fun _ -> seq [ Right 0; Left "left"; Right 1 ]) |> List.ofSeq = [Right 0; Left "left"; Right 1]
         ] |> List.forall id
-
+    
     let getOrDef x = function Right x -> x | _ -> x
     let getOrDef' fn = function Right x -> x | Left x -> fn x
-    let get = function Right x -> x | Left x -> failwithf "try get right, but '%A'" x
+    let get = function Right x -> x | x -> failwithf "try get right, but '%A'" x
+    let getLeft = function Left x -> x | x -> failwithf "try get left, but '%A'" x
     let isRight = function Right _ -> true | _ -> false
     let isLeft = function Left _ -> true | _ -> false
     let concat x = bind id x
@@ -81,6 +88,11 @@ module List =
             | xs, [] -> List.map Either.get xs |> Right
             | _, Left x::_ -> Left x
             | _ -> failwith ""
+    open FsharpMyExtension.FSharpExt
+    let partitionEithers xs =
+        xs |> List.partition (Either.isLeft)
+        |> mapPair (List.map Either.getLeft) (List.map Either.get)
+
     // assert
     //     let xs : list<Either<unit, _>> = List.init 500000 Right
     //     travEither id xs |> ignore

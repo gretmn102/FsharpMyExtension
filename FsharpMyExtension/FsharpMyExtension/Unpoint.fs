@@ -79,7 +79,11 @@ module Unpoint =
 
     let print = 
         let interp = function
-            | "op_Addition" -> "+" | "op_Subtraction" -> "-" | "op_Multiply" -> "*" | "Identity" -> "id" | x -> x
+            | "op_Addition" -> "+"
+            | "op_Subtraction" -> "-"
+            | "op_Multiply" -> "*"
+            | "Identity" -> "id"
+            | x -> x
         let rec f paren = function
         | Lambda(x, body) -> 
             showParen paren (showString "fun " << showString x << showString " -> " << f false body)

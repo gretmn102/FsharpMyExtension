@@ -60,22 +60,42 @@ module ParserString =
         let len = System.Int32.MaxValue |> string |> Seq.length
         let digit = seq{'0'..'9'} |> Seq.mapi (fun i x -> x, i) |> Map.ofSeq
         let f =
-            Seq.unfold (function (h:char)::t -> Map.tryFind h digit |> Option.map (fun x -> (x, t), t) | [] -> None)
+            Seq.unfold (function
+                | (h:char)::t ->
+                    Map.tryFind h digit
+                    |> Option.map (fun x -> (x, t), t)
+                | [] -> None)
             >> Seq.truncate len
             >> Seq.fold (fun st (x, xs) -> fst st * 10 + x, xs) (0,[])
+        let err s = Left (sprintf "expected [-](0|1|..|9) but take: %s" s)
         function
-            | h::t as xs -> (if h = '-' then mapFst ((*) -1) (f t) else f xs) |> Right
-            | [] -> Left ""
+            | ['-'] -> err "empty stream"
+            | '-'::((x::_) as xs) as ys ->
+                if Map.containsKey x digit then
+                    mapFst ((*) -1) (f xs) |> Right
+                else
+                    err (sprintf "%A" <| List.truncate 10 ys)
+            | h::_ as xs ->
+                if Map.containsKey h digit then
+                    f xs |> Right
+                else
+                    err (sprintf "%A" <| List.truncate 10 xs)
+                // let bind x next =
+                //     if Map.containsKey x digit then next ()
+                //     else err (List.truncate 10 xs)
+                        
+                // bind h (fun () ->
+                //     if h = '-' then
+                //         if List.isEmpty t then err
+                //         else
+                //             bind (List.head t) (fun () ->
+                //                 mapFst ((*) -1) (f t) |> Right)
+                //     else f xs |> Right
+                //     )
+            | [] -> Left "empty stream"
         : Pars<_,_>
 
-    assert
-        let test num s = pint32 (num |> fun x -> sprintf "%d%s" x s |> List.ofSeq) = Right(num, List.ofSeq s)
-        [
-        test 1234567899 "9123"
-        test 123 "a1234"
-        test -123 "a1234"
-        test System.Int32.MinValue " some string"
-        test System.Int32.MaxValue " some string" ] |> List.forall id
+
     // let pfloat32 =
     //     let len = System.Single.MaxValue |> string |> Seq.length
     //     let digit = seq{'0'..'9'} |> Seq.mapi (fun i x -> x, i) |> Map.ofSeq

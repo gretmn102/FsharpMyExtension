@@ -1,12 +1,6 @@
 open Fuchu
 open FsharpMyExtension.FSharpExt
 
-[<Tests>]
-let simpleTest =
-    testCase "A simple test" <|
-        fun _ ->
-            //Assert.Equal("2+3", 4, 2+3)
-            (10, "20") |> function (a, b) as x -> Assert.Equal("comma a b = (a, b)", x, comma 10 b)
 let ran = System.Random() |> fun x k n-> x.Next(k, n)
 
 module ParserXpath =
@@ -71,7 +65,9 @@ module ParserXpath =
                ]
 module ParserStringTest =
     open Parser
+    open Parser.Primitives
     open Parser.ParserString
+    open FsharpMyExtension.Either
     [<Tests>]
     let isAnyOfTest =
         testList "ParserString.isAnyOf" [
@@ -83,6 +79,32 @@ module ParserStringTest =
                 do List.init 10 (fun _ -> fn 'a') |> ignore
                 Assert.Equal("some2", 1, !i)
                ]
+
+    [<Tests>]
+    let pint32Test =
+        let test lab num s =
+            testCase lab <| fun () ->
+                let e = Right(num, List.ofSeq s)
+                let act = run (sprintf "%d%s" num s) pint32
+                Assert.Equal("", e, act)
+        testList "pint32Test" [
+            testCase "empty stream" <| fun () ->
+                let act = run "" pint32
+                Assert.Equal(sprintf "%A" act, true, act |> Either.isLeft)
+            test "big number" 1234567899 "9123"
+            test "" 123 "a1234"
+            test "" -123 "a1234"
+            test "" System.Int32.MinValue " some string"
+            test "" System.Int32.MaxValue " some string"
+            testCase "empty" <| fun () ->
+                let s = "-abcd"
+                let act = run s pint32
+                Assert.Equal(sprintf "must be: %A, but %A" s act, true, act |> Either.isLeft)
+            testCase "empty neg" <| fun () ->
+                let s = "-abcd"
+                let act = run s pint32
+                Assert.Equal(sprintf "must be: %A, but %A" s act, true, act |> Either.isLeft)
+       ]
 module ListTests =
     open FsharpMyExtension.List
 
@@ -173,6 +195,26 @@ module EitherTests =
     module ListTests =
         [<Tests>]
         let listTrav = travBaseTests "List.seqEitherBase" List.seqEither
+        [<Tests>]
+        let partitionEither =
+            let part = FsharpMyExtension.Either.List.partitionEithers
+            testList "partitionEither" [
+                testCase "empty" <| fun () ->
+                    Assert.Equal("", ([],[]), part [])
+                testCase "mix" <| fun () ->
+                    let xs = [Left "1"; Right 2; Left "3"; Right 4]
+                    let ys = part xs
+                    Assert.Equal("", (["1"; "3";], [2; 4]), part xs)
+                testCase "mix2" <| fun () ->
+                    let xs = [Right "1"; Left 2; Right "3"; Left 4]
+                    Assert.Equal("", ([2; 4], ["1"; "3";]), part xs)
+                // testCase "seq with Left" <| fun () ->
+                //     let x = "error"
+                //     Assert.Equal("", Left x, fn [Right 0; Left x; Right 1])
+                // testCase "seq only with Right" <| fun () ->
+                //     Assert.Equal("", Right [0..9], List.init 10 Right |> fn)
+                    ]
+
 
     module SeqTests =
         [<Tests>]
@@ -197,17 +239,17 @@ module EitherTests =
                     Assert.Equal("Right x = Some x", Some x, Option.ofEither (Right x))
                    ]
 module OptionTests =
-    module Option =
-        [<Tests>]
-        let ofNullTest =
-            let ofNull = FsharpMyExtension.Option.Option.ofNull
-            testList "ofNullTest" [
-                testCase "null case" <| fun () ->
-                    Assert.Equal("", None, ofNull null)
-                testCase "some case" <| fun () ->
-                    let x = 1
-                    Assert.Equal("", Some x, ofNull( box x) |> Option.map unbox)
-           ]
+    // module Option =
+    //     [<Tests>]
+    //     let ofNullTest =
+    //         let ofNull = FsharpMyExtension.Option.Option.ofNull
+    //         testList "ofNullTest" [
+    //             testCase "null case" <| fun () ->
+    //                 Assert.Equal("", None, ofNull null)
+    //             testCase "some case" <| fun () ->
+    //                 let x = 1
+    //                 Assert.Equal("", Some x, ofNull( box x) |> Option.map unbox)
+    //        ]
     module Seq =
         let seqOpt = FsharpMyExtension.Option.Seq.seqOpt
         [<Tests>]
@@ -316,6 +358,64 @@ module ParserTests =
         //         //     Assert.Equal("", "", sprintf "%A" r)
         //            ]
 
+module LZTests =
+    open FsharpMyExtension.ListZipper
+
+    [<Tests>]
+    let RemoveRTest =
+        let next = ListZ.next >> Option.get
+        let rem = ListZ.removeR >> Option.get
+        testList "RemoveRTest" [
+            testCase "base case" <| fun () ->
+                Assert.Equal("", None, ListZ.ofList [1] |> ListZ.removeR)
+            testCase "remove first elem of two" <| fun () ->
+                let x, y = 1, 2
+                let act = ListZ.ofList [x;y] |> rem
+                Assert.Equal("", ListZ.ofList [y], act)
+            testCase "remove second elem of two" <| fun () ->
+                let x, y = 1, 2
+                let act = ListZ.ofList [x;y] |> next |> rem
+                Assert.Equal("", ListZ.ofList [x], act)
+            testCase "remove 2/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act = ListZ.ofList [x;y;z] |> next |> rem
+                let e = ListZ.ofList [x;z] |> next
+                Assert.Equal("", e, act)
+            testCase "remove 3/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act =
+                    ListZ.ofList [x;y;z] |> next |> next |> rem
+                let e = ListZ.ofList [x;y] |> next
+                Assert.Equal("", e, act)
+       ]
+module LZCTests =
+    open FsharpMyExtension.ListZipperCircle2
+    [<Tests>]
+    let RemoveRTest =
+        let rem = LZC.removeR >> Option.get
+        testList "LZC.RemoveR" [
+            testCase "base case" <| fun () ->
+                Assert.Equal("", None, LZC.ofList [1] |> LZC.removeR)
+            testCase "remove first elem of two" <| fun () ->
+                let x, y = 1, 2
+                let act = LZC.ofList [x;y] |> rem
+                Assert.Equal("", LZC.ofList [y] |> LZC.next, act)
+            testCase "remove 2/2" <| fun () ->
+                let x, y = 1, 2
+                let act = LZC.ofList [x;y] |> LZC.next |> rem
+                let e = LZC.ofList [x] |> LZC.next
+                Assert.Equal("", e, act)
+            testCase "remove 2/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act = LZC.ofList [x;y;z] |> LZC.next |> rem
+                let e = LZC.ofList [x;z] |> LZC.next
+                Assert.Equal("", e, act)
+            testCase "remove 3/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act = LZC.ofList [x;y;z] |> LZC.next |> LZC.next |> rem
+                let e = LZC.ofList [x;y] |> LZC.next |> LZC.next
+                Assert.Equal("", e, act)
+       ]
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

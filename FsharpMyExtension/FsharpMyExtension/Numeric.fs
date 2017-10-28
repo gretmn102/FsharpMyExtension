@@ -376,3 +376,64 @@ type RatBig with
     static member Sign x = RatBig.SignRational
     static member Zero = RatBig.ZeroRational
     static member One = RatBig.OneRational
+
+
+type PercentType = RatBig
+module private Tool = 
+    let max = RatBig.mkRational 100I 1I
+    let min = RatBig.mkRational 0I 1I
+    let plane x = 
+        if x > max then max
+        elif x < min then min
+        else x
+// [<StructuredFormatDisplayAttribute("({Val})")>]
+// [<Struct>]
+// type PercentType(x:Numeric.Rational) =
+//     member __.Val = Tool.plane x
+//     // new (x) =
+//     //     let s = 10
+        
+//     //     { Val = Tool.plane x }
+//     //     then
+//     //         PercentType <| PercentType.Plane
+//     // end
+//     // static member Max = Tool.max |> PercentType
+//     // static member Min = Tool.min |> PercentType
+//     // static member Plane (x:PercentType) = Tool.plane x.Val |> PercentType
+//     static member (+) ((x:PercentType),y:PercentType) =
+//         x.Val + y.Val |> Tool.plane |> PercentType
+//     static member (-) ((x:PercentType),y:PercentType) = x.Val - y.Val |> Tool.plane |> PercentType
+//     static member (*) ((x:PercentType),y:PercentType) = x.Val * y.Val |> Tool.plane |> PercentType
+//     static member (/) ((x:PercentType),y:PercentType) = x.Val / y.Val |> Tool.plane |> PercentType
+
+
+// type PercentType = Numeric.Rational
+// [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+// [<RequireQualifiedAccess>]
+// module PercentType =
+//     let max = Tool.max : PercentType
+//     let min = Tool.min : PercentType
+//     let plane (x:PercentType) = Tool.plane x : PercentType
+//     let inline ofNum x = Numeric.Rational.ofNum x |> plane
+//     //let inline change (x:PercentType) count = x + Numeric.Rational.ofNum count |> plane
+//     let inline change (x:PercentType) (count:PercentType) = x + count |> plane
+//     /// процент от имеющегося.
+//     /// Например, `x = 30`, `count = 0.5` -> `15`
+//     /// `x = 30`, `count = 1.5` -> `45`
+//     let inline changeof (x:PercentType) (count:PercentType) = x * count |> plane
+
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module PercentType =
+    let max = Tool.max : PercentType
+    let min = Tool.min : PercentType
+    let plane (x:PercentType) = Tool.plane x : PercentType
+    let inline ofNum x = RatBig.ofNum x |> plane
+    //let inline change (x:PercentType) count = x + Numeric.Rational.ofNum count |> plane
+    let inline change (x:PercentType) (count:PercentType) = RatBig.AddRational x count |> plane
+    /// процент от имеющегося.
+    /// Например, `x = 30`, `count = 0.5` -> `15`
+    /// `x = 30`, `count = 1.5` -> `45`
+    let inline changeof (x:PercentType) (count:PercentType) = x * count |> plane
+

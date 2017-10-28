@@ -49,13 +49,47 @@ let tryGet encoding (url:string) =
         Right(url, resp.StatusCode, reader.ReadToEnd()) : Res
     with e -> Left(url, e)
 
-/// <summary> Использует Cookies </summary>
+// assert
+//     let c = CookieContainer()
+//     let uri = Uri("https://www.google.com")
+//     c.SetCookies(uri, "PHPSESSID=1")
+//     c.GetCookieHeader(uri)
+//     let s f = lock c f
+//     let xs = Seq.init 10000 (fun i -> async { c.SetCookies(uri, sprintf "PHPSESSID=%d" i) })
+//     Async.Parallel xs |> Async.RunSynchronously |> ignore
+//     c.GetCookieHeader uri
+    
+    
+//     let monitor = Object()
+//     let a = ref 4
+
+//     printfn "1) a = %i" !a
+
+//     let t1 = System.Threading.Thread (fun () ->  
+//         printfn "locked in thread 1"    
+//         lock monitor (fun () -> a:= !a + 2)
+//         printfn "unlocked in thread 1"    
+//         )
+
+//     let t2 = System.Threading.Thread (fun () ->  
+//         printfn "locked in thread 2"    
+//         lock monitor (fun () -> a:= !a - 3)
+//         printfn "unlocked in thread 2"    
+//         )
+
+//     t1.Start()
+//     t2.Start()
+
+//     System.Threading.Thread.Sleep 1000 // wait long enough to get the correct value
+//     printfn "2) a = %i" !a
+    
+//     true
+
+/// CookieContainer небезопастно использовать в паралельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
 let getAsync encoding urls =
-    let get url withCookies = 
-        let req = 
-            let req = WebRequest.Create(url:string) :?> HttpWebRequest
-            if withCookies then req.CookieContainer <- cookies
-            req
+    let get url = 
+        let req = WebRequest.Create(url:string) :?> HttpWebRequest
+        req.CookieContainer <- cookies
         async {
             try
                 let! rsp = req.AsyncGetResponse()
@@ -68,52 +102,50 @@ let getAsync encoding urls =
             with
             | ex -> return (Left(url, ex) : Res)
         }
-    let getHtmlWithCookie url = get url false
-
-    let webPages = List.map getHtmlWithCookie >> Async.Parallel >> Async.RunSynchronously
-
-    Seq.collect webPages (List.chunkBySize 8 urls)
+    let webPages = List.map get >> Async.Parallel >> Async.RunSynchronously
+    List.chunkBySize 8 urls
+    |> Seq.collect webPages
 
 let post (url:string) (postData:string) = 
-        let request = WebRequest.Create(url) :?> HttpWebRequest
+    let request = WebRequest.Create(url) :?> HttpWebRequest
 
-        request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-        request.CookieContainer <- cookies;
-        request.Method <- "POST"
-        request.ContentType <- "application/x-www-form-urlencoded"
+    request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
+    request.CookieContainer <- cookies;
+    request.Method <- "POST"
+    request.ContentType <- "application/x-www-form-urlencoded"
 
-        let data = Text.Encoding.ASCII.GetBytes(postData)
-        request.ContentLength <- int64 data.Length
+    let data = Text.Encoding.ASCII.GetBytes(postData)
+    request.ContentLength <- int64 data.Length
 
-        using (request.GetRequestStream())
-                (fun stream -> stream.Write(data, 0, data.Length))
+    using (request.GetRequestStream())
+            (fun stream -> stream.Write(data, 0, data.Length))
 
-        use resp = request.GetResponse() :?> HttpWebResponse
-           
-        use stream = resp.GetResponseStream()
-        use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
-        reader.ReadToEnd()
+    use resp = request.GetResponse() :?> HttpWebResponse
+       
+    use stream = resp.GetResponseStream()
+    use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
+    reader.ReadToEnd()
 
 let tryPost (url:string) (postData:string) = 
-        let request = WebRequest.Create(url) :?> HttpWebRequest
+    let request = WebRequest.Create(url) :?> HttpWebRequest
 
-        request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-        request.CookieContainer <- cookies;
-        request.Method <- "POST"
-        request.ContentType <- "application/x-www-form-urlencoded"
+    request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
+    request.CookieContainer <- cookies;
+    request.Method <- "POST"
+    request.ContentType <- "application/x-www-form-urlencoded"
 
-        let data = Text.Encoding.ASCII.GetBytes(postData)
-        request.ContentLength <- int64 data.Length
+    let data = Text.Encoding.ASCII.GetBytes(postData)
+    request.ContentLength <- int64 data.Length
 
-        try 
-            using (request.GetRequestStream())
-                (fun stream -> stream.Write(data, 0, data.Length))
-            use resp = request.GetResponse() :?> HttpWebResponse
-           
-            use stream = resp.GetResponseStream()
-            use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
-            Right(url, resp.StatusCode, reader.ReadToEnd()) : Res
-        with e -> Left(url, e)
+    try 
+        using (request.GetRequestStream())
+            (fun stream -> stream.Write(data, 0, data.Length))
+        use resp = request.GetResponse() :?> HttpWebResponse
+       
+        use stream = resp.GetResponseStream()
+        use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
+        Right(url, resp.StatusCode, reader.ReadToEnd()) : Res
+    with e -> Left(url, e)
 
 (*
 /// test

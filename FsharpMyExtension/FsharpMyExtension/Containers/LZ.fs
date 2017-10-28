@@ -9,7 +9,7 @@ module ListZ =
         | [] -> failwith "list is empty"
         | h::t -> { Left = t; Current = h; Right = []; Index = 0 }
     let toList { ListZ.Left = l; Current = h; Right = r } = List.rev r @ h::l
-        
+
     let next lst = //(Lz(xs, x, ys)) =
         match lst.Left with
         | h::t -> 
@@ -42,11 +42,18 @@ module ListZ =
         next' xs |> next' |> next' |> prev' |> prev' |> prev' = xs    
 
     let removeR lz =
-        match next lz with
-        //| Some ({Left=x; Current=ys; Right=_::t; Index=i} as lz) ->
-        | Some ({ Right=_::t; Index=i } as lz) ->
-            Some <| { lz with Right=t; Index = i - 1 } // Lz(x, ys, t)
-        | _ -> None
+        match lz with
+        | { Left = h::t; Index = i } ->
+            { lz with Left = t; Current = h; Index = i }
+            |> Some
+        | { Right = h::t; Index = i } ->
+            { lz with Right = t; Current = h; Index = i - 1 }
+            |> Some
+        | { Left = []; Right = [] } -> None
+        // match next lz with
+        // | Some ({ Right=_::t; Index=i } as lz) ->
+        //     Some <| { lz with Right=t; Index = i - 1 }
+        // | _ -> None
 
     let set x (lz:ListZ<_>) = { lz with Current = x }
     let hole lst = lst.Current

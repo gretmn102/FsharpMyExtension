@@ -50,3 +50,11 @@ module Reflection =
         unionEnum<'Union>
         |> Array.map (fun x -> x, z)
         |> Map.ofArray
+
+    //let inline initUnionMapV< ^Union, ^Typ when ^Typ : (static member Zero : ^Typ) and ^Union : comparison > =
+    //let inline initUnionMapV< ^Union when ^Union : comparison > (z: ^Typ) =
+    let inline initUnionMapV (v: ^Typ) =
+        //let z = LanguagePrimitives.GenericZero< 'Typ>
+        unionEnum< ^Union>
+        |> Array.map (fun x -> x, v)
+        |> Map.ofArray

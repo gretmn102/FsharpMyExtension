@@ -15,7 +15,7 @@ let reader () =
     f() |> ignore
     s.ToString()
 
-let run f = reader() |> String.collect f |> printfn "Result:\n%s"
+let run reader f = reader() |> String.collect f |> printfn "Result:\n%s"
 
 ///**Description**
 /// escape '\' -> "\\" | '"' -> '\"\"'
@@ -24,7 +24,7 @@ let escape () =
         | '\\' -> "\\\\"
         | '"' -> "\\\""
         | x -> string x
-    run f
+    run reader f
 
 ///**Description**
 /// escape '\' -> "\\" | '"' -> '\"\"' and \n -> "\\n" | \r -> ""
@@ -35,7 +35,18 @@ let escapen () =
         | '\n' -> "\\n"
         | '\r' -> ""
         | x -> string x
-    run f
+    run reader f
+///**Description**
+/// escape '\' -> "\\" | '"' -> '\"\"' and \n -> "\\n" | \r -> ""
+let escapens s =
+    let f = function
+        | '\\' -> "\\\\"
+        | '"' -> "\\\""
+        | '\n' -> "\\n"
+        | '\r' -> ""
+        | x -> string x
+    run (fun () -> s) f
+
 
 ///**Description**
 /// for @ string ('"' -> '""')
@@ -43,4 +54,4 @@ let escape2 () =
     let f = function
         | '"' -> "\"\""
         | x -> string x
-    run f
+    run reader f

@@ -10,7 +10,7 @@ module HtmlNode =
         [ HtmlNode.CreateNode "<div att='val'></div>" |> getAttVal "att" = "val"
           HtmlNode.CreateNode "<div att='val'></div>" |> getAttVal "att2" |> isNull ] |> List.forall id
     
-    let tryGetAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null) |> Option.ofNull
+    let tryGetAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null) |> Option.ofObj
     assert
         [ HtmlNode.CreateNode "<div att='val'></div>" |> tryGetAttVal "att" = Some "val"
           HtmlNode.CreateNode "<div att='val'></div>" |> tryGetAttVal "att2" = None ] |> List.forall id
@@ -19,5 +19,17 @@ module HtmlNode =
     let nodeType (node:HtmlNode) = node.NodeType
 
     let ofString s = HtmlDocument() |> fun d -> d.LoadHtml s |> fun () -> d.DocumentNode
-    let selectSingle s (node:HtmlNode) = node.SelectSingleNode s |> Option.ofNull
-    let selectNodes s (node:HtmlNode) = node.SelectNodes s |> Option.ofNull |> Option.map (Seq.cast<HtmlNode>)
+    ///**Exceptions**
+    /// `System.Xml.XPath.XPathException`
+    let selectSingle s (node:HtmlNode) = node.SelectSingleNode s |> Option.ofObj    
+    
+    ///**Description**
+    /// If `HtmlNode.SelectNodes` is nothing found, then he return `null`.
+    /// 
+    ///**Exceptions**
+    /// `System.Xml.XPath.XPathException`
+    let selectNodes s (node:HtmlNode) = node.SelectNodes s |> Option.ofObj |> Option.map (Seq.cast<HtmlNode>)
+    assert
+        let nd = HtmlNode.CreateNode "<a><b /><c /></a>"
+        selectNodes "d" nd = None
+        
