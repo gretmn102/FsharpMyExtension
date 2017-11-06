@@ -11,9 +11,11 @@ let values (m:Map<_,_>) = m |> Seq.map (function KeyValue(k:'key, v:'value) -> v
 let keys (m:Map<_,_>) = m |> Seq.map (function KeyValue(k:'key, v:'value) -> k )
 let chooseS fn (m:Map<_,_>) =
     m |> Seq.choose (function KeyValue(k:'key, v:'value) -> fn k v)
-let filterS (fn:'key -> 'value -> _) =
-    //Seq.filter (function KeyValue(k:'key, v:'value) -> fn k v)
-    Map.filter fn >> values
+let filterS (fn:'key -> 'value -> _) (m:Map<_,_>) =
+    // m |> Seq.filter (function KeyValue(k:'key, v:'value) -> fn k v)
+    // |> Seq.map (fun x -> x)
+    chooseS (fun x y -> if fn x y then Some y else None) m
+    //Map.filter fn >> values
     //: Map<_,_> -> _
     //choose (fun k v -> if fn k v then Some v else None)
 /// жаль что нет встроенной реализации. А так, приходится дважды искать ключ, хотя можно было бы сначала найти (если есть) и заменить значение.

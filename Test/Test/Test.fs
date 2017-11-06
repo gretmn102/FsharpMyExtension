@@ -2,7 +2,16 @@ open Fuchu
 open FsharpMyExtension.FSharpExt
 
 let ran = System.Random() |> fun x k n-> x.Next(k, n)
-
+module FsharpExt =
+    [<Tests>]
+    let For'Test =
+        testList "For'Test" [
+            testCase "base case" <| fun () ->
+                let st = -1
+                Assert.Equal("", st, for' 1 0 (fun _ _ -> 2) st)
+            testCase "fact" <| fun () ->
+                Assert.Equal("", List.reduce (*) [1..12], for' 1 12 (*) 1)
+       ]
 module ParserXpath =
     open FsharpMyExtension.MainModule
     open Parser.Primitives

@@ -13,6 +13,9 @@ module FSharpExt =
     assert
         let init = 1
         until (fun x -> x % 2 <> 0) ((+)1) init = init
+    let rec for' n k f st =
+        if n > k then st
+        else for' (n+1) k f (f st n)
 
     let flip f x y = f y x
     assert 
