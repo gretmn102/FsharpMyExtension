@@ -13,7 +13,6 @@ module FsharpExt =
                 Assert.Equal("", List.reduce (*) [1..12], for' 1 12 (*) 1)
        ]
 module ParserXpath =
-    open FsharpMyExtension.MainModule
     open Parser.Primitives
     open FsharpMyExtension.Either
     open Parser.XPathPar
@@ -424,6 +423,22 @@ module LZCTests =
                 let act = LZC.ofList [x;y;z] |> LZC.next |> LZC.next |> rem
                 let e = LZC.ofList [x;y] |> LZC.next |> LZC.next
                 Assert.Equal("", e, act)
+       ]
+
+module Path =
+    open FsharpMyExtension
+    [<Tests>]
+    let ChangeFileNameWithoutExtTest =
+        testList "ChangeFileNameWithoutExtTest" [
+            testCase "base case" <| fun () ->
+                Assert.Equal("", "file1",
+                    Path.changeFileNameWithoutExt (sprintf "%s1") "file")
+            testCase "" <| fun () ->
+                Assert.Equal("", "dir\\file1.fs",
+                    Path.changeFileNameWithoutExt (sprintf "%s1") "dir\\file.fs")
+            testCase "" <| fun () ->
+                Assert.Equal("", "e:\\dir\\file1.fs",
+                    Path.changeFileNameWithoutExt (sprintf "%s1") "e:\\dir\\file.fs")
        ]
 [<EntryPoint>]
 let main arg =

@@ -36,6 +36,12 @@
     <Compile Include="WebDownloader.fs" />
     <Compile Include="Numeric.fs" />
     <Compile Include="Json.fs" />
+    
+    <Compile Include="Containers/TwoDSeq.fs" />
+    <Compile Include="Containers/Array2D.fs" />
+    <Compile Include="Bitmap.fs" />
+
+    <Compile Include="Path.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

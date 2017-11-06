@@ -1,4 +1,4 @@
-module WebDownloader
+module FsharpMyExtension.WebDownloader
 open System
 open System.Net
 open System.IO
@@ -22,6 +22,7 @@ do
                 if ((flagsValue &&& 0x1000000) <> 0) then
                     flagsField.SetValue(parser, flagsValue &&& ~~~0x1000000);
         )
+        
 type Url = string
 type Content = string
 //type Result = 

@@ -15,12 +15,14 @@
   Зато он строится и успешно запускается.
   Не веришь? Раскоментируй и удали ниже
     `<Reference Include="..\..\FsharpMyExtension\FsharpMyExtension\bin\debug\net45\FsharpMyExtension.dll" />`
-  Попробуй в данном проэкте написать `Parser.trav`, скажет - `The namespace 'Parser' not defined`.
+  Попробуй в данном проекте написать `Parser.trav`, скажет - `The namespace 'Parser' not defined`.
   Такие дела. -->
   <ItemGroup>
     <Compile Include="ParserPrimitives.fs" />
-    <Compile Include="Test.fs" />
+    <Compile Include="Array2D.fs" />
+    <Compile Include="Bitmap.fs" />
     
+    <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
