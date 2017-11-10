@@ -42,6 +42,10 @@
     <Compile Include="Bitmap.fs" />
 
     <Compile Include="Path.fs" />
+    
+    <Compile Include="DateTime.fs" />
+
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
