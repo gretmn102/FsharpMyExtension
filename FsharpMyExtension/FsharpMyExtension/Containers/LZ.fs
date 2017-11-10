@@ -54,7 +54,19 @@ module ListZ =
         // | Some ({ Right=_::t; Index=i } as lz) ->
         //     Some <| { lz with Right=t; Index = i - 1 }
         // | _ -> None
-
+    
+    
+    ///**Description**
+    ///
+    ///**Exceptions**
+    ///  * `System.ArgumentException`: Thrown when the `Current` does not have precisely one element.
+    let concat lst = //(Lz(xs, x, ys)) =
+        {
+            Left    = List.concat lst.Left
+            Current = List.exactlyOne lst.Current
+            Right   = List.concat lst.Right
+            Index   = lst.Index
+        }
     let set x (lz:ListZ<_>) = { lz with Current = x }
     let hole lst = lst.Current
     let update f (lz:ListZ<_>) = { lz with Current = f lz.Current }

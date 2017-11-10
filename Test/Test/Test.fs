@@ -23,7 +23,7 @@ module ParserXpath =
             testCase "base case" <| fun () ->
                 let txt = "some text"
                 let nod = HtmlAgilityPack.HtmlNode.CreateNode (sprintf "<a>%s</a>" txt)
-                let p : HtmlAgilityPack.HtmlNode -> _ = Parser.XPathPar.exec { Name = None; Att = []; Text = Some txt }
+                let p : HtmlAgilityPack.HtmlNode -> _ = exec { Name = None; Att = []; Text = Some txt }
                 
                 Assert.Equal("'*[text()='%s']' = '<a>%s</a>'", true, p nod)
             testCase "" <| fun () ->
@@ -35,42 +35,57 @@ module ParserXpath =
     let parserTest =
         testList "xpath parse" [
             testCase "empty req" <| fun () ->
-                let k = run "" Parser.XPathPar.Parser.name |> Either.isRight
+                let k = run "" Parser.name |> Either.isRight
                 Assert.Equal("some", false, not k)
             testCase "only name tag without attributes" <| fun () ->
-                let k = run "a" Parser.XPathPar.Parser.name |> Either.isRight
+                let k = run "a" Parser.name |> Either.isRight
                 Assert.Equal("some", true, k)
             testCase "a[@href]" <| fun () ->
                 let xpath = "a[@href]"
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal(sprintf "%A" act, true, Either.isRight act)
             testCase "*[@att='value'][@*='value'][@*]" <| fun () ->
                 let xpath = "*[@att='value'][@*='value'][@*]"
                 let exp = Right({ Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)]; Text = None}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal("some", exp, act)
 
             testCase "any tag with some text: *[text()='some text in node']" <| fun () ->
                 let xpath = "*[text()='some text in node']"
                 let exp = Right({ Name = None; Att = []; Text = Some "some text in node"}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "*[@att='value'][text()='some text in node']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node']"
                 let exp = Right({ Name = None; Att = [(Some "att", Some "value");]; Text = Some "some text in node"}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "text between attributes: *[@att='value'][text()='some text in node'][@att2='val']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node'][@att2='val']"
                 let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "two text: *[text()='some text in node'][text()='txt2']" <| fun () ->
                 let xpath = "*[text()='some text in node'][text()='txt2']"
                 //let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
-                let act = run xpath Parser.XPathPar.Parser.res
+                let act = run xpath Parser.res
                 Assert.Equal("", true, Either.isLeft act)
                ]
+module ParserHtmlNodeTest =
+    open HtmlAgilityPack
+    open Parser.ParHtmlNode
+    [<Tests>]
+    let isEmptyInnerTextTest =
+        testList "isEmptyInnerTextTest" [
+            testCase "base case" <| fun () ->
+                let emptyNode = HtmlNode.CreateNode " \n \r \n\r"
+                let act = isEmptyInnerText emptyNode
+                Assert.Equal(@"expected ' \n \r \n\r' is empty", true, act)
+            testCase "" <| fun () ->
+                let emptyNode = HtmlNode.CreateNode " \n \r \n\rb"
+                let act = isEmptyInnerText emptyNode
+                Assert.Equal(@"expected ' \n \r \n\rb' is not empty", false, act)
+       ]
 module ParserStringTest =
     open Parser
     open Parser.Primitives

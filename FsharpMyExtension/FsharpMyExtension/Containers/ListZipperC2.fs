@@ -4,7 +4,8 @@ type Place = Middle | EndR | EndL
 type 'a LZC = {
     State:Place * FsharpMyExtension.ListZipper.ListZ<'a>
 }
-
+[<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
 module LZC =
     open FsharpMyExtension.ListZipper
     open FsharpMyExtension.FSharpExt
