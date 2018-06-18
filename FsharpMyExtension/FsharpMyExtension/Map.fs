@@ -1,4 +1,5 @@
-﻿module FsharpMyExtension.Map.Map
+﻿[<RequireQualifiedAccess>]
+module FsharpMyExtension.Map
 //module Map =
 open FsharpMyExtension.FSharpExt
 
@@ -19,11 +20,18 @@ let filterS (fn:'key -> 'value -> _) (m:Map<_,_>) =
     //: Map<_,_> -> _
     //choose (fun k v -> if fn k v then Some v else None)
 /// жаль что нет встроенной реализации. А так, приходится дважды искать ключ, хотя можно было бы сначала найти (если есть) и заменить значение.
-let addOrMod modify def key db =
+let addOrMod key def modify db =
     Map.tryFind key db
     |> Option.map modify
     |> Option.defaultValue def
     |> flip (Map.add key) db
+
+let addOrModWith key def modify db =
+    Map.tryFind key db
+    |> Option.map modify
+    |> Option.defaultWith def
+    |> flip (Map.add key) db
+
 
 (*
 let chooseFilMap fn m = 

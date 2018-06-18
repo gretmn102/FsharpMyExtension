@@ -1,10 +1,10 @@
-namespace FsharpMyExtension.TwoDSeq
+module FsharpMyExtension.TwoDSeq
 
 module TwoDOp =
-    type 'a T =
+    type T<'a,'b> =
         {
             Get: int -> int -> 'a
-            Set: int -> int -> 'a -> unit
+            Set: int -> int -> 'b -> unit
             Length1: int
             Length2: int
         }

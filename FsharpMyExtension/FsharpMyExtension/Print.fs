@@ -18,7 +18,7 @@ let reader () =
 let run reader f = reader() |> String.collect f |> printfn "Result:\n%s"
 
 ///**Description**
-/// escape '\' -> "\\" | '"' -> '\"\"'
+/// `escape '\' -> "\\\\" | '"' -> "\\\""`
 let escape () =
     let f = function
         | '\\' -> "\\\\"
@@ -55,3 +55,16 @@ let escape2 () =
         | '"' -> "\"\""
         | x -> string x
     run reader f
+
+
+open FsharpMyExtension
+let toSnippet s =
+    s
+    |> String.lines
+    |> Array.map (String.collect (function
+            | '\\' -> "\\\\"
+            | '"' -> "\\\""
+            | '\n' -> "\\n"
+            | '\r' -> ""
+            | x -> string x) >> sprintf "\"%s\"")
+    |> String.concat ",\n" |> printfn "%s"

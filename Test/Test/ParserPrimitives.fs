@@ -22,60 +22,60 @@ let xs = [1..5]
 [<Tests>]
 let runTest = 
     testCase "run; praw" <| fun () ->
-        Assert.Equal("", (List.tail xs, List.head xs |> Right), run xs praw)
+        Assert.Equal("", ((List.tail xs, ()), List.head xs |> Right), run xs praw)
 
 [<Tests>]
 let preturnTest =
     testCase "preturn" <| fun () ->
         let x = 1
-        Assert.Equal("", (xs, x |> Right), run xs (preturn x))
+        Assert.Equal("", ((xs, ()), x |> Right), run xs (preturn x))
 [<Tests>]
 let satisfyTest =
     testList "satisfyTests" [
         testCase "error" <| fun () ->
             // satisfy
-            Assert.Equal("", (xs, notChange "some"), run xs (satisfy (k false) "some"))
+            Assert.Equal("", ((xs,()), notChange "some"), run xs (satisfy (k false) "some"))
         testCase "right" <| fun () ->
-            Assert.Equal("", (List.tail xs, List.head xs |> Right), run xs (satisfy (k true) null))
+            Assert.Equal("", ((List.tail xs,()), List.head xs |> Right), run xs (satisfy (k true) null))
     ]
 [<Tests>]
 let pzeroTest =
     testCase "pzeroTest" <| fun () ->
-        Assert.Equal("", (xs, notChange ""), run xs pzero)
+        Assert.Equal("", ((xs,()), notChange ""), run xs pzero)
 
 [<Tests>]
 let bindTest =
     testList "(>>=) test; need: preturn, pzero" [
         testCase "error" <| fun () ->
             // satisfy
-            Assert.Equal("", (xs, notChange ""), run xs ( pzero >>= fun _ -> praw ))
+            Assert.Equal("", ((xs,()), notChange ""), run xs ( pzero >>= fun _ -> praw ))
         testCase "error2" <| fun () ->
-            Assert.Equal("", (List.tail xs, change ""), (run xs ( praw >>= fun _ -> pzero ) : Result<int,unit>))
+            Assert.Equal("", ((List.tail xs,()), change ""), (run xs ( praw >>= fun _ -> pzero ) : Result<int,unit,_>))
         testCase "right" <| fun () ->
             let ys = xs |> List.skip 1
-            Assert.Equal("", (List.tail ys, (List.head xs, List.head ys) |> Right), run xs ( praw >>= fun x -> praw >>= fun y -> preturn (x, y) ))
+            Assert.Equal("", ((List.tail ys,()), (List.head xs, List.head ys) |> Right), run xs ( praw >>= fun x -> praw >>= fun y -> preturn (x, y) ))
     ]
 [<Tests>]
 let bindRightTest =
     testList "'(>>.)' test" [
         testCase "(>>.), praw, pzero" <| fun () ->
-            Assert.Equal("", (List.tail xs, change ""), (run xs (praw >>. pzero) : Result<int, int>))
+            Assert.Equal("", ((List.tail xs,()), change ""), (run xs (praw >>. pzero) : Result<int, int,_>))
         testCase "right" <| fun () ->
             let ys = xs |> List.skip 1
-            Assert.Equal("",  (List.tail ys, List.head ys |> Right), run xs (praw >>. praw))
+            Assert.Equal("",  ((List.tail ys,()), List.head ys |> Right), run xs (praw >>. praw))
     ]
 
 [<Tests>]
 let orTest =
     testList "'(<|>)' test; need: 'pzero', '(>>.)'" [
         testCase "(>>.), praw, pzero" <| fun () ->
-            let expected = xs, Left (false, Node(Or, [Tree.singleton <| NotBack ""; Tree.singleton <| NotBack ""]))
-            Assert.Equal("", expected, (run xs (pzero <|> pzero) : Result<int,int>))
+            let expected = (xs,()), Left (false, Node(Or, [Tree.singleton <| NotBack ""; Tree.singleton <| NotBack ""]))
+            Assert.Equal("", expected, (run xs (pzero <|> pzero) : Result<int,int,_>))
         testCase "sdf" <| fun () ->
             
-            Assert.Equal("", ([], Left (true, Tree.singleton <| NotBack "1")), (run [1] (((praw .>> (pzero <?> "1")) <|> praw)) : Result<int, int>))
+            Assert.Equal("", (([],()), Left (true, Tree.singleton <| NotBack "1")), (run [1] (((praw .>> (pzero <?> "1")) <|> praw)) : Result<int, int,_>))
         testCase "right" <| fun () ->
-            Assert.Equal("",  (List.tail xs, List.head xs |> Right), run xs (pzero <|> praw))
+            Assert.Equal("",  ((List.tail xs,()), List.head xs |> Right), run xs (pzero <|> praw))
     ]
 
 [<Tests>]
@@ -85,9 +85,9 @@ let manyTest =
         testCase "(>>.), praw, pzero" <| fun () ->
             let n = 3
             let ys = List.take n xs
-            Assert.Equal("", (List.skip n xs, Right ys), run xs (many (satisfy (Set.ofList ys |> flip Set.contains) null)))
+            Assert.Equal("", ((List.skip n xs,()), Right ys), run xs (many (satisfy (Set.ofList ys |> flip Set.contains) null)))
         testCase "st, many pzero -> st, Right []" <| fun () ->
-            Assert.Equal("", (xs, Right []), run xs (many pzero))
+            Assert.Equal("", ((xs,()), Right []), run xs (many pzero))
         testCase "right" <| fun () ->
             let pdigit = (fun (n:int) -> satisfy ((=) n) (sprintf "%d" n))
             let p f = run [1;3] (f (pdigit 1 >>. pdigit 2 )) // ->  ([3], Left (true, [NotBack "2"]))
@@ -100,16 +100,16 @@ let attemptTest =
         //testCase "base" <| fun () ->
         testCase "base case `attempt (praw >>. pzero)` (state test)" <| fun () ->
             let actual = fst <| run xs (attempt (praw >>. pzero))
-            Assert.Equal("", xs, actual)
+            Assert.Equal("", (xs,()), actual)
         testCase "attempt in attempt: `attempt (attempt (praw .>> pzero))` (state test)" <| fun () ->
-            let act = fst (run xs (attempt ( attempt (praw .>> pzero))) : Result<int,int>)
-            Assert.Equal("", xs, act)
+            let act = fst (run xs (attempt ( attempt (praw .>> pzero))) : Result<int,int,_>)
+            Assert.Equal("", (xs,()), act)
         testCase "very big stmt (state test)" <| fun () ->
             let choice xs = Seq.reduce (<|>) xs
-            let p : Pars<_,unit> = attempt (choice [pzero; praw >>? pzero; pzero; praw >>? pzero] ) <|> pzero
+            let p : Pars<_,unit,_> = attempt (choice [pzero; praw >>? pzero; pzero; praw >>? pzero] ) <|> pzero
             
 //            |> mapSnd (Either.either (fun x -> Tree.visualize (sprintf "%A") (snd x) ) (sprintf "Right - %A"))
-            Assert.Equal("", xs, fst <| run xs (attempt p <|> pzero))
+            Assert.Equal("", (xs,()), fst <| run xs (attempt p <|> pzero))
         // testCase "attempt in attempt" <| fun () ->
         //     let pzero s = pzero <?> s
         //     let s = "1"
@@ -132,12 +132,12 @@ let attemptTest =
 let bindLeftTest =
     testList "'.>>' test; need: 'praw', 'pzero'" [
         testCase "right `zero`" <| fun () ->
-            Assert.Equal("", (List.tail xs, change ""), run xs (praw .>> pzero))
+            Assert.Equal("", ((List.tail xs,()), change ""), run xs (praw .>> pzero))
         testCase "left `zero`" <| fun () ->
-            Assert.Equal("", (xs, notChange ""), run xs (pzero .>> praw))
+            Assert.Equal("", ((xs,()), notChange ""), run xs (pzero .>> praw))
         testCase "both `praw`" <| fun () ->
             let ys = xs |> List.skip 1
-            Assert.Equal("", (List.tail ys, List.head xs |> Right), run xs (praw .>> praw))
+            Assert.Equal("", ((List.tail ys,()), List.head xs |> Right), run xs (praw .>> praw))
     ]
 [<Tests>]
 let sepByTest =
@@ -146,12 +146,12 @@ let sepByTest =
     testList "'sepBy' test; need: 'praw', 'satisfy'" [
         testCase "number seq with sep - ','" <| fun () ->
             let xs = "1,2,3"
-            Assert.Equal("", ([], Right ['1'; '2'; '3']), run xs <| sepBy praw (pchar ',') )
+            Assert.Equal("", (([],()), Right ['1'; '2'; '3']), run xs <| sepBy praw (pchar ',') )
         testCase "number seq with sep - ',' and end sep" <| fun () ->
             let xs = "1,2,3,"
-            Assert.Equal(xs, ([','], Right ['1'; '2'; '3']), run xs <| sepBy praw (pchar ',') )
+            Assert.Equal(xs, (([','],()), Right ['1'; '2'; '3']), run xs <| sepBy praw (pchar ',') )
         testCase "empty" <| fun () ->
-            Assert.Equal("always return empty if p fail", ([], Right []), run "" <| sepBy pzero pzero)
+            Assert.Equal("always return empty if p fail", (([],()), Right []), run "" <| sepBy pzero pzero)
         // testCase "attempt" <| fun () ->
         //     ([1..5], 0) |> fun (xs, sep) ->
         //     List.map List.singleton xs

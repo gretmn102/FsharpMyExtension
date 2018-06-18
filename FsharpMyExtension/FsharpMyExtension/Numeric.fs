@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.Numeric
+module FsharpMyExtension.Numeric
 
 
 //CustomEquality;

@@ -1,4 +1,5 @@
 namespace FsharpMyExtension.ListZipperCircle2
+open FsharpMyExtension.FSharpExt
 
 type Place = Middle | EndR | EndL
 type 'a LZC = {
@@ -7,8 +8,9 @@ type 'a LZC = {
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LZC =
+    open FsharpMyExtension
     open FsharpMyExtension.ListZipper
-    open FsharpMyExtension.FSharpExt
+    let toList (lz:_ LZC) = lz.State |> snd |> ListZ.toList
     let isEndR' lz =
         List.isEmpty lz.Left
         //lz |> Option.map (fun x -> List.isEmpty x.Left ) |> Option.defaultValue false
@@ -31,6 +33,10 @@ module LZC =
     //     fn lz.State
         // Option.map f
         // >> Option.defaultWith g
+    let isSingletone (lzc:_ LZC) =
+        lzc.State |> snd
+        |> ListZ.isSingleton
+
     let map f lst = lst.State |> f |> lzc
     let update' f = map (snd >> f)
     
@@ -60,6 +66,7 @@ module LZC =
                     endR x |> lzc
             ListZ.removeR lz |> Option.map f)
     let hole lst = lst.State |> (snd >> ListZ.hole)
+    let pos lst = lst.State |> fst
     let update'' f = map (mapSnd f)
     let update f = update'' (ListZ.update f)
     let set x = update (k x)

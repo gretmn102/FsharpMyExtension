@@ -5,6 +5,8 @@ type ListZ<'a> = { Index:int; Left:'a list; Current:'a; Right:'a list }
 [<RequireQualifiedAccess>]
 module ListZ =
     let singleton x = { Index = 0; Left = []; Current = x; Right = [] }
+    let isSingleton x =
+        List.isEmpty x.Right && List.isEmpty x.Left
     let ofList = function
         | [] -> failwith "list is empty"
         | h::t -> { Left = t; Current = h; Right = []; Index = 0 }
@@ -120,6 +122,10 @@ module ListZ =
                               Current = 8;
                               Right = [7; 6; 5; 4; 3; 2; 1];}
         nth 5 xs = None
+    let iter fn lz =
+        List.iter fn lz.Left
+        fn lz.Current
+        List.iter fn lz.Right
     let map fn lz = {
         Left = List.map fn lz.Left
         Current = fn lz.Current

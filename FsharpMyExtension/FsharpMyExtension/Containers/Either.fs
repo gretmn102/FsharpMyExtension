@@ -1,4 +1,5 @@
 ﻿namespace FsharpMyExtension.Either
+open FsharpMyExtension.FSharpExt
 open FsharpMyExtension.List
 
 type Either<'a,'b> = Left of 'a | Right of 'b
@@ -62,7 +63,13 @@ module Either =
         ] |> List.forall id
     
     let getOrDef x = function Right x -> x | _ -> x
+    let getOrElse f = function
+        | Right x -> x
+        | Left _ -> f()
     let getOrDef' fn = function Right x -> x | Left x -> fn x
+    let orElse f = function
+        | Right x -> Right x
+        | Left _ -> f()
     let get = function Right x -> x | x -> failwithf "try get right, but '%A'" x
     let getLeft = function Left x -> x | x -> failwithf "try get left, but '%A'" x
     let isRight = function Right _ -> true | _ -> false
@@ -88,7 +95,7 @@ module List =
             | xs, [] -> List.map Either.get xs |> Right
             | _, Left x::_ -> Left x
             | _ -> failwith ""
-    open FsharpMyExtension.FSharpExt
+    open FsharpMyExtension
     let partitionEithers xs =
         xs |> List.partition (Either.isLeft)
         |> mapPair (List.map Either.getLeft) (List.map Either.get)
@@ -112,6 +119,16 @@ module Seq =
         f [] <| xs.GetEnumerator()
 
     let seqEither xs = travEither id xs
+    // open FsharpMyExtension.FSharpExt
+    // let partitionEithers (xs : _ seq) =
+    //     let xs = xs.GetEnumerator()
+    //     let rec f acc = 
+    //         if xs.MoveNext() then
+    //             xs.Current |> function
+    //                 | Right x -> f (mapSnd (List.cons x) acc)
+    //                 | Left x  -> f (mapFst (List.cons x) acc)
+    //         else mapPair List.rev List.rev acc
+    //     f ([],[])
 
 [<RequireQualifiedAccess>]
 module Option =

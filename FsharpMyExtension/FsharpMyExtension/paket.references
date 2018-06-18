@@ -3,3 +3,4 @@ HtmlAgilityPack
 FParsec
 Fuchu
 Newtonsoft.Json
+Newtonsoft.Json.Bson

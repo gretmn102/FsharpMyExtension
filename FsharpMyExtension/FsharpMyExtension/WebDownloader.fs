@@ -203,3 +203,49 @@ List.zip fileNames pages |> List.iter (File.WriteAllText)
 //         (fun x -> streamToStream(stream, x))
 
 
+module DownThemAll =
+    open FsharpMyExtension.XmlBuilder
+    // let f () =
+    //     System.IO.File.ReadAllText @"e:\downloads\Downloads.meta4"
+    //     |> FsharpMyExtension.HtmlNode.HtmlNode.ofString
+    //     |> fun x -> x.ChildNodes
+    //     |> Node.ofHtmlNodes
+    //     |> Seq.map (sprintf "%A")
+    //     |> fun cont -> System.IO.File.WriteAllLines("output/outputTemp.txt", cont)
+    /// DownThemAll! 3.0v
+    let metalink (xs:(string * string) list) = 
+        let now = System.DateTime.Now
+        let nowStr = 
+            now
+            |> FsharpMyExtension.DateTime.Unix.toMSec
+            |> string
+        // let now = System.DateTime.Now
+        // now.ToString("R")
+
+        let file i (name, url) = 
+            Node
+              ("file",
+               [("name", name)
+                ("a0:num", sprintf "%d" i)
+                ("a0:startdate", nowStr) // "1524916470084");
+                ("a0:referrer", "")],
+               [
+                //Node ("description",[],[Text ""]);
+                Node
+                  ("url",
+                   [("priority", "100");
+                    ("a0:usable", url)],
+                   [Text url])
+                ]);
+        Node
+          ("metalink",
+           [("xmlns", "urn:ietf:params:xml:ns:metalink"); ("version", "4.0");
+            ("a0:version", "3.0.8");
+            ("xmlns:a0", "http://www.downthemall.net/properties#")],
+           [yield Node ("generator",[],[Text "DownThemAll!/3.0"]);
+            yield Node ("published",[],[Text (now.ToString("R"))]) //"Sat, 28 Apr 2018 11:55:16 GMT"]);
+            yield! List.mapi file xs
+           ])
+        |> Node.sprintNodeXml
+    let metalinkf (path:string) (xs:(string * string) list) =
+        metalink xs |> fun cont -> System.IO.File.WriteAllText(path, cont)

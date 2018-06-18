@@ -1,9 +1,11 @@
-﻿namespace FsharpMyExtension.Queue
+﻿namespace FsharpMyExtension
+[<Struct>]
 type 'a Queue = Q of 'a list * 'a list
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Queue =
     let rec deq = function
-        | Q((x::xs), ys) -> (x, Q(xs, ys))
+        | Q((x::xs), ys) -> x, Q(xs, ys)
         | Q([], []) -> failwith "queue empty"
         | Q([], ys) -> deq (Q((List.rev ys), []))
     let enq (Q(xs, ys)) y = Q(xs, y::ys)

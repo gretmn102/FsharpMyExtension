@@ -1,4 +1,6 @@
 ﻿namespace Parser
+open FsharpMyExtension
+open FsharpMyExtension.FSharpExt
 
 module XPathPar =
     open Primitives
@@ -36,37 +38,50 @@ module XPathPar =
 
     module Parser =
         open ParserString
-        open FsharpMyExtension.FSharpExt
+        open FsharpMyExtension
 
         //let name = (pchar '*' >>% None) <|> (pstr |>> Some)
         //manyChars (p)
         
         let name = (pchar '*' >>% None) <|> (manySatisfy (isNoneOf " []=") |>> Some)
-        let val' = 
-            let v = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''
-            v
-        let opt x = (x |>> Some) <|> (preturn None)
+        let val' = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''
         let patt = 
             pchar '@' >>. name >>= fun name -> opt val' |>> fun att -> name,att
         let ptext = pstring "text()" >>. val'
         let attempt x = x
         let res =
-            let patts = many (attempt (pchar '[' >>. patt) .>> pchar ']')
+            let brackets p = attempt (pchar '[' >>. p) .>> pchar ']'
+            let patts = many (brackets patt)
             name >>= fun name ->
-            pipe2 patts (pipe2 (opt (attempt (pchar '[' >>. ptext) .>> pchar ']')) patts comma )
-                (fun x (txt, y) -> 
-                    let atts = match y with [] -> x | y -> x @ y
+            pipe2 patts (pipe2 (opt (brackets ptext)) patts comma )
+                (fun xs (txt, ys) -> 
+                    let atts = match ys with [] -> xs | y -> xs @ y
                     { Name = name; Att = atts; Text = txt }) .>> pend (sprintf "%A")
-            // patts patt .>> pend (sprintf "%A") |>> fun att ->
-            // { Name = name; Att = att; Text = None }
-
     let parse xs = 
         run xs Parser.res |> Either.map (fst >> exec)
-
+    let show (x:Req) = 
+        let name = x.Name |> Option.defaultValue "*"
+        let atts =
+            x.Att
+            |> List.map (
+                mapPair
+                    (Option.defaultValue "*")
+                    (Option.map (sprintf "='%s'") >> Option.defaultValue "")
+                >> curry (sprintf "@%s%s"))
+        
+        let all =
+            x.Text
+            |> Option.map (sprintf "text()=%s" >> fun x -> x::atts)
+            |> Option.defaultValue atts
+        
+        // let xs = 
+        List.map (sprintf "[%s]") (all) |> String.concat ""
+        |> sprintf "%s%s" name
+    
 module ParHtmlNode = 
     open Primitives
-    open FsharpMyExtension.HtmlNode
-    open FsharpMyExtension.FSharpExt
+    open FsharpMyExtension
+    open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
     open HtmlAgilityPack
 
@@ -127,3 +142,4 @@ module ParHtmlNode =
         .>> ws
     let sub (p:Pars<_,_>) (x:HtmlNode) =
         preturn (run x.ChildNodes (ws >>. p)) |> trav : Pars<_,_>
+    let (>>@) p x = p >>= sub x

@@ -1,5 +1,6 @@
 [<RequireQualifiedAccessAttribute>]
 module FsharpMyExtension.Array2D
+open FsharpMyExtension.FSharpExt
 open FsharpMyExtension.TwoDSeq
 let private toT (xss:_ [,]) = {
     TwoDOp.T.Get = Array2D.get xss
@@ -16,7 +17,7 @@ let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
 let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
 
 open System.Drawing
-open FsharpMyExtension.FSharpExt
+open FsharpMyExtension
 
 let ofListList l1 l2 xss =
     let yss = Array2D.zeroCreate l1 l2
@@ -159,6 +160,22 @@ let toBitmap =
     // toBitmapF Imaging.PixelFormat.Format32bppArgb
     toBitmapFast
 
+let toArrayArray xss = 
+    let h = Array2D.length1 xss
+    let w = Array2D.length2 xss
+    let yss = Array.init h (fun _ -> Array.zeroCreate w)
+
+    // for i = 0 to Array2D.length1 xss - 1 do
+    //     for j = 0 to Array2D.length2 xss - 1 do
+    //         yss.[i].[j] <- xss.[i,j]
+    iteriP (fun i j x -> yss.[i].[j] <- x) xss
+    yss
+assert
+    let xss = [|[| 1..5 |]; [| 6..10 |]|]
+    xss
+    |> ofArAr
+    |> toArrayArray
+    |> (=) xss
 /// n*i + j
 let to1DArray n (i, j) = n*i + j
 let testTo1DArray () =

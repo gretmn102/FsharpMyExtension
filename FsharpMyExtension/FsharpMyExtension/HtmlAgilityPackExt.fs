@@ -1,9 +1,13 @@
-﻿namespace FsharpMyExtension.HtmlNode
+﻿namespace FsharpMyExtension.HtmlAgilityPackExt
 open HtmlAgilityPack
 
+module HtmlDocument = 
+    let loadHtml x = 
+        let d = new HtmlDocument()
+        d.LoadHtml x
+        d
 module HtmlNode =
-    open FsharpMyExtension.Option
-
+    // open FsharpMyExtension.Option
     let createNode html = HtmlNode.CreateNode html
     let getAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null)
     assert
@@ -18,17 +22,20 @@ module HtmlNode =
     let innerText (node:HtmlNode) = node.InnerText
     let nodeType (node:HtmlNode) = node.NodeType
 
-    let ofString s = HtmlDocument() |> fun d -> d.LoadHtml s |> fun () -> d.DocumentNode
+    let ofString x =
+        let d = HtmlDocument.loadHtml x
+        d.DocumentNode
     ///**Exceptions**
     /// `System.Xml.XPath.XPathException`
-    let selectSingle s (node:HtmlNode) = node.SelectSingleNode s |> Option.ofObj    
+    let selectSingle (s:string) (node:HtmlNode) = node.SelectSingleNode s |> Option.ofObj    
     
     ///**Description**
     /// If `HtmlNode.SelectNodes` is nothing found, then he return `null`.
     /// 
     ///**Exceptions**
     /// `System.Xml.XPath.XPathException`
-    let selectNodes s (node:HtmlNode) = node.SelectNodes s |> Option.ofObj |> Option.map (Seq.cast<HtmlNode>)
+    let selectNodes (s:string) (node:HtmlNode) =
+        node.SelectNodes s |> Option.ofObj |> Option.map (Seq.cast<HtmlNode>)
     assert
         let nd = HtmlNode.CreateNode "<a><b /><c /></a>"
         selectNodes "d" nd = None

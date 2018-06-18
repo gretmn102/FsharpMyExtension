@@ -1,75 +1,33 @@
 ﻿namespace FsharpMyExtension.Combinatorics
-
-type 'a LazyTree = Node of 'a * 'a LazyTree seq
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-[<RequireQualifiedAccess>]
-module LazyTree = 
-    let visualize print inputTree = 
-        let prefMid = seq { yield "├─"; while true do yield "│ " }
-        let prefEnd = seq { yield "└─"; while true do yield "  " }
-        let prefNone = seq { while true do yield "" }
- 
-        let inline c2 x y = Seq.map2 (+) x y
-
-        let rec visualize (Node(label:'a, children:LazyTree<'a> seq)) pre =
-            seq {
-                yield Seq.head pre + print label
-                if not <| Seq.isEmpty children then
-                    let preRest = Seq.skip 1 pre
-                    let last = Seq.last children
-                    for e in children do
-                        if e = last then yield! visualize e (c2 preRest prefEnd)
-                        else yield! visualize e (c2 preRest prefMid)
-            }
-        System.String.Join("\n", visualize inputTree prefNone)
-
-    assert
-        let dummy = 
-            Node ("root",
-                    [Node ("a", 
-                            [Node ("a1",
-                                    [Node ("a11", []);
-                                    Node ("a12", []) ]) ]);
-                    Node ("b",
-                            [Node ("b1", []) ]) ])
-        visualize (sprintf "%s") dummy = "root\n├─a\n│ └─a1\n│   ├─a11\n│   └─a12\n└─b\n  └─b1"
-    /// <summary> распаковать в вид [[1;2]; [1;3]...] </summary>
-    let rec unpack pairs =
-        let f = function
-            | Node(e, L) when Seq.isEmpty L -> [[e]]
-            | Node(e, L) -> List.map (fun x -> e::x) (unpack L)
-        Seq.map f pairs |> List.concat
-    assert
-        let dummy = 
-             [Node (0,seq [Node (1,seq []); Node (2,seq []); Node (3,seq [])]);
-             Node (1,seq [Node (2,seq []); Node (3,seq [])]);
-             Node (2,seq [Node (3,seq [])])]
-        unpack dummy = [[0; 1]; [0; 2]; [0; 3]; [1; 2]; [1; 3]; [2; 3]]
+open FsharpMyExtension
 module Comb =
-    let rec perm count = 
+    /// Сочетания без повторений:
+    /// `f 2 [1..3]` -> `[[1; 2]; [1; 3]; [2; 3]]`
+    let rec comb count = 
         if count <= 0 then fun _ -> Seq.empty
         else
             let fn = function
-                | [] -> None
                 | h::t as xs ->
                     if List.length xs < count then None
-                    else Some(Node(h, perm <| count - 1 <| t), t)
+                    else Some(LT(h, comb (count - 1) t), t)
+                | [] -> None
             Seq.unfold fn
     assert
-        perm 0 [0..4] |> Seq.isEmpty
+        comb 0 [0..4] |> Seq.isEmpty
     assert
         let xs = [1..4]
-        perm 1 xs |> List.ofSeq = List.map (fun x -> Node(x, Seq.empty)) xs
+        comb 1 xs |> List.ofSeq = List.map (fun x -> LT(x, Seq.empty)) xs
     assert
-        perm 2 [0..3] |> LazyTree.unpack = [[0; 1]; [0; 2]; [0; 3]; [1; 2]; [1; 3]; [2; 3]]
+        comb 2 [0..3] |> LazyTree.unpack |> List.ofSeq = [[0; 1]; [0; 2]; [0; 3]; [1; 2]; [1; 3]; [2; 3]]
     assert
-        perm 4 [0..3] |> LazyTree.unpack = [[0..3]]
+        comb 4 [0..3] |> LazyTree.unpack |> List.ofSeq = [[0..3]]
     assert
-        perm 5 [0..3] |> Seq.isEmpty
+        comb 5 [0..3] |> Seq.isEmpty
+
 //    let rec permm xs =
 //        let fn = function
 //            | [] -> None
-//            | h::t as xs -> Some(Node(h, seq{ yield Nil; yield! permm t}), t)
+//            | h::t as xs -> Some(LT(h, seq{ yield Nil; yield! permm t}), t)
 //        Seq.unfold fn xs
 //    assert
 //        
@@ -77,12 +35,81 @@ module Comb =
 //    let xs = Seq.init 10 (printfn "%d")
 //    Seq.take 2 xs
 //    Seq.skip 2 xs
+    /// Бесконечные сочитания с повторениями:
+    /// `f [1..3]` -> (если отсеять до 2-ух в ширину) `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
+    /// Бесконечная как в ширину, так и в длину.
+    let combRepLazy = 
+        let rec f = function
+            | x::xs as ys -> 
+                seq {
+                    yield LT(x, f ys)
+                    yield! f xs
+                }
+            | [] -> Seq.empty
+        f
+    /// Сочитания с повторениями:
+    /// `f 2 [1..3]` -> `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
+    let combRep i xs = 
+        let rec count i xs =
+            if i = 0 then Seq.empty
+            else
+                xs |> Seq.map (fun (LT(x,xs)) ->
+                                LT(x, count (i - 1) xs))
+        combRepLazy xs |> count i
 
-
-
-
-//module SandBox = 
-//    open FsControl
-//    let sdf xs = Operators.map id xs
-//    
-//    (Some 1) >>= (+) 1
+    /// Произведение списков:
+    /// f `[['1'..'2']; ['a'..'c']]` -> `[['1'; 'a']; ['1'; 'b']; ['1'; 'c']; ['2'; 'a']; ['2'; 'b']; ['2'; 'c']]`
+    let pow xss =
+        let rec f = function
+            | xs::xss -> Seq.map (fun x -> LT(x, f xss)) xs
+            | [] -> Seq.empty
+        f xss
+    /// Перестановка без повторений в алфавитном порядке:
+    /// `f [1..3]` -> `[[1; 2; 3]; [1; 3; 2]; [2; 1; 3]; [2; 3; 1]; [3; 1; 2]; [3; 2; 1]]`
+    let rec permutation xs = 
+        // более понятный вариант:
+        // /// 1234 -> [1, 234; 2, 134; 3, 124; 4, 123]
+        // /// [(1, [2; 3; 4]); (2, [1; 3; 4]); (3, [1; 2; 4]); (4, [1; 2; 3])]
+        // let rem xs =
+        //     let add xs ys = List.fold (fun st x -> x::st) ys xs
+        //     let rec f left = function
+        //         | x::xs ->
+        //             (x, add left xs) :: f (x::left) xs
+        //         | [] -> []
+        //     f [] xs
+        // let rec f = function
+        //     | [] -> Seq.empty
+        //     | xs ->
+        //         rem xs |> Seq.map (fun (x, xs) -> LT(x, f xs))
+        // f xs
+        let add xs ys = List.fold (fun st x -> x::st) ys xs
+        let rec f left = function
+            | x::xs ->
+                printfn "%A" (x::xs)
+                seq{
+                    yield LT(x, permutation (add left xs))
+                    yield! f (x::left) xs
+                }
+            | [] -> Seq.empty
+        f [] xs
+    // let xs = permutation [1..5]
+    // Seq.truncate 4 xs |> List.ofSeq |> ignore
+    // // assert
+    // let xs = [1..3]
+    // // mapBoth LazyTree.unpack (perm3 xs, perm4 xs) |> curry (=)
+    // permutation xs |> LazyTree.unpack
+    
+module CombUnpacked = 
+    // open FsharpMyExtension.FSharpExt
+    /// Перестановки без повторений в странном порядке:
+    /// `[1..3]` -> `[[1; 2; 3]; [2; 1; 3]; [2; 3; 1]; [1; 3; 2]; [3; 1; 2]; [3; 2; 1]]`
+    let permutation xs = 
+        let rec inserts x = function
+            | []           -> [[x]]
+            | (y::ys) as l ->
+                (x::l)::(List.map (fun xs -> y::xs) (inserts x ys))
+        // inserts 1 [2..3]
+        let rec perm = function
+            | x :: xs -> Seq.collect (inserts x) (perm xs)
+            | []      -> Seq.singleton []
+        perm xs

@@ -274,7 +274,7 @@ module OptionTests =
     //                 Assert.Equal("", Some x, ofNull( box x) |> Option.map unbox)
     //        ]
     module Seq =
-        let seqOpt = FsharpMyExtension.Option.Seq.seqOpt
+        let seqOpt = FsharpMyExtension.Seq.seqOpt
         [<Tests>]
         let seqOptTest =
             testList "seqOptTest" [
@@ -300,7 +300,7 @@ module T =
     open Parser
     open Parser.Primitives
     open Parser.ParHtmlNode
-    open FsharpMyExtension.HtmlNode
+    open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
     let pUrlThumb =
         ParserString.pstringCI "background-image: url(" >>. ParserString.manyChars ((ParserString.pstringCI "&amp;" >>% '&') <|> (satisfy ((<>) ')') (k null) null)) .>> ParserString.pchar ')' .>> pend (fun _ -> "error then thumb def")
@@ -481,6 +481,21 @@ module DateTimeTest =
                 Assert.Equal("", exp, act)
        ]
 
+module Comb =
+    open FsharpMyExtension
+    open FsharpMyExtension.Combinatorics
+    [<Tests>]
+    let packTest =
+        testList "paTest" [
+            testCase "base case" <| fun () ->
+                // let exp = Comb.comb 3 [1..6] |> LazyTree.unpack |> List.ofSeq
+                let exp = 
+                    [[1; 2; 3]; [1; 2; 4]; [1; 2; 5]; [1; 2; 6]; [1; 3; 4]; [1; 3; 5]; [1; 3; 6];
+                     [1; 4; 5]; [1; 4; 6]; [1; 5; 6]; [2; 3; 4]; [2; 3; 5]; [2; 3; 6]; [2; 4; 5];
+                     [2; 4; 6]; [2; 5; 6]; [3; 4; 5]; [3; 4; 6]; [3; 5; 6]; [4; 5; 6]]
+                let act = LazyTree.pack exp |> LazyTree.unpack |> List.ofSeq
+                Assert.Equal("", exp, act)
+       ]
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

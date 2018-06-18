@@ -2,7 +2,7 @@
 
 [<RequireQualifiedAccess>]
 module List =
-    open FsharpMyExtension.FSharpExt
+    open FsharpMyExtension
     let cons x xs = x::xs
     let consFlip xs x = x::xs
     
@@ -54,7 +54,7 @@ module List =
     //     takeWhile (flip (%) 2 >> (=) 0) [3;4;5;6] = ([], [3;4;5;6])
 
     ///**Description**
-    /// * `takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2;4;6], [7;8;9])`
+    /// * `takeWhileRest (fun x -> x % 2 = 0) [2; 4; 6; 1; 2; 4] = ([2;4;6], [1;2;4])`
     ///**Parameters**
     ///  * `p` - parameter of type `'a -> bool`
     ///
@@ -66,10 +66,10 @@ module List =
     let takeWhileRest p =
         let takeWhileRest p =
             let rec f acc = function
-                | [] -> List.rev acc, []
                 | h::t as xs ->
-                    if p h then f <| h::acc <| t
+                    if p h then f (h::acc) t
                     else List.rev acc, xs
+                | [] -> List.rev acc, []
             f []
         /// faster then `takeWhileRest`?
         let takeWhileRest2 pred =
@@ -142,9 +142,16 @@ module List =
     ///**Output Type**
     ///  * `'a option list list`
     let transposeOpt xss =
-        let ss xss =
-            List.foldBack (fun x (xs, yss) -> match x with (h::t) -> Some h::xs, t::yss | [] -> None::xs, []::yss) xss ([], [])
-        ss xss |> List.unfold (function xs, _ when List.forall Option.isNone xs -> None | (xs, yss) -> Some(xs, ss yss))    
+        let f xss =
+            List.foldBack (fun x (xs, yss) ->
+                    match x with
+                    | h::t -> Some h::xs, t::yss
+                    | [] -> None::xs, []::yss)
+                xss ([], [])
+        f xss
+        |> List.unfold (function
+            | xs, _ when List.forall Option.isNone xs -> None
+            | xs, yss -> Some(xs, f yss))
     assert
         let input = 
             [[1; 2; 3];
@@ -197,16 +204,43 @@ module List =
     ///  * trans [[1;2]; [3;4;5]] -> [[1; 3]; [2; 4]]
     ///  * but trans [[1;2]; [3]] -> Exception
     let trans xss = 
-        let ss = function 
+        let f = function 
             | []::_ -> [], []
-            | xss -> List.foldBack (fun x (xs, yss) -> match x with (h::t) -> h::xs, t::yss | _ -> raise (System.ArgumentException("The lists had different lengths")) ) xss ([], [])
-        ss xss |> List.unfold (function [], _ -> None | (xs, yss) -> Some(xs, ss yss))
+            | xss ->
+                List.foldBack (fun x (xs, yss) ->
+                    match x with
+                    | h::t -> h::xs, t::yss
+                    | _ ->
+                        raise (System.ArgumentException("The lists had different lengths")) )
+                    xss
+                    ([], [])
+        f xss |> List.unfold (function [], _ -> None | xs, yss -> Some(xs, f yss))
     assert
         let xss = List.chunkBySize 2 [1..6]
         trans xss = [[1; 2]; [3; 4]; [5; 6]]
-    
+    /// попроще чем `trans`
+    let rec trans3 = function
+        | []::_ -> []
+        | xss ->
+            List.map List.head xss :: trans3 (List.map List.tail xss)
     [<System.ObsoleteAttribute("use 'transposeOpt'")>]
     let trans2 xss = failwith "use 'transposeOpt'"
+    // /// медленное перемешивание
+    // let shuffle xs =
+    //     let r = System.Random()
+    //     let rec f acc = function
+    //         | [] -> acc
+    //         | xs -> 
+    //             let l = List.length xs
+    //             let curr = r.Next(0, l)
+    //             let rec f' i acc = function
+    //                 | h::t -> 
+    //                     if i = curr then h, List.append (List.rev acc) t
+    //                     else f' (i+1) (h::acc) t
+    //                 | [] -> failwith "empty lst"
+    //             let curr, rest = f' 0 [] xs
+    //             f (curr::acc) rest
+    //     f [] xs |> List.rev
     let shuffle cards =
         let rnd = System.Random()
         let ranOf (l:System.Collections.Generic.List<'a>) =
@@ -215,11 +249,11 @@ module List =
             l.[r]
         let s = new System.Collections.Generic.List<'a>(Seq.ofList cards)
         let rec f acc =
-            if s.Count <> 0 then
+            if s.Count = 0 then acc
+            else
                 let current = ranOf s
                 s.Remove current |> ignore
                 f (current::acc)
-            else acc
         f []
 
     // [<System.ObsoleteAttribute("use 'List.unfold' in Fsharp.Core 4.0")>]
@@ -234,19 +268,19 @@ module List =
         List.init 10 Some |> travOpt = Some [0..9]
     assert
         [ yield Some 1; yield None; yield Some 3 ] |> travOpt = None
-
+    ///**Description**
+    ///  * Последовательная группировка.
+    ///  * `f (=) [1;2;1;1;3;3;4;4;5]` -> `[[1]; [2]; [1; 1]; [3; 3]; [4; 4]; [5]]`
     let groupBySeq f = function
         | x::xs ->
             List.fold (fun (prev, xs) x ->
                 match xs with
                 | h::t -> 
                     if f prev x then x, (x::h)::t
-                    else x, [x]::(List.rev h)::t
+                    else x, [x]::h::t
                 | [] -> failwith "")
                 (x, [[x]]) xs
-            |> snd |> function
-                | x::xs -> List.rev x::xs |> List.rev
-                | [] -> failwith "something wrong"//function [x] -> [List.rev x] | xs -> List.rev xs
+            |> snd |> List.map List.rev |> List.rev
         | [] -> []
     // assert
     //     [] = groupBySeq (=) []
@@ -262,13 +296,15 @@ module List =
     // assert
     //     groupBySeq (fun x y -> snd x = snd y) [ 1,1; 2,1; 3,2; 4,2 ] = [ [1,1; 2,1;]; [3,2; 4,2] ]
     module Alt =
+        /// `f isEven [2;4;5;6;7]` -> `([2; 4], [5; 6; 7])`
         let span fn xs =
             let rec f = function
                 | x::xs' as xs ->
                     if fn x then
-                        let ys,zs = f xs' in x::ys, zs
+                        let ys, zs = f xs'
+                        x::ys, zs
                     else [], xs
-                | [] as xs -> xs, xs
+                | xs -> xs, xs
             f xs
         // clear, but not safe
         let groupBySeq2 fn xs =
@@ -319,32 +355,6 @@ module List =
         seq { while true do for x in xs do yield x }
 
 
-// module T =
-//     (*type List<'a> =
-//         | Cons of 'a * List<'a>
-//         | Nil
-//     let (>!) x xs = Cons(x, xs) *)
-//     let rec foldBack f st = function
-//         | x :: xs -> foldBack f (f x st) xs
-//         | [] -> st
-    
-    
-//     //((a + b) + c)
-//     List.rev [1..10] |> foldBack (fun x st -> x::st) []
-//     let rec fold f st = function
-//         | x::xs -> f x (lazy(fold f st xs))
-//         | [] -> st
-//     let rec fold' fn st =
-//         let rec f st = function
-//             | x::xs -> fn x  (lazy(f st xs))
-//             | [] -> st
-//         f st
-//     let i = ref 0
-//     let fn step ini (xs:'T list) n = fold step ini xs n
-//     let take n xs = fn (fun x st -> function 0 -> [] | n -> x :: (st.Value (n - 1))) (fun _ -> []) xs n
-//     take 20000 [1..20000]
-//     Seq.unfold (fun (xs, ys) -> ys |> function h::t -> Some((h, t), t) | [] -> None ) ([], [1..10])
-    
 
     ///**Description**
     /// Цель: преобразовать элементы в строковое значение так, чтобы
@@ -359,12 +369,14 @@ module List =
     ///  * `seq<'a * string>`
     let numerate fn xs =
         let print = defaultArg fn (sprintf "_%A")
-        let takeNull n =
-            Seq.replicate n '0'
-            |> System.String.Concat
         let capacityNum = 
             List.length xs - 1 |> fun x -> x.ToString() |> String.length
         xs
         |> List.mapi (fun i num ->
             let str = i.ToString()
-            num, sprintf "%s%s%s" (takeNull (capacityNum - str.Length)) str (print num))
+            let str =
+                sprintf "%s%s%s"
+                    (String.replicate (capacityNum - str.Length) "0")
+                    str
+                    (print num)
+            num, str)

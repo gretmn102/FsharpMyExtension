@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.Reflection
+module FsharpMyExtension.Reflection
 
 module Reflection =
     ///**Description**
@@ -58,3 +58,14 @@ module Reflection =
         unionEnum< ^Union>
         |> Array.map (fun x -> x, v)
         |> Map.ofArray
+    let recordEq cond (x:'a) (y:'a) = 
+        let t = x.GetType()
+        if not <| Reflection.FSharpType.IsRecord t then
+            failwith "arg is not record"
+        let fs =
+            Reflection.FSharpType.GetRecordFields t
+            |> Array.map (fun x -> x.Name)
+        let xs = Reflection.FSharpValue.GetRecordFields x
+        let ys = Reflection.FSharpValue.GetRecordFields y
+        Array.map3 (fun x y z -> x, (y, z)) fs xs ys
+        |> Array.filter cond

@@ -1,5 +1,5 @@
 ﻿module Unpoint
-
+open FsharpMyExtension.FSharpExt
 //#if INTERACTIVE
 //#load "Library1.fs"
 //#endif
@@ -52,7 +52,7 @@
 //     xs |> Seq.map f |> Seq.take 7 |> List.ofSeq |> List.trans |> List.map (String.concat " ")
 
 module Unpoint =
-    open FsharpMyExtension.FSharpExt
+    open FsharpMyExtension
     open FsharpMyExtension.Show
 
     type Var = string

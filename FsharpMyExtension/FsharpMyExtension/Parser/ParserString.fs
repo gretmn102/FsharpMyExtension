@@ -6,10 +6,10 @@ module ParserString =
     // //#load "List.fs"
     // //#load "Either.fs"
     // #endif
+    open FsharpMyExtension
     open FsharpMyExtension.Either
     open FsharpMyExtension.List
     open FsharpMyExtension.FSharpExt
-    open FsharpMyExtension.String
 
     open Parser.Primitives
 

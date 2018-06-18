@@ -2,6 +2,7 @@
 
 
 open FsharpMyExtension.Either
+open FsharpMyExtension
 open FsharpMyExtension.FSharpExt
 //type ElemS<'StateElem, 'Elem> =
 //    { State:'StateElem; IsEmpty:'StateElem -> bool; Head:'StateElem -> 'Elem; Tail:'StateElem -> 'StateElem }
@@ -56,6 +57,9 @@ let (>>.) p1 p2 = p1 >>= k p2
 let (>>%) p x = p >>= k (preturn x)
 let (.>>) p1 p2 = p1 >>= (>>%) p2
 let (|>>) p f = p >>= (f >> preturn)
+let (.>>.) p p' =
+    // p >>= fun x -> p' |>> comma x
+    p >>= ((|>>) p' << comma)
 
 let pipe2 p1 p2 f = p1 >>= fun a -> p2 >>= fun b -> preturn (f a b)
 let pipe3 p1 p2 p3 f = pipe2 p1 p2 comma >>= ((|>>) p3 << curry f)
@@ -64,4 +68,5 @@ let pipe5 p1 p2 p3 p4 p5 f = pipe4 p1 p2 p3 p4 ((<<) ((<<) comma << comma) << co
 let many1 p = pipe2 p (many p) (fun hd tl -> hd::tl)
 let sepBy p sep = pipe2 p (many (sep >>. p)) (fun hd tl -> hd::tl) <|> (preturn [])
 
+let opt x = (x |>> Some) <|> (preturn None)
 let run s (p:Pars<_,_>) = List.ofSeq s |> p

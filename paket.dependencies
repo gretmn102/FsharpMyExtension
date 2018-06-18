@@ -7,3 +7,4 @@ nuget FSharp.Core
 nuget FuChu
 nuget HtmlAgilityPack
 nuget Newtonsoft.Json
+nuget Newtonsoft.Json.Bson

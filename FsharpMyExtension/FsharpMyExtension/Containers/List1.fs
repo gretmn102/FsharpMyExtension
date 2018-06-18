@@ -1,8 +1,9 @@
 namespace FsharpMyExtension
+open FsharpMyExtension.FSharpExt
 
 type List1<'a> = 'a * 'a list
 module List1 =
-    open FsharpMyExtension.FSharpExt
+    open FsharpMyExtension
     let head : List1<'a> -> 'a = fst
     let tail = let fn xs = snd xs |> on List.head List.tail in fn : (List1<'a> -> List1<'a>)
     let (|Many|One|) =

@@ -7,24 +7,37 @@
     <DocumentationFile>bin\Debug\net45\FsharpMyExtension.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="App.config" />
+
     <Compile Include="Some/FsharpMyExtension.fs" />
     <Compile Include="Library1.fs" />
     <Compile Include="Containers/List.fs" />
     <Compile Include="Containers/List1.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Containers/Option.fs" />
+    <Compile Include="Containers/Array.fs" />
     <Compile Include="Containers/LazyList.fs" />
+    
     <Compile Include="Containers/LZ.fs" />
+    <!-- <Compile Include="Containers/LZLazy.fs" /> -->
+    <!-- <Compile Include="Containers/LZLazy2.fs" /> -->
     <Compile Include="Containers/ListZipperC.fs" />
     <Compile Include="Containers/ListZipperC2.fs" />
+    
     <Compile Include="Unpoint.fs" />
     <Compile Include="Queue.fs" />
+    
+    <Compile Include="LazyTree.fs" />
     <Compile Include="Combinatorics.fs" />
+    
+    
     <Compile Include="Tree.fs" />
     <Compile Include="Map.fs" />
     <Compile Include="Seq.fs" />
     <Compile Include="String.fs" />
-    <Compile Include="HtmlNode.fs" />
+    <Compile Include="Graph.fs" />
+    
+    <Compile Include="HtmlAgilityPackExt.fs" />
     <Compile Include="Parser/ParserPrimitives2.fs" />
     <Compile Include="Parser/ParserPrimitives.fs" />
     <Compile Include="Parser/ParserString.fs" />
@@ -32,7 +45,8 @@
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
     <Compile Include="XmlBuilder.fs" />
-    <None Include="App.config" />
+    
+    <Compile Include="DateTime.fs" />
     <Compile Include="WebDownloader.fs" />
     <Compile Include="Numeric.fs" />
     <Compile Include="Json.fs" />
@@ -43,9 +57,9 @@
 
     <Compile Include="Path.fs" />
     
-    <Compile Include="DateTime.fs" />
-
-
+    <Compile Include="File.fs" />
+    
+    <Compile Include="Clipboard.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -54,6 +68,7 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

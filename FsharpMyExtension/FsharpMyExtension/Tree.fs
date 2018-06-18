@@ -1,7 +1,4 @@
-﻿namespace FsharpMyExtension.Tree
-//#if INTERACTIVE
-//#load "library1.fs"
-//#endif
+﻿module FsharpMyExtension.Tree
 open FsharpMyExtension.FSharpExt
 type Tree<'a> = Node of 'a * Tree<'a> list
 module Tree =
@@ -35,7 +32,7 @@ module Tree =
                     [Node ("a",
                             [Node ("a1",
                                     [Node ("a11", []);
-                                    Node ("a12", []) ]) ]);
+                                     Node ("a12", []) ]) ]);
                     Node ("b",
                             [Node ("b1", []) ]) ])
         visualize (sprintf "%s") dummy = "root\n├─a\n│ └─a1\n│   ├─a11\n│   └─a12\n└─b\n  └─b1"
@@ -149,10 +146,14 @@ module Tree =
                         iter xs (i+1) |> fun (xs,i) -> f i ((curr, xs)::acc) x
                     | None -> acc
             // f 0 [] (map Val tree) |> List.map (fun (x,xs) -> xs |> List.map (fun y -> x, y)  ) |> List.concat
-            List.collect (fun (x,xs) -> xs |> List.map (fun y -> x, y)) (f 0 [] (map Val tree))
+            f 0 [] (map Val tree)
+            |> List.collect (fun (x,xs) -> xs |> List.map (fun y -> x, y))
 
         let toTgf (xs : 'a Graph) =
-            let f xs = xs |> Seq.map (fun (x, y) -> sprintf "%d %A" x y) |> String.concat "\n"
+            let f xs =
+                xs |> Seq.map (fun (x, y) -> sprintf "%d %A" x y)
+                |> String.concat "\n"
             xs |> List.fold (fun (xs, st) (x, y) ->
-                (fst x, fst y) :: xs, st |> Set.add x |> Set.add y ) ([], Set.empty)
+                    (fst x, fst y) :: xs, st |> Set.add x |> Set.add y )
+                ([], Set.empty)
             |> fun (nodes, def) -> sprintf "%s\n#\n%s" (f def) (f nodes)
