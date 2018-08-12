@@ -362,8 +362,29 @@ module T =
             //     Assert.Equal("", "", sprintf "%A" r)
                ]
 module TreeTest =
-
-    ()
+    open FsharpMyExtension
+    [<Tests>]
+    let VisualizeTest =
+        testList "VisualizeTest" [
+            testCase "base case" <| fun () ->
+                let dummy = 
+                  LT
+                    ("1",
+                     seq
+                       {yield LT ("2",seq { yield LT ("3",Seq.empty); yield LT ("4",Seq.empty)});
+                        yield LT ("3",seq { yield LT ("4",Seq.empty)})})
+                let exp =
+                    [
+                        "1"
+                        "├─2"
+                        "│ ├─3"
+                        "│ └─4"
+                        "└─3"
+                        "  └─4"
+                    ] |> String.concat "\n"
+                let act = LazyTree.visualize (sprintf "%s") dummy
+                Assert.Equal("", exp, act)
+       ]
 
 module ParserTests =
     module PrimitivesTests =
@@ -496,6 +517,10 @@ module Comb =
                 let act = LazyTree.pack exp |> LazyTree.unpack |> List.ofSeq
                 Assert.Equal("", exp, act)
        ]
+module WebDownloader = 
+    open FsharpMyExtension
+    open FsharpMyExtension.WebDownloader
+
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

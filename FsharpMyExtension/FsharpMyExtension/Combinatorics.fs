@@ -36,7 +36,7 @@ module Comb =
 //    Seq.take 2 xs
 //    Seq.skip 2 xs
     /// Бесконечные сочитания с повторениями:
-    /// `f [1..3]` -> (если отсеять до 2-ух в ширину) `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
+    /// `f [1..3]` -&gt; (если отсеять до 2-ух в ширину) `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
     /// Бесконечная как в ширину, так и в длину.
     let combRepLazy = 
         let rec f = function
@@ -48,7 +48,7 @@ module Comb =
             | [] -> Seq.empty
         f
     /// Сочитания с повторениями:
-    /// `f 2 [1..3]` -> `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
+    /// `f 2 [1..3]` -&gt; `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
     let combRep i xs = 
         let rec count i xs =
             if i = 0 then Seq.empty
@@ -58,14 +58,14 @@ module Comb =
         combRepLazy xs |> count i
 
     /// Произведение списков:
-    /// f `[['1'..'2']; ['a'..'c']]` -> `[['1'; 'a']; ['1'; 'b']; ['1'; 'c']; ['2'; 'a']; ['2'; 'b']; ['2'; 'c']]`
+    /// f `[['1'..'2']; ['a'..'c']]` -&gt; `[['1'; 'a']; ['1'; 'b']; ['1'; 'c']; ['2'; 'a']; ['2'; 'b']; ['2'; 'c']]`
     let pow xss =
         let rec f = function
             | xs::xss -> Seq.map (fun x -> LT(x, f xss)) xs
             | [] -> Seq.empty
         f xss
     /// Перестановка без повторений в алфавитном порядке:
-    /// `f [1..3]` -> `[[1; 2; 3]; [1; 3; 2]; [2; 1; 3]; [2; 3; 1]; [3; 1; 2]; [3; 2; 1]]`
+    /// `f [1..3]` -&gt; `[[1; 2; 3]; [1; 3; 2]; [2; 1; 3]; [2; 3; 1]; [3; 1; 2]; [3; 2; 1]]`
     let rec permutation xs = 
         // более понятный вариант:
         // /// 1234 -> [1, 234; 2, 134; 3, 124; 4, 123]
@@ -85,7 +85,7 @@ module Comb =
         let add xs ys = List.fold (fun st x -> x::st) ys xs
         let rec f left = function
             | x::xs ->
-                printfn "%A" (x::xs)
+                // printfn "%A" (x::xs)
                 seq{
                     yield LT(x, permutation (add left xs))
                     yield! f (x::left) xs
@@ -98,7 +98,12 @@ module Comb =
     // let xs = [1..3]
     // // mapBoth LazyTree.unpack (perm3 xs, perm4 xs) |> curry (=)
     // permutation xs |> LazyTree.unpack
-    
+
+    /// `f [1;2]` -&gt; `[[1;1]; [1;2]; [2;1]; [1;2]]`
+    let permRepLazy xs =
+        let rec f () =
+            xs |> Seq.map (fun x -> LT(x, f()))
+        f ()
 module CombUnpacked = 
     // open FsharpMyExtension.FSharpExt
     /// Перестановки без повторений в странном порядке:

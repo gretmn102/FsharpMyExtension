@@ -65,6 +65,11 @@ module LZC =
                 else
                     endR x |> lzc
             ListZ.removeR lz |> Option.map f)
+    let nexts i lzc = 
+        (i, lzc)
+        |> until (fst >> (>) 1)
+            (fun (i, lzc) -> i - 1, next lzc)
+        |> snd
     let hole lst = lst.State |> (snd >> ListZ.hole)
     let pos lst = lst.State |> fst
     let update'' f = map (mapSnd f)

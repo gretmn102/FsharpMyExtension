@@ -58,6 +58,7 @@ module Reflection =
         unionEnum< ^Union>
         |> Array.map (fun x -> x, v)
         |> Map.ofArray
+  
     let recordEq cond (x:'a) (y:'a) = 
         let t = x.GetType()
         if not <| Reflection.FSharpType.IsRecord t then
@@ -69,3 +70,16 @@ module Reflection =
         let ys = Reflection.FSharpValue.GetRecordFields y
         Array.map3 (fun x y z -> x, (y, z)) fs xs ys
         |> Array.filter cond
+  
+    let printProperties main =
+        let t = main.GetType()
+        t.GetMembers()
+        |> Array.filter (fun x -> x.MemberType = System.Reflection.MemberTypes.Property)
+        |> Array.map (fun x ->
+            let y = x :?> System.Reflection.PropertyInfo
+            try
+                let y = y.GetMethod.Invoke(main, [||])
+                string y
+            with _ -> "?"
+            |> comma x.Name
+            )

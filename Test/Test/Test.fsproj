@@ -3,11 +3,11 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
-  <!-- <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension.fsproj">
       <Name>FsharpMyExtension.fsproj</Name>
     </ProjectReference>
-  </ItemGroup> -->
+  </ItemGroup>
   <!-- Почему не сделать так?
   Зачем каждый раз компилировать ссылочный проект чтобы работало IntelliSence?
   Если в ссылочном проекте, один из файлов `.fs` лежит в папке, то
@@ -31,7 +31,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime" />
-    <Reference Include="..\..\FsharpMyExtension\FsharpMyExtension\bin\debug\net45\FsharpMyExtension.dll" />
+    <!-- <Reference Include="..\..\FsharpMyExtension\FsharpMyExtension\bin\debug\net45\FsharpMyExtension.dll" /> -->
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

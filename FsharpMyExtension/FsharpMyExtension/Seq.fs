@@ -12,7 +12,16 @@ let headTail (xs: _ seq) =
     let xs = xs.GetEnumerator()
     xs.MoveNext() |> ignore
     xs.Current, seq{ while xs.MoveNext() do yield xs.Current }
-
+let mapMidLast fmid flast (xs:_ seq) =
+    let xs = xs.GetEnumerator()
+    seq{
+        if xs.MoveNext() then
+            let mutable x = xs.Current
+            while xs.MoveNext() do
+                yield fmid x
+                x <- xs.Current
+            yield flast x
+    }
 let rec foldr f st (xs: _ seq) =
     let xs = xs.GetEnumerator()
     let rec foldr f st =

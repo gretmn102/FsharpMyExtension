@@ -213,6 +213,7 @@ module DownThemAll =
     //     |> Seq.map (sprintf "%A")
     //     |> fun cont -> System.IO.File.WriteAllLines("output/outputTemp.txt", cont)
     /// DownThemAll! 3.0v
+    /// (path * url) list
     let metalink (xs:(string * string) list) = 
         let now = System.DateTime.Now
         let nowStr = 
@@ -235,7 +236,7 @@ module DownThemAll =
                   ("url",
                    [("priority", "100");
                     ("a0:usable", url)],
-                   [Text url])
+                   [TextStr url])
                 ]);
         Node
           ("metalink",
@@ -247,5 +248,6 @@ module DownThemAll =
             yield! List.mapi file xs
            ])
         |> Node.sprintNodeXml
+    /// filepath -> (path * url) list
     let metalinkf (path:string) (xs:(string * string) list) =
         metalink xs |> fun cont -> System.IO.File.WriteAllText(path, cont)

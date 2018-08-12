@@ -380,3 +380,44 @@ module List =
                     str
                     (print num)
             num, str)
+
+    /// `List.splitInto size [0..length - 1] |> List.map (on List.head List.last)`
+    let inline splitIntoRange size length =
+        let size = int size
+        let len = int (float length / float size)
+        let n = length - size * len
+        let xs = List.replicate n (succ len) @ List.replicate (size - n) len
+        List.tail xs
+        |> List.scan
+            (fun (_,i) x -> succ i, i + x)
+            (LanguagePrimitives.GenericZero, pred (List.head xs))
+    assert
+        let size, length = 41, 1234
+        List.splitInto size [0..length - 1] |> List.map (on List.head List.last) = splitIntoRange size length
+    /// `List.splitInto size [0..length - 1] |> List.map (on List.head List.last)`
+    let inline splitIntoRange64 size length =
+        let size = int64 size
+        let len = int64 (float length / float size)
+        let n = length - size * len
+        let xs = List.replicate (int n) (succ len) @ List.replicate (int (size - n)) len
+        List.tail xs
+        |> List.scan
+            (fun (_,i) x -> succ i, i + x)
+            (LanguagePrimitives.GenericZero, pred (List.head xs))
+    /// `List.chunkBySize size [0..length - 1] |> List.map (on List.head List.last)`
+    let inline chunkBySizeRange size length =
+        // let length, parts = 9, 5
+        let parts = int size
+        let len = int (float length / float parts)
+        let n = length - parts * len
+        let xs = List.replicate len parts @ [n]
+
+        // List.chunkBySize parts [0..length - 1] |> List.map List.length
+
+        List.tail xs
+        |> List.scan
+            (fun (_,i) x -> succ i, i + x)
+            (LanguagePrimitives.GenericZero, pred (List.head xs))
+    assert
+        let length, size = 9, 5
+        List.chunkBySize size [0..length - 1] |> List.map (on List.head List.last) = chunkBySizeRange size length

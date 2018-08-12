@@ -35,7 +35,7 @@ module FSharpExt =
     /// (<||)
     let curry = (<||)
     let uncurry f x y = f(x, y)
-
+    
     let konst f x _ = f x
     let konts f _ y = f y
     // let mapFst fn (x, y) = fn x, y
@@ -58,8 +58,8 @@ module FSharpExt =
         let test f nul init = Option.fold (konts f) nul init = match init with None -> nul | Some x -> f x
         test ((+) 1) 0 <| Some 1
 
-    let inline succ x = LanguagePrimitives.GenericOne + x
-    let inline pred x = LanguagePrimitives.GenericOne - x
+    let inline succ x = x + LanguagePrimitives.GenericOne
+    let inline pred x = x - LanguagePrimitives.GenericOne
     let isEven x = x % 2 = 0
     (*
     I := λx.x
@@ -88,10 +88,19 @@ module FSharpExt =
     let kk _ y = y
     let w x y = x y y
 
-    let (^<) = (<<)
     let (^|) = (<|)
 
-    // open FSharpExt
+    let cprintfn background foreground fmt =
+        Printf.kprintf (fun x ->
+            let f', b' = System.Console.ForegroundColor, System.Console.BackgroundColor
+            System.Console.ForegroundColor <- foreground
+            System.Console.BackgroundColor <- background
+            System.Console.WriteLine x
+            System.Console.ForegroundColor <- f'
+            System.Console.BackgroundColor <- b'
+        ) fmt
+    // System.Console.BackgroundColor <- System.ConsoleColor.Black
+    // System.Console.ForegroundColor <- System.ConsoleColor.Gray
 
 module Show =
     open FSharpExt
@@ -135,10 +144,10 @@ module Show =
         let s = showAutoParen "("
         show (s (showChar 'a') << s (showChar 'b')) = "(a)(b)"
 
-    let join s (xs: ShowS list) = 
+    let join s = 
         let join s =
             cond List.isEmpty (k empty) (List.reduce (fun x y -> x << (s << y)))
-        join (showString s) xs : ShowS
+        join (showString s) : ShowS list -> ShowS
         
     assert
         [
@@ -156,8 +165,6 @@ module ShowList =
     open FSharpExt
     type String = char list
     type ShowS = String -> String
-
-    let split sep (str:string) = str.Split([|sep|])
 
     let showChar c = let f xs = c :: xs in f : ShowS
 
@@ -189,15 +196,21 @@ module ShowList =
     assert
         joins (showString ", ") [id;id;showString "Abram";showString "Lyouis";id;id;showString "Loid";id;id] []
         |> System.String.Concat = "Abram, Lyouis, Loid"
-    let join sep xs = joins (showString sep) xs
+    let join sep = joins (showString sep)
     let (nl:ShowS) = showString System.Environment.NewLine
     let lines = joins nl
     let between (opened:ShowS) (closed:ShowS) (p:ShowS) = (opened << p << closed):ShowS
     
-    //let showParen b = (fun p -> if b then showChar '(' << p << showChar ')' else p):(ShowS -> ShowS)
-    let showParen b = (cond (k b) (between (showChar '(') (showChar ')')) id):(ShowS -> ShowS)
+    let showParen =
+        let l, r = showChar '(', showChar ')'
+        fun b ->
+            if b then between l r
+            else id
+            : ShowS -> ShowS
     
-    let bet opened closed (p:ShowS) = (showString opened << p << showString closed):ShowS
+    let bet opened closed =
+        between (showString opened) (showString closed)
+        // : _ -> ShowS
     let show (x:ShowS) = System.String.Concat(x List.empty)
     let shows x = showString (x.ToString()) :ShowS
 

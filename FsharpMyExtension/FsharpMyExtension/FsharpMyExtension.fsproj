@@ -24,16 +24,17 @@
     <Compile Include="Containers/ListZipperC.fs" />
     <Compile Include="Containers/ListZipperC2.fs" />
     
-    <Compile Include="Unpoint.fs" />
     <Compile Include="Queue.fs" />
     
+    <Compile Include="Seq.fs" />
     <Compile Include="LazyTree.fs" />
     <Compile Include="Combinatorics.fs" />
     
     
     <Compile Include="Tree.fs" />
+    <Compile Include="Containers/TreeZipper.fs" />
+    
     <Compile Include="Map.fs" />
-    <Compile Include="Seq.fs" />
     <Compile Include="String.fs" />
     <Compile Include="Graph.fs" />
     
@@ -48,6 +49,7 @@
     
     <Compile Include="DateTime.fs" />
     <Compile Include="WebDownloader.fs" />
+    <Compile Include="WebDownloaderParallel.fs" />
     <Compile Include="Numeric.fs" />
     <Compile Include="Json.fs" />
     

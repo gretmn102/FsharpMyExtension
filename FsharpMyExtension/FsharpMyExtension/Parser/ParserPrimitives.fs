@@ -19,7 +19,7 @@ type Pars<'Elem, 'State> = 'Elem list -> Result<'Elem, 'State>
 //let cat (x: Pars<'Elem, Result<_, 'State>>) = x >> Either.concat
 let trav (x: Pars<_, Result<_, 'State>>) =
     //x >> Either.bind (fun (x, y) -> x |> Either.map (mapSnd (k y))) : Pars<'Elem, 'State>
-    x >> Either.bind (curry <| flip (Either.map ^< mapSnd ^< k) ) : Pars<'Elem, 'State>
+    x >> Either.bind (curry <| flip (Either.map << mapSnd << k) ) : Pars<'Elem, 'State>
 let preturn (x:'State) = let f xs = Right(x, xs) in f : Pars<'Elem,'State>
 let pend lab = 
     let fn = function

@@ -16,7 +16,9 @@ module Either =
         | Right x -> Right(g x)
         | Left x -> Left(f x)
     let mapLeft f = function Left x -> Left(f x) | Right x -> Right x
-
+    let iter fn = function
+        | Right x -> fn x
+        | Left _ -> ()
     let fold fn state = function
         | Right x -> fn state x
         | _ -> state
@@ -29,7 +31,7 @@ module Either =
         | Right x, Right y -> fn x y |> Right
         | Left x, _ -> Left x
         | _, Left x -> Left x        
-    let (<*>) (f : Either<'a, ('b -> 'c)>) xs =
+    let ap (f : Either<'a, ('b -> 'c)>) xs =
         //bind (fun x -> map x xs) f
         match f, xs with
         | Right x, Right y -> Right <| x y
@@ -67,14 +69,45 @@ module Either =
         | Right x -> x
         | Left _ -> f()
     let getOrDef' fn = function Right x -> x | Left x -> fn x
-    let orElse f = function
+    let orElse x = function
+        | Right x -> Right x
+        | Left _ -> x
+    let orElseWith f = function
         | Right x -> Right x
         | Left _ -> f()
     let get = function Right x -> x | x -> failwithf "try get right, but '%A'" x
     let getLeft = function Left x -> x | x -> failwithf "try get left, but '%A'" x
     let isRight = function Right _ -> true | _ -> false
     let isLeft = function Left _ -> true | _ -> false
+    
     let concat x = bind id x
+    
+    let travOpt (rf: 'a -> option<'b>) (x : Either<'c,'a>) : option<Either<'c,'b>> =
+        match x with
+        | Left x -> Some (Left x)
+        | Right x ->  (rf >> Option.map Right) x
+    let seqOpt x = travOpt id x
+    assert
+        (Some(Left "") = (seqOpt (Left "") : Either<_,int> option))
+
+    assert
+        Some(Right "") = (seqOpt (Right <| Some "") : Either<int,string> option)
+    assert
+        (None = seqOpt (Right None))
+module Operators =
+    let (<*>) x f = Either.ap f x
+    let (>>=) x f = Either.bind f x
+    let (>=>) f g x = Either.bind g (f x)
+    let preturn x = Right x
+    let (>>.) p1 p2 = p1 >>= k p2
+    let (>>%) p x = p >>= k (preturn x)
+    let (.>>) p1 p2 = p1 >>= (>>%) p2
+    let (|>>) p f = p >>= (f >> preturn)
+    let (.>>.) p1 p2 =
+        // p >>= fun x -> p' |>> comma x
+        p1 >>= ((|>>) p2 << comma)
+    let (<|>) p1 p2 = Either.orElse p1 p2
+
 
 [<RequireQualifiedAccess>]
 module List =
@@ -107,6 +140,9 @@ module List =
     //     true
     // let seqEither f = List.map f >> seqEither
     // let ss xs = s id xs
+
+
+
 [<RequireQualifiedAccess>]
 module Seq =
     let travEither fn (xs : _ seq) =
@@ -133,3 +169,12 @@ module Seq =
 [<RequireQualifiedAccess>]
 module Option =
     let ofEither x = x |> Either.either (fun _ -> None) Some
+    let travEither (f : 'a -> Either<'c, 'b>) (x:Option<'a>) =
+        match x with
+        | Some x ->
+            // f x |> Either.map Some
+            match f x with
+            | Right x -> Right(Some x)
+            | Left x -> Left x
+        | None -> Right None
+    let seqEither x = travEither id x

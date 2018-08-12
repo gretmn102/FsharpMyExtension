@@ -6,35 +6,33 @@ type 'a LazyTree = LT of 'a * 'a LazyTree seq
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LazyTree =
+    open FsharpMyExtension
     let visualize print inputTree = 
         let prefMid = seq { yield "├─"; while true do yield "│ " }
         let prefEnd = seq { yield "└─"; while true do yield "  " }
         let prefNone = seq { while true do yield "" }
- 
+        // let c2 x y = Seq.map2 (fun u v -> String.concat "" [u; v]) x y
         let inline c2 x y = Seq.map2 (+) x y
-
-        let rec visualize (LT(label:'a, children:LazyTree<'a> seq)) pre =
+        
+        let rec visualize (LT(label, children)) pre =
             seq {
                 yield Seq.head pre + print label
                 if not <| Seq.isEmpty children then
                     let preRest = Seq.skip 1 pre
-                    let last = Seq.last children
-                    for e in children do
-                        if e = last then yield! visualize e (c2 preRest prefEnd)
-                        else yield! visualize e (c2 preRest prefMid)
+                    // let last = Seq.last children
+                    // for e in children do
+                    //     if e = last then yield! visualize e (c2 preRest prefEnd)
+                    //     else yield! visualize e (c2 preRest prefMid)
+                    let xs = 
+                        children
+                        |> Seq.mapMidLast
+                            (flip visualize (c2 preRest prefMid))
+                            (flip visualize (c2 preRest prefEnd))
+                    yield! Seq.concat xs
             }
-        System.String.Join("\n", visualize inputTree prefNone)
+        visualize inputTree prefNone
+        |> String.concat "\n"
 
-    assert
-        let dummy = 
-            LT ("root",
-                    [LT ("a", 
-                            [LT ("a1",
-                                    [LT ("a11", []);
-                                    LT ("a12", []) ]) ]);
-                    LT ("b",
-                            [LT ("b1", []) ]) ])
-        visualize (sprintf "%s") dummy = "root\n├─a\n│ └─a1\n│   ├─a11\n│   └─a12\n└─b\n  └─b1"
     /// <summary> распаковать в вид [[1;2]; [1;3]...] </summary>
     let rec unpack pairs =
         let f = function
@@ -59,5 +57,15 @@ module LazyTree =
             |> Seq.filter (List.isEmpty >> not)
             |> Seq.groupBy List.head
             |> Seq.map (fun (k, v) -> LT(k, pack <| Seq.map (List.tail) v))
-    
-
+    let map f (LT(x, xs)) =
+        let rec loop xs =
+            xs |> Seq.map (fun (LT(x, xs)) -> LT(f x, loop xs))
+        LT(f x, loop xs)
+    let rec truncate count (LT(x, xs)) = 
+        if count > 1 then
+            LT(x, xs |> Seq.map (truncate (count - 1)))
+        else
+            LT(x, [])
+    let rec fold f (ini:'state) xs =
+        Seq.fold (fun st (LT(x, xs)) ->
+            fold f (f st x) xs ) ini xs
