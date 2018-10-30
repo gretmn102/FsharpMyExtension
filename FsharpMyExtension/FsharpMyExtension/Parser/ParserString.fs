@@ -8,9 +8,6 @@ module ParserString =
     // #endif
     open FsharpMyExtension
     open FsharpMyExtension.Either
-    open FsharpMyExtension.List
-    open FsharpMyExtension.FSharpExt
-
     open Parser.Primitives
 
     //

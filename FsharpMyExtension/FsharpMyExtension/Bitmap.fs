@@ -9,8 +9,12 @@ let private toT (bmp:Bitmap) = {
     TwoDOp.T.Length2 = bmp.Height
 }
 let iteri f = toT >> TwoDOp.iteri f
+let map f = toT >> TwoDOp.map f
+let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
+let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
+
 /// not working
-let iteriP f = toT >> TwoDOp.iterPar f
+let iteriP f = toT >> TwoDOp.Parallel.iter f
 let mapP f (bmp:Bitmap) =
         // match bmp.PixelFormat with
         // | Imaging.PixelFormat.Format32bppArgb ->
@@ -67,31 +71,33 @@ let mapP f (bmp:Bitmap) =
         //     true
         // | _ -> false
     // ofBitmap bmp
-let map f = toT >> TwoDOp.map f
+let ofArray (width:int) height xss =
+    let bmp = new System.Drawing.Bitmap(width, height)
 
-let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
-let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
+    for i = 0 to width - 1 do
+        for j = 0 to height - 1 do
+            bmp.SetPixel(i, j, Array.get (Array.get xss j) i)
+    bmp
+let ofArray' xss =
+    let width = Array.length (Array.item 0 xss)
+    let height = Array.length xss
+    ofArray width height xss
 
-// let map f (bmp:Bitmap) =
-    // for i = 0 to bmp.Width - 1 do
-    //     for j = 0 to bmp.Height - 1 do
-    //         bmp.SetPixel(i, j, f <| bmp.GetPixel(i,j))
-// let iteri f (bmp:Bitmap) =
-    // for i = 0 to bmp.Width - 1 do
-    //     for j = 0 to bmp.Height - 1 do
-    //         f i j <| bmp.GetPixel(i,j)
-// let mapFoldi f st (bmp:Bitmap) =
-    // let mutable st = st
-    // for i = 0 to bmp.Width - 1 do
-    //     for j = 0 to bmp.Height - 1 do
-    //         let c,st' = f st (i, j) (bmp.GetPixel(i,j))
-    //         st <- st'
-    //         bmp.SetPixel(i, j, c)
-    // st
-// let iterFoldi f st (bmp:Bitmap) =
-//     let mutable st = st
-//     for i = 0 to bmp.Width - 1 do
-//         for j = 0 to bmp.Height - 1 do
-//             let st' = f st (i, j) (bmp.GetPixel(i,j))
-//             st <- st'
-//     st
+let toArray (img : System.Drawing.Bitmap) =
+    // let s = img.Size
+    let w, h = img.Width, img.Height
+    let xss: System.Drawing.Color [] [] =
+        Array.create h [||]
+        |> Array.map (fun _ -> Array.create w System.Drawing.Color.Empty)
+    for i = 0 to w - 1 do
+        for j = 0 to h - 1 do
+            xss.[j].[i] <- img.GetPixel(i, j)
+    xss
+assert
+    let w,h = 3, 5
+    let xss =
+        List.chunkBySize 3 [1..w * h]
+        |> List.map (List.map System.Drawing.Color.FromArgb >> Array.ofList)
+        |> Array.ofList
+    let bmp = ofArray w h xss
+    bmp |> toArray = xss

@@ -1,9 +1,7 @@
 module ParserPrimitivesTest
 
+open FsharpMyExtension
 open FsharpMyExtension.Either
-open FsharpMyExtension.List
-open FsharpMyExtension.FSharpExt
-open FsharpMyExtension.String
 open Fuchu
 
 // #if INTERACTIVE

@@ -8,35 +8,41 @@ let private toT (xss:_ [,]) = {
     TwoDOp.T.Length1 = Array2D.length1 xss
     TwoDOp.T.Length2 = Array2D.length2 xss
 }
-// let iteri f = toT >> TwoDOp.iteri f
-// let map f = toT >> TwoDOp.map f
-let iteriP f = toT >> TwoDOp.iterPar f
-let mapP f = toT >> TwoDOp.mapP f
-let mapiP f = toT >> TwoDOp.mapiP f
+
 let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
 let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
 
-open System.Drawing
+
+
+
 open FsharpMyExtension
 
 let ofListList l1 l2 xss =
     let yss = Array2D.zeroCreate l1 l2
-    xss |> List.iteri (fun i x -> Array2D.set yss i |> fun f -> x |> List.iteri f )
+    xss |> List.iteri (fun i -> Array2D.set yss i |> fun f -> List.iteri f )
     yss
 let ofListListD xss =
     xss |> ofListList (List.length xss) (List.head xss |> List.length)
-let ofArAr xss =
-    let ofArAr l1 l2 xss =
-        let yss = Array2D.zeroCreate l1 l2
-        xss |> Array.iteri (fun i x -> Array2D.set yss i |> fun f -> x |> Array.iteri f )
-        yss
-    xss |> ofArAr (Array.length xss) (Array.get xss 0 |> Array.length)
+
 let ofSeqSeq l1 l2 xss =
     let yss = Array2D.zeroCreate l1 l2
     xss |> Seq.iteri (fun i x -> Array2D.set yss i |> fun f -> x |> Seq.iteri f )
     yss
 let ofSeqSeqD xss =
     xss |> ofSeqSeq (Seq.length xss) (Seq.head xss |> Seq.length)
+
+let ofArAr xss =
+    let ofArAr l1 l2 xss =
+        Array2D.init l1 l2 (fun i j ->
+            Array.get (Array.get xss i) j
+        )
+        // let yss = Array2D.zeroCreate l1 l2
+        // xss |> Array.iteri (fun i x ->
+        //     Array2D.set yss i |> fun f -> x |> Array.iteri f )
+        // yss
+    xss |> ofArAr (Array.length xss) (Array.get xss 0 |> Array.length)
+
+open System.Drawing
 /// Подходит любой из:
 /// Format16bppRgb555
 /// Format16bppRgb565
@@ -61,7 +67,6 @@ let ofBitmapFast (bmp:Bitmap) =
     bmp.UnlockBits(bmpData)
 
     let colors = Array2D.zeroCreate bmp.Height bmp.Width
-
     0 |> for' 0 (bmp.Height - 1) (fun st i ->
         st |> for' 0 (bmp.Width - 1) (fun st j ->
             let get n = Array.get rgbValues (st + n) |> int
@@ -120,11 +125,7 @@ let ofBitmapFast (bmp:Bitmap) =
 //     | _ -> None
 
 let ofBitmapSlow (bmp:Bitmap) =
-    let xss = Array2D.zeroCreate bmp.Height bmp.Width
-    for i = 0 to bmp.Width - 1 do
-        for j = 0 to bmp.Height - 1 do
-            Array2D.set xss j i (bmp.GetPixel(i,j))
-    xss
+    Array2D.init bmp.Height bmp.Width (fun i j -> bmp.GetPixel(j,i))
 let ofBitmap (bmp:Bitmap) = ofBitmapFast bmp
 
 let toBitmapFast (xss:Color [,]) =
@@ -136,58 +137,133 @@ let toBitmapFast (xss:Color [,]) =
     let ptr = bmpData.Scan0
     let len = abs bmpData.Stride * bmp.Height
 
-    let rgbValues : byte [] = Array.zeroCreate len
+    let rgbValues =
+        let w = Array2D.length2 xss
+        Array.Parallel.init len (fun i ->
+            let x =
+                let i = i / 4
+                Array2D.get xss (i / w) (i % w)
+            match i % 4 with
+            | 3 -> x.A
+            | 2 -> x.R
+            | 1 -> x.G
+            | 0 -> x.B
+            | _ -> failwith ""
+        )
+    
+    
+    // System.Threading.Tasks.Task.Factory.
 
-    // let colors = Array2D.zeroCreate bmp.Height bmp.Width
-
-    iterFoldi (fun st _ (x:Color) ->
-        let set i = Array.set rgbValues (st + i)
-        set 3 x.A
-        set 2 x.R
-        set 1 x.G
-        set 0 x.B
-        st + 4 ) 0 xss |> ignore
+    // System.Threading.Tasks.TaskFactory()
+    // последовательный способ:
+    // let rgbValues : byte [] = Array.zeroCreate len
+    // iterFoldi (fun st _ (x:Color) ->
+    //     let set i = Array.set rgbValues (st + i)
+    //     set 3 x.A
+    //     set 2 x.R
+    //     set 1 x.G
+    //     set 0 x.B
+    //     st + 4 ) 0 xss |> ignore
 
     System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, len)
     bmp.UnlockBits(bmpData)
     bmp
-let toBitmapF (imgPixFrm:Imaging.PixelFormat) xss =
+let toBitmapSlow (imgPixFrm:Imaging.PixelFormat) xss =
     let bmp = new Bitmap(Array2D.length2 xss, Array2D.length1 xss, imgPixFrm)
     Array2D.iteri (fun i j x -> bmp.SetPixel(j, i, x)) xss
     bmp
-/// default - Imaging.PixelFormat.Format32bppArgb; Slow function
+/// default - Imaging.PixelFormat.Format32bppArgb
 let toBitmap =
     // toBitmapF Imaging.PixelFormat.Format32bppArgb
     toBitmapFast
 
+
 let toArrayArray xss = 
     let h = Array2D.length1 xss
     let w = Array2D.length2 xss
-    let yss = Array.init h (fun _ -> Array.zeroCreate w)
+    Array.init h (fun i -> Array.init w (fun j -> xss.[i,j] ))
 
-    // for i = 0 to Array2D.length1 xss - 1 do
-    //     for j = 0 to Array2D.length2 xss - 1 do
-    //         yss.[i].[j] <- xss.[i,j]
-    iteriP (fun i j x -> yss.[i].[j] <- x) xss
-    yss
 assert
     let xss = [|[| 1..5 |]; [| 6..10 |]|]
     xss
     |> ofArAr
     |> toArrayArray
     |> (=) xss
+
+module Parallel =
+    let iteri f = toT >> TwoDOp.Parallel.iter f
+    let map f = toT >> TwoDOp.Parallel.map f
+    let mapi f = toT >> TwoDOp.Parallel.mapi f
+    let toArrayArray xss = 
+        let h = Array2D.length1 xss
+        let w = Array2D.length2 xss
+        
+        let yss = Array.init h (fun _ -> Array.zeroCreate w)
+        // for i = 0 to Array2D.length1 xss - 1 do
+        //     for j = 0 to Array2D.length2 xss - 1 do
+        //         yss.[i].[j] <- xss.[i,j]
+        iteri (fun i j x -> yss.[i].[j] <- x) xss
+        yss
+    assert
+        let xss = [|[| 1..5 |]; [| 6..10 |]|]
+        xss
+        |> ofArAr
+        |> toArrayArray
+        |> (=) xss
+    let toArrayArray' xss = 
+        let h = Array2D.length1 xss
+        let w = Array2D.length2 xss
+        Array.Parallel.init h (fun i ->
+            Array.Parallel.init w (fun j ->
+                xss.[i,j]
+            )
+        )
+    assert
+        let xss = [|[| 1..5 |]; [| 6..10 |]|]
+        xss
+        |> ofArAr
+        |> toArrayArray'
+        |> (=) xss
+    
 /// n*i + j
-let to1DArray n (i, j) = n*i + j
+/// Отображение двухмерного массива на одномерный.
+/// при `w = 3`:
+/// `|0|1|2|`
+/// `|3|4|5|`
+/// `-> |0|1|2|3|4|5|`
+let to1DArray =
+    // n * i + j
+    fun (w:int) (i:int) -> (+) (w * i)
+
+let testTo1DArray2 () =
+    let w, h = 3, 2
+    let xss =
+        [|
+            [| 0; 1; 2 |]
+            [| 3; 4; 5 |]
+        |]
+    let ys = Array.create (w * h) 0
+    xss |> Array.iteri (fun i ->
+        let f = to1DArray w i
+        Array.iteri (fun j x ->
+            Array.set ys (f j) x ))
+    ys = [|0; 1; 2; 3; 4; 5|]
 let testTo1DArray () =
     let len = 6
     let input = [0..len - 1]
     let n = 3
     let xss = input |> List.chunkBySize n |> ofListList (len / n) n
     let act = Array.zeroCreate len
-    xss |> Array2D.iteri (fun i j x -> to1DArray n (i, j) |> fun i -> Array.set act i x )
+    xss |> Array2D.iteri (fun i j x ->
+        to1DArray n i j |> fun i -> Array.set act i x )
     input |> Array.ofList = act
 
 /// i / n, i % n
+/// при `w = 3`:
+/// `|0|1|2|3|4|5|`
+/// `->`
+/// `|0|1|2|`
+/// `|3|4|5|`
 let to2DArray n i = i / n, i % n
 let testTo2DArray () =
     let len = 10
@@ -195,5 +271,7 @@ let testTo2DArray () =
     let n = 2
     let exp = input |> List.chunkBySize n |> ofListList (len / n) n
     let act : int [,] = Array2D.zeroCreate (len / n) n
-    input |> List.iteri (fun i x -> to2DArray n i |> fun (i,j) -> Array2D.set act i j x) //printfn "%d%A" x i)
+    input |> List.iteri (fun i x ->
+        to2DArray n i |> fun (i,j) ->
+            Array2D.set act i j x) //printfn "%d%A" x i)
     exp = act

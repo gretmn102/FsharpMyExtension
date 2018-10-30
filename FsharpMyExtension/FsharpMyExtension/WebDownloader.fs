@@ -25,30 +25,28 @@ do
         
 type Url = string
 type Content = string
-//type Result = 
-//    | Success of Url * HttpStatusCode * string
-//    | Fail of Url * Exception
-type Res = Either<(Url*Exception), (Url * HttpStatusCode * Content)>
+type Res = Url * Either<Exception, HttpStatusCode * Content>
 
-/// <summary> Использует Cookies, Uri поддерживающий точку </summary>
-let get encoding =
-    fun (url:string) ->
-        let req = WebRequest.Create(url) :?> HttpWebRequest
-        req.CookieContainer <- cookies
-        use resp = req.GetResponse()
-        use stream = resp.GetResponseStream()
-        use reader = new StreamReader(stream, (encoding:Text.Encoding)) //Text.Encoding.GetEncoding "windows-1251"
-        reader.ReadToEnd()
-
-let tryGet encoding (url:string) =
+let tryGet (encoding:System.Text.Encoding) (url:string) =
     let req = WebRequest.Create(url) :?> HttpWebRequest
     req.CookieContainer <- cookies
+    req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
     try
         use resp = req.GetResponse() :?> HttpWebResponse
-        use stream = resp.GetResponseStream()
-        use reader = new StreamReader(stream, (encoding:Text.Encoding)) //Text.Encoding.GetEncoding "windows-1251"
-        Right(url, resp.StatusCode, reader.ReadToEnd()) : Res
-    with e -> Left(url, e)
+        match resp.Headers.["Content-Encoding"] with
+        | "gzip" ->
+            try
+                use receiveStream = resp.GetResponseStream()
+                use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
+                use r = new System.IO.StreamReader(zl, encoding)
+                let str = r.ReadToEnd()
+                url, Right(resp.StatusCode, str) : Res
+            with e -> url, Left e
+        | _ -> // `null` возьмет?
+            use stream = resp.GetResponseStream()
+            use reader = new StreamReader(stream, encoding)
+            url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
+    with e -> url, Left e
 
 // assert
 //     let c = CookieContainer()
@@ -87,47 +85,39 @@ let tryGet encoding (url:string) =
 //     true
 
 /// CookieContainer небезопастно использовать в паралельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
-let getAsync encoding urls =
+let getAsync (encoding:System.Text.Encoding) (urls: Url list) =
     let get url = 
         let req = WebRequest.Create(url:string) :?> HttpWebRequest
+        req.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
+        req.Accept <- "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        req.Headers.Add (System.Net.HttpRequestHeader.AcceptLanguage, "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3")
         req.CookieContainer <- cookies
+        req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
         async {
             try
-                let! rsp = req.AsyncGetResponse()
-                let rsp = rsp :?> HttpWebResponse
-                
-                use stream = rsp.GetResponseStream()
-                use reader = new StreamReader(stream, (encoding:Text.Encoding)) //Text.Encoding.GetEncoding "windows-1251"
-                let r = reader.ReadToEnd() // .AsyncReadToEnd()
-                return (Right(url, rsp.StatusCode, r) : Res)
-            with
-            | ex -> return (Left(url, ex) : Res)
+                let! resp = req.AsyncGetResponse()
+                use resp = resp :?> HttpWebResponse
+                match resp.Headers.["Content-Encoding"] with
+                | "gzip" ->
+                    try
+                        use receiveStream = resp.GetResponseStream()
+                        use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
+                        use r = new System.IO.StreamReader(zl, encoding)
+                        let str = r.ReadToEnd()
+                        return (url, Right(resp.StatusCode, str) : Res)
+                    with e -> return url, Left e
+                | _ -> // `null` возьмет?
+                    use stream = resp.GetResponseStream()
+                    use reader = new StreamReader(stream, encoding)
+                    return (url, Right(resp.StatusCode, reader.ReadToEnd()) : Res)
+            with e -> return (url, Left e : Res)
         }
     let webPages = List.map get >> Async.Parallel >> Async.RunSynchronously
     List.chunkBySize 8 urls
     |> Seq.collect webPages
 
-let post (url:string) (postData:string) = 
-    let request = WebRequest.Create(url) :?> HttpWebRequest
-
-    request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-    request.CookieContainer <- cookies;
-    request.Method <- "POST"
-    request.ContentType <- "application/x-www-form-urlencoded"
-
-    let data = Text.Encoding.ASCII.GetBytes(postData)
-    request.ContentLength <- int64 data.Length
-
-    using (request.GetRequestStream())
-            (fun stream -> stream.Write(data, 0, data.Length))
-
-    use resp = request.GetResponse() :?> HttpWebResponse
-       
-    use stream = resp.GetResponseStream()
-    use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
-    reader.ReadToEnd()
-
-let tryPost (url:string) (postData:string) = 
+/// раньше стояла кодировка "windows-1251"
+let tryPost (encoding:System.Text.Encoding) (url:string) (postData:string) = 
     let request = WebRequest.Create(url) :?> HttpWebRequest
 
     request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
@@ -144,9 +134,32 @@ let tryPost (url:string) (postData:string) =
         use resp = request.GetResponse() :?> HttpWebResponse
        
         use stream = resp.GetResponseStream()
-        use reader = new StreamReader(stream, Text.Encoding.GetEncoding "windows-1251")
-        Right(url, resp.StatusCode, reader.ReadToEnd()) : Res
-    with e -> Left(url, e)
+        use reader = new StreamReader(stream, encoding)
+
+        url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
+    with e -> url, Left e
+let tryPost2 (encoding:System.Text.Encoding) changeReq (url:string) (postData:string) = 
+    // let request = request() :?> 
+    let request = WebRequest.Create(url) :?> HttpWebRequest
+    changeReq request
+    // request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
+    request.CookieContainer <- cookies;
+    request.Method <- "POST"
+    request.ContentType <- "application/x-www-form-urlencoded"
+
+    let data = Text.Encoding.ASCII.GetBytes(postData)
+    request.ContentLength <- int64 data.Length
+
+    try 
+        using (request.GetRequestStream())
+            (fun stream -> stream.Write(data, 0, data.Length))
+        use resp = request.GetResponse() :?> HttpWebResponse
+       
+        use stream = resp.GetResponseStream()
+        use reader = new StreamReader(stream, encoding)
+
+        url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
+    with e -> url, Left e
 
 (*
 /// test

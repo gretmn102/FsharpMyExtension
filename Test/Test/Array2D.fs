@@ -3,7 +3,6 @@ open Fuchu
 open System.Drawing
 open FsharpMyExtension
 open FsharpMyExtension.Either
-open FsharpMyExtension.FSharpExt
 
 [<Tests>]
 let mapPTest =
@@ -13,7 +12,7 @@ let mapPTest =
                 let r = System.Random()
                 Array2D.zeroCreate 10 20
                 |> Array2D.map (fun _ -> r.Next(0, 100))
-            let act = Array2D.copy exp |> fun yss -> Array2D.mapP id yss; yss
+            let act = Array2D.copy exp |> fun yss -> Array2D.Parallel.map id yss; yss
 
             Assert.Equal("", exp, act)
     ]
@@ -28,12 +27,12 @@ let ofBitmapFast =
         |> Seq.cast<Imaging.PixelFormat>
     let bmps =
         pfs |> Seq.map (fun pf ->
-                try
-                    sampleBmpArr |> Array2D.toBitmapF pf
-                    |> comma pf
-                    |> Right
-                with e -> Left(pf, e)
-            )
+            try
+                sampleBmpArr |> Array2D.toBitmapSlow pf
+                |> comma pf
+                |> Right
+            with e -> Left(pf, e)
+        )
     let _lefts, rights = bmps |> List.ofSeq |> List.partitionEithers
     let xs =
         rights |> List.map (fun (x, bmp) ->
@@ -54,7 +53,10 @@ let ofBitmapFast =
 let toBitmapFastTest =
     testList "toBitmapFastTest" [
         testCase "base case" <| fun () ->
-            let exp = sampleBmpArr |> Array2D.toBitmap |> Array2D.ofBitmapSlow
+            let exp =
+                sampleBmpArr
+                |> Array2D.toBitmapSlow Imaging.PixelFormat.Format32bppArgb
+                |> Array2D.ofBitmapSlow
             let act = sampleBmpArr |> Array2D.toBitmapFast |> Array2D.ofBitmapSlow
             Assert.Equal("", exp, act)
    ]

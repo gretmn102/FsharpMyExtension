@@ -22,9 +22,9 @@ module FSharpExt =
     assert
         let init = 1
         until (fun x -> x % 2 <> 0) ((+)1) init = init
-    let rec for' n k f st =
-        if n > k then st
-        else for' (n+1) k f (f st n)
+    let rec for' fromInclusive toInclusive f st =
+        if fromInclusive > toInclusive then st
+        else for' (fromInclusive + 1) toInclusive f (f st fromInclusive)
 
     let flip f x y = f y x
     assert 

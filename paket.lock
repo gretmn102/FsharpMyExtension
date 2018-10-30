@@ -11,3 +11,4 @@ NUGET
     Newtonsoft.Json (11.0.2)
     Newtonsoft.Json.Bson (1.0.1)
       Newtonsoft.Json (>= 10.0.1)
+    YamlDotNet (5.2.1)

@@ -67,3 +67,14 @@ let travOpt fn (xs : _ seq) =
     f [] <| xs.GetEnumerator()
 
 let seqOpt xs = travOpt id xs
+
+let concatSep sep (xs:_ seq) =
+    let xs = xs.GetEnumerator()
+    let rec f () =
+        let x = xs.Current
+        if xs.MoveNext() then
+            seq { yield x; yield sep; yield! f (); }
+        else
+            Seq.singleton x
+    if xs.MoveNext() then f ()
+    else Seq.empty

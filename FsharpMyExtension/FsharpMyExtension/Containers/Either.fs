@@ -1,6 +1,5 @@
 ﻿namespace FsharpMyExtension.Either
-open FsharpMyExtension.FSharpExt
-open FsharpMyExtension.List
+open FsharpMyExtension
 
 type Either<'a,'b> = Left of 'a | Right of 'b
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -55,7 +54,7 @@ module Either =
         Left "0" |> seqEitherPseudo |> List.ofSeq = [Left "0"]
         Right (seq[ Left "0"; Right 1 ]) |> seqEitherPseudo |> List.ofSeq = [Left "0"; Right 1]
         Right (seq[ ]) |> seqEitherPseudo |> List.ofSeq |> List.isEmpty ] |> List.forall id
-
+    let listEitherPseudo xs = either (Left >> List.singleton) id xs
     let collect f = map f >> seqEitherPseudo
     assert
         [

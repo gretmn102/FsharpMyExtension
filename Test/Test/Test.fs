@@ -129,7 +129,7 @@ module ParserStringTest =
                 Assert.Equal(sprintf "must be: %A, but %A" s act, true, act |> Either.isLeft)
        ]
 module ListTests =
-    open FsharpMyExtension.List
+    open FsharpMyExtension
 
     [<Tests>]
     let groupBySeqTest =
@@ -198,6 +198,22 @@ module ListTests =
                 Assert.Equal(sprintf "arg [0..30], must be [0,\"00.\"; 0,\"01.\"...]", None, x)
        ]
 
+    [<Tests>]
+    let concatSepTest =
+        let inline gen (sep: char) xs =
+            let xs = List.ofSeq xs
+            let exp = String.concat (sep.ToString()) (List.map string xs)
+            let act = List.concatSep sep xs |> System.String.Concat
+            testCase "" <| fun _ -> Assert.Equal("", exp, act)
+        seq {
+            yield gen '+' "abcde"
+            yield gen '+' "abcd"
+            yield gen '+' "abc"
+            yield gen '+' "ab"
+            yield gen '+' "a"
+            yield gen '+' ""
+        }
+        |> testList "concatSepTest"
 module EitherTests =
     open FsharpMyExtension.Either
 
@@ -517,6 +533,35 @@ module Comb =
                 let act = LazyTree.pack exp |> LazyTree.unpack |> List.ofSeq
                 Assert.Equal("", exp, act)
        ]
+module SeqTests =
+    open FsharpMyExtension
+    [<Tests>]
+    let concatSepTest =
+        let inline gen (sep: char) xs =
+            let xs = List.ofSeq xs
+            let exp = String.concat (sep.ToString()) (List.map string xs)
+            let act = Seq.concatSep sep xs |> System.String.Concat
+            testCase "" <| fun _ -> Assert.Equal("", exp, act)
+        seq {
+            yield gen '+' "abcde"
+            yield gen '+' "abcd"
+            yield gen '+' "abc"
+            yield gen '+' "ab"
+            yield gen '+' "a"
+            yield gen '+' ""
+        }
+        |> testList "concatSepTest"
+        // TODO: test on lazy
+        // let xs =
+        //     seq{
+        //         printfn "a"; yield 'a';
+        //         printfn "b"; yield 'b';
+        //         printfn "b"; yield 'c';
+        //         printfn "b"; yield 'd';
+        //         failwith ""
+        //         printfn "e"; yield 'e';
+        //     } 
+        // concatSepSeqSeq '+' xs |> List.ofSeq
 module WebDownloader = 
     open FsharpMyExtension
     open FsharpMyExtension.WebDownloader
