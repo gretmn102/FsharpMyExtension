@@ -1,15 +1,20 @@
 module FsharpMyExtension.Reflection
 
 module Reflection =
-    ///**Description**
+    /// **Description**
+    /// 
     /// In module declared:
-    /// * `type internal IMarker = interface end`
-    /// * `let t = typeof<IMarker>.DeclaringType`
+    /// ```fsharp
+    /// type internal IMarker = interface end
+    /// let t = typeof<IMarker>.DeclaringType
+    /// ```
     /// after that, send in this function `%ModuleName%.t`
-    ///**Output Type**
+    /// 
+    /// **Output Type**
     ///  * `System.Type -> values:string [] * functions:string []`
     ///  * `values` - function without arguments
-    ///**Exceptions**
+    /// 
+    /// **Exceptions**
     /// `System.ArgumentException` if arg is not module
     let getFnNamesFromModule = 
         let xs = set["ToString"; "Equals"; "GetHashCode"; "GetType"]

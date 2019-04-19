@@ -16,8 +16,6 @@ let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
 /// not working
 let iteriP f = toT >> TwoDOp.Parallel.iter f
 let mapP f (bmp:Bitmap) =
-        // match bmp.PixelFormat with
-        // | Imaging.PixelFormat.Format32bppArgb ->
     let bmpData =
         bmp.LockBits(Rectangle(0, 0, bmp.Width, bmp.Height),
             Imaging.ImageLockMode.ReadWrite,
@@ -42,35 +40,7 @@ let mapP f (bmp:Bitmap) =
         | _ -> failwith "")
     System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, len)
     bmp.UnlockBits(bmpData)
-            // true
-        // | Imaging.PixelFormat.Format24bppRgb ->
-        //     let bmpData =
-        //         bmp.LockBits(Rectangle(0, 0, bmp.Width, bmp.Height),
-        //             Imaging.ImageLockMode.ReadWrite,
-        //             Imaging.PixelFormat.Format24bppRgb)
-        //     let ptr = bmpData.Scan0
-        //     let len = abs bmpData.Stride * bmp.Height
 
-        //     let rgbValues : byte [] = Array.zeroCreate len
-        //     System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, len)
-
-        //     rgbValues |> Array.chunkBySize 3
-        //     |> Array.Parallel.iteri (fun i x ->
-        //         let x = x |> Array.map int
-        //         match x with
-        //         | [| b; g; r; |] ->
-        //             let c = Color.FromArgb(r, g, b)
-        //             let set =
-        //                 let i = i * 3
-        //                 fun n -> Array.set rgbValues (i + n)
-        //             let (c:Color) = f c
-        //             set 0 c.B; set 1 c.G; set 2 c.R;
-        //         | _ -> failwith "")
-        //     System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, len)
-        //     bmp.UnlockBits(bmpData)
-        //     true
-        // | _ -> false
-    // ofBitmap bmp
 let ofArray (width:int) height xss =
     let bmp = new System.Drawing.Bitmap(width, height)
 

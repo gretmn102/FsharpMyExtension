@@ -124,7 +124,8 @@ let truncList n xs =
 //     |> Option.isNone
 
 ///**Description**
-/// * transpose lists
+/// transpose lists:
+/// ```fsharp
 /// [[Some 1; Some 1;  Some 1]
 /// [Some 2; Some 2;  Some 2]
 /// [Some 3; Some 3;  Some 3]
@@ -135,6 +136,7 @@ let truncList n xs =
 /// [None;   Some 8;  None  ]
 /// [None;   Some 9;  None  ]
 /// [None;   Some 10; None  ]]
+/// ```
 ///**Parameters**
 ///  * `xss` - parameter of type `'a list list`
 ///
@@ -305,7 +307,7 @@ module Alt =
                 else [], xs
             | xs -> xs, xs
         f xs
-    // clear, but not safe
+    /// clear, but not safe
     let groupBySeq2 fn xs =
         let rec f acc = function
             | x::xs ->
@@ -331,7 +333,24 @@ module Alt =
     let f() = 
         let xs = List.init 10000 (List.replicate 5000)
         timer (fun () -> xs |> groupBySeq2 (=)), timer (fun () -> xs |> groupBySeq (=))
-
+/// Группирует подряд повторяющиеся элементы с их количеством.
+/// 
+/// `f [2;3;3;6;4;5;6]` -> `[(2, 1); (3, 2); (6, 1); (4, 1); (5, 1); (6, 1)]`
+/// 
+/// **Рекурсивно!**
+let groupRep = function
+    | x::xs -> 
+        let rec f item n = function
+            | x::xs ->
+                if item = x then
+                    f item (n + 1) xs
+                else
+                    (item, n) :: f x 1 xs
+            | [] -> [item, n]
+        f x 1 xs
+    | [] -> []
+assert
+    groupRep [2;3;3;6;4;5;6] = [(2, 1); (3, 2); (6, 1); (4, 1); (5, 1); (6, 1)]
 
 // let xs = List.init 5000 (List.replicate 2)
 // xs |> groupBySeq2 (=)
@@ -340,14 +359,20 @@ let rec fold' f st = function
     | x::xs -> f x (lazy (fold' f st xs))
     | [] -> st
 ///**Description**
-/// [1..3] -> [1;2;3;1;2;3;1...]
+/// 
+/// `[1..3]` -> `[1;2;3; 1;2;3; 1...]`
+/// 
 ///**Parameters**
 ///  * `xs` - parameter of type `list<'a>`
+/// 
 /// Why not `seq` in input? Because `seq` - potential infinity structure and
 /// it `list` cache structure.
+/// 
 ///**Output Type**
 ///  * `seq<'a>`
+/// 
 ///**Exceptions**
+/// 
 /// System.ArgumentException: Thrown when the list is empty.
 let circle (xs: _ list) =
     if List.isEmpty xs then raise (System.ArgumentException "The input list was empty.")
@@ -356,14 +381,18 @@ let circle (xs: _ list) =
 
 
 ///**Description**
+/// 
 /// Цель: преобразовать элементы в строковое значение так, чтобы
 /// после сортировки полученных строковых значений, последовательность
 /// была такой же как у исходного списка.
+/// 
 /// Решение: в начале каждого элемента нумерацию в стиле:
 /// "01, 02,..., 10, 11,..." и прибавить к этому по-умолчанию `sprintf "_A"`.
+/// 
 ///**Parameters**
 ///  * `fn` - parameter of type `('a -> string) option`
 ///  * `xs` - parameter of type `seq<'a>`
+/// 
 ///**Output Type**
 ///  * `seq<'a * string>`
 let numerate fn xs =

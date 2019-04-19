@@ -1,14 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <DocumentationFile>bin\Debug\net45\FsharpMyExtension.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\net461\FsharpMyExtension.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-
     <Compile Include="Some/FsharpMyExtension.fs" />
     <Compile Include="Library1.fs" />
     <Compile Include="Containers/List.fs" />
@@ -17,27 +17,20 @@
     <Compile Include="Containers/Option.fs" />
     <Compile Include="Containers/Array.fs" />
     <Compile Include="Containers/LazyList.fs" />
-    
     <Compile Include="Containers/LZ.fs" />
     <!-- <Compile Include="Containers/LZLazy.fs" /> -->
     <!-- <Compile Include="Containers/LZLazy2.fs" /> -->
     <Compile Include="Containers/ListZipperC.fs" />
     <Compile Include="Containers/ListZipperC2.fs" />
-    
     <Compile Include="Queue.fs" />
-    
     <Compile Include="Seq.fs" />
     <Compile Include="LazyTree.fs" />
     <Compile Include="Combinatorics.fs" />
-    
-    
     <Compile Include="Tree.fs" />
     <Compile Include="Containers/TreeZipper.fs" />
-    
     <Compile Include="Map.fs" />
     <Compile Include="String.fs" />
     <Compile Include="Graph.fs" />
-    
     <Compile Include="HtmlAgilityPackExt.fs" />
     <Compile Include="Parser/ParserPrimitives2.fs" />
     <Compile Include="Parser/ParserPrimitives.fs" />
@@ -46,22 +39,20 @@
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
     <Compile Include="XmlBuilder.fs" />
-    
     <Compile Include="DateTime.fs" />
     <Compile Include="WebDownloader.fs" />
     <Compile Include="WebDownloaderParallel.fs" />
     <Compile Include="Numeric.fs" />
     <Compile Include="Json.fs" />
-    
     <Compile Include="Containers/TwoDSeq.fs" />
     <Compile Include="Containers/Array2D.fs" />
     <Compile Include="Bitmap.fs" />
-
     <Compile Include="Path.fs" />
-    
     <Compile Include="File.fs" />
-    
     <Compile Include="Clipboard.fs" />
+    <Compile Include="Int32.fs" />
+    <Compile Include="Regex.fs" />
+    <Compile Include="Proc.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

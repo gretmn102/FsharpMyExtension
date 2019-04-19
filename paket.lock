@@ -1,14 +1,14 @@
-RESTRICTION: >= net45
+RESTRICTION: >= net461
 NUGET
   remote: https://www.nuget.org/api/v2
-    FAKE (5.3)
+    FAKE (5.8.4)
     FParsec (1.0.3)
       FSharp.Core (>= 4.0.0.1)
-    FSharp.Core (4.3.4)
+    FSharp.Core (4.5.4)
     Fuchu (1.0.3)
       FSharp.Core (>= 3.1.2.1)
-    HtmlAgilityPack (1.8.4)
-    Newtonsoft.Json (11.0.2)
-    Newtonsoft.Json.Bson (1.0.1)
-      Newtonsoft.Json (>= 10.0.1)
-    YamlDotNet (5.2.1)
+    HtmlAgilityPack (1.8.14)
+    Newtonsoft.Json (12.0.1)
+    Newtonsoft.Json.Bson (1.0.2)
+      Newtonsoft.Json (>= 12.0.1)
+    YamlDotNet (5.3)

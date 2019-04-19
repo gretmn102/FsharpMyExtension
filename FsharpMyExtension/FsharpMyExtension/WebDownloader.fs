@@ -227,7 +227,7 @@ module DownThemAll =
     //     |> fun cont -> System.IO.File.WriteAllLines("output/outputTemp.txt", cont)
     /// DownThemAll! 3.0v
     /// (path * url) list
-    let metalink (xs:(string * string) list) = 
+    let metalink (xs:(string * string) seq) = 
         let now = System.DateTime.Now
         let nowStr = 
             now
@@ -258,7 +258,7 @@ module DownThemAll =
             ("xmlns:a0", "http://www.downthemall.net/properties#")],
            [yield Node ("generator",[],[Text "DownThemAll!/3.0"]);
             yield Node ("published",[],[Text (now.ToString("R"))]) //"Sat, 28 Apr 2018 11:55:16 GMT"]);
-            yield! List.mapi file xs
+            yield! Seq.mapi file xs
            ])
         |> Node.sprintNodeXml
     /// filepath -> (path * url) list

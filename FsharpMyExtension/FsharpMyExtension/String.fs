@@ -23,4 +23,14 @@ let trimChars trimChars (s:string) = s.Trim trimChars
 let toLower (s:string) = s.ToLower()
 let contains value (s:string) = s.Contains value
 /// `TRACE` | `tRaCe` -> `Trace`
-let firstCapital (x:string) = string x.[0] + String.map System.Char.ToLower x.[1..]
+let firstCapital (x:string) =
+    if x = "" then ""
+    else
+        // TODO: optimize
+        string (System.Char.ToUpper x.[0]) + String.map System.Char.ToLower x.[1..]
+
+/// **Exceptions**
+/// * System.ArgumentException: The input string was empty.
+let last = function
+    | "" -> raise (new System.ArgumentException("The input string was empty."))
+    | str -> str.[str.Length - 1]

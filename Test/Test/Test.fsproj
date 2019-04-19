@@ -1,7 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension.fsproj">
@@ -21,7 +23,6 @@
     <Compile Include="ParserPrimitives.fs" />
     <Compile Include="Array2D.fs" />
     <Compile Include="Bitmap.fs" />
-    
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>

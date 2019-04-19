@@ -39,7 +39,7 @@ Target.create "Test" (fun _ ->
     testPath
     |> Option.bind (fun p ->
         let dir = System.IO.Path.GetDirectoryName p
-        let d = sprintf @"bin\%A\net45\test.exe" buildConf
+        let d = sprintf @"bin\%A\net461\test.exe" buildConf
         let dir = System.IO.Path.Combine(dir, d)
         if System.IO.File.Exists dir then Some dir else None
     )

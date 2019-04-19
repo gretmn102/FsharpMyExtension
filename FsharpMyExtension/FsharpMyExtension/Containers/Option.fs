@@ -8,4 +8,3 @@
 //     let ofNull = function null -> None | x -> Some x
 //     [<System.ObsoleteAttribute("`Option.flatten` in FSharp v4")>]
 //     let concat x = Option.bind id x
-

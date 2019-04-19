@@ -20,7 +20,7 @@ let toAdjacencys xs =
 /// `[a = b; a = c; e = d; d = f;]`
 /// Вдруг захотелось узнать, что `[[a = b = c]; [d = e = f]]` — этот алгоритм самое то для решения такой задачи.
 /// Стоит ли говорить, что алгоритм крайне тяжелый?
-let connectedComponents (gr:_ Graph) = 
+let connectedComponents (gr:_ Graph) =
     toAdjacencys gr
     |> List.unfold (fun m ->
         match Seq.tryHead m with
@@ -74,7 +74,7 @@ module group2 =
             else List.tryPick find xs
     assert
         let (<!>) x xs = Node(x, xs)
-        let nod = 
+        let nod =
             1 <!> [
                     2 <!> [Tree.singleton 3]
                     4 <!> [
@@ -84,7 +84,7 @@ module group2 =
                   ]
         // nod |> Tree.visualize (sprintf "%d") |> Clipboard.setText
         Some(Node(2, [Tree.singleton 3])) = find nod
-        
+
     type 'a Val = Val of 'a | Ref of int * 'a
     let getVal = function Val x -> x | x -> failwithf "expected `Val _`, but actual: `%A`" x
     let replaces i rep tree =
@@ -123,3 +123,107 @@ module group2 =
                 (fst x, fst y) :: xs, st |> Set.add x |> Set.add y )
             ([], Set.empty)
         |> fun (nodes, def) -> sprintf "%s\n#\n%s" (f def) (f nodes)
+module Group3 =
+    open FsharpMyExtension
+    open FsharpMyExtension.Tree
+    let ofTree tree =
+        let rec f (Node(x, xs)) =
+            xs
+            |> List.collect (fun (Node(y, xs)) ->
+                (x, y)::List.collect f xs )
+        f tree
+    type 'a T = Val of 'a | Ref of 'a * int
+    // open FsharpMyExtension.Map
+
+    let leafs inputTree =
+        let rec f acc = function
+            | Node(x, []) -> Set.singleton x::acc
+            | Node(_, xs) ->
+                let isEmpty = function Node(_, []) -> true | _ -> false
+                // TODO: оптимизировать
+                if List.forall isEmpty xs then
+                    let xs =
+                        List.fold (fun st x ->
+                            Set.add (Tree.getValue x) st ) Set.empty xs
+                    xs::acc
+                else
+                    List.foldBack (fun x state -> f state x) xs acc
+        f [] inputTree
+    let leafs2 st inputTree =
+        let rec f st = function
+            | Node(x, []) -> Node(x, [] ), st //failwith "leaf" //Set.singleton x::acc
+            | Node(Val x, xs) ->
+                let isEmpty = function Node(_, []) -> true | _ -> false
+                // TODO: оптимизировать
+                if List.forall isEmpty xs then
+                    let xs =
+                        List.fold (fun st x ->
+                            Set.add (Tree.getValue x) st ) Set.empty xs
+                    let (i, m) = st
+                    match Map.tryFind xs m with
+                    | None ->
+                        Node(Ref(x, i), [] ), (i + 1, Map.add xs i m)
+                    | Some i' ->
+                        Node(Ref(x, i'), [] ), (i, m)
+                else
+                    let xs, st =
+                        xs
+                        // |> List.mapFold (fun (i, m) x -> f (i + 1, m) x) (i, m)
+                        |> List.mapFold f st
+                    Node(Val x, xs), st
+            | Node(Ref _, _) as x -> failwithf "non empty ref: %A" x
+        f st inputTree
+    let group tree =
+        let rec f (tr, st) =
+            match tr with
+            | Node(x, []) ->
+                let i, m = st
+                i + 1, Map.add (Set.singleton x) i m
+            | _ -> f (leafs2 st tr)
+        let tree = Tree.map Val tree
+        f (tree, (0, Map.empty))
+    let toTgf (length, graph) =
+        let m = graph |> Map.fold (fun st k v -> Map.add v k st) Map.empty
+
+        m |> Map.fold (fun st k v ->
+            let kstr = sprintf "ref %d"
+            let kstring = kstr k
+            v |> Set.fold (fun (i, acc) ->
+                    function
+                    | Val x -> i + 1, ((k, kstring), (i, x))::acc
+                    | Ref(x, i') ->
+                        let curr = (i, x)
+                        i + 1, ((k, kstring), curr)::(curr, (i', kstr i'))::acc
+                ) st
+            ) (length, [])
+        |> snd
+        |> group2.toTgf
+    let toTree (length, graph) =
+        let m = graph |> Map.fold (fun st k v -> Map.add v k st) Map.empty
+        let rec restore xs =
+            xs |> Seq.map (function
+                | Ref (x, i) -> Node(x, restore (Map.find i m) )
+                | Val x -> Node(x, [])
+            ) |> List.ofSeq
+        List.head <| restore (Map.find (length - 1) m)
+    let test tree =
+        let toGraph tree =
+            toTgf (group tree)
+            |> uncurry System.IO.File.WriteAllText "output\\output.tgf"
+        // let tr = Tree.map Val tree
+        // let tr', st = tr |> leafs2 (0, Map.empty)
+
+        // let tr'', st' = tr' |> leafs2 st
+        // let tr''', st'' = tr'' |> leafs2 st'
+
+
+
+        // let length, m =
+        let act = toTree (group tree)
+        // tree
+        // |> Tree.visualize (sprintf "%A")
+        // |> uncurry System.IO.File.WriteAllText "output\\outputExp.txt"
+        // act
+        // |> Tree.visualize (sprintf "%A")
+        // |> uncurry System.IO.File.WriteAllText "output\\outputAct.txt"
+        tree = act

@@ -53,6 +53,7 @@ module FSharpExt =
     let swap (x, y) = y, x
 
     let s = fun f g x -> f x (g x)
+    let s' = fun g f x -> f x (g x)
     let b = fun f g x -> f (g x)
     assert
         let test f nul init = Option.fold (konts f) nul init = match init with None -> nul | Some x -> f x

@@ -120,3 +120,30 @@ module Node =
                 List.map ((<<) (showString "// ") << showString)
                     (List.ofArray (String.lines s))
         f node : ShowS list
+    let ofXmlNodes =
+        let att (node:XmlNode) =
+            node.Attributes
+            |> Seq.cast<XmlAttribute>
+            |> Seq.map (fun x -> x.Name, x.Value ) |> List.ofSeq
+        let rec f (xs:XmlNode seq) =
+            xs |> Seq.choose (fun node ->
+                match node.NodeType with
+                | XmlNodeType.Element ->
+                    let xs = node.ChildNodes |> Seq.cast<_> |> f
+                    Some <| Node(node.Name, att node, List.ofSeq xs )
+                | XmlNodeType.Text ->
+                    // if Parser.ParHtmlNode.isEmptyInnerText node then
+                    //     None
+                    // else
+                        let x = node :?> XmlText
+                        Some <| Text x.Value
+                | XmlNodeType.Comment ->
+                    // TODO: комментарии всегда отображаются как есть, `XmlWriter.WriteComment` обрамляет их в <!--...-->
+                    let x = node :?> XmlComment
+                    Some <| Comment x.Value
+                | x -> failwithf "%A" x
+            )
+        f
+
+    let ofXmlNode =
+        Seq.singleton >> ofXmlNodes >> Seq.head
