@@ -32,5 +32,67 @@ let firstCapital (x:string) =
 /// **Exceptions**
 /// * System.ArgumentException: The input string was empty.
 let last = function
-    | "" -> raise (new System.ArgumentException("The input string was empty."))
+    | "" -> raise (System.ArgumentException("The input string was empty."))
     | str -> str.[str.Length - 1]
+
+/// Строит таблицу. Пример:
+/// `table 4 [["a"; "bc"; "e"]; ["f"; "ghx"]; [""; ""; "df"]; ["sdkjf"; "as"; "fkj"; "jaf"]]`
+/// Вернет:
+/// ```
+/// a        bc     e
+/// f        ghx
+///                 df
+/// sdkjf    as     fkj    jaf
+/// ```
+let createTable width lines =
+    let mapping fBoth fxs =
+        let join xs ys = List.fold List.consFlip ys xs
+        let rec red acc = function
+            | x::xs, y::ys ->
+                red (fBoth x y :: acc) (xs,ys)
+            | xs, [] ->
+                join acc (List.map fxs xs)
+            | [], xs ->
+                join acc xs
+        red []
+    let ls =
+        lines
+        |> List.fold (fun st xs ->
+            mapping (fun x y -> max (String.length x) y ) String.length (xs,st) ) []
+    let ls = List.rev ls |> function _::xs -> 0::xs |> List.rev | [] -> []
+
+    let swidth = String.replicate width " "
+    lines
+    |> List.map (Seq.map2 (fun l x -> x.PadRight l) ls >> String.concat swidth)
+    |> String.concat "\n"
+// open FsharpMyExtension
+let createTableTest() =
+    let xs =
+        [
+            "([волк;коза;капуста],[])"
+            "->\tкоза\t([волк;капуста],[])"
+            "<-\t\t([волк;капуста], [коза])"
+            "->\tкапуста\t([волк], [коза])"
+            "<-\tкоза\t([волк], [капуста])"
+            "->\tволк\t([коза], [капуста])"
+            "<-\t\t([коза], [волк;капуста])"
+            "->\tкоза\t([], [волк;капуста])"
+            "([],[волк;коза;капуста])"
+        ]
+        |> List.map (fun s ->
+            s.Split([| "\t"|], System.StringSplitOptions.None)
+            |> List.ofArray)
+    let exp =
+        [
+            "([волк;коза;капуста],[])"
+            "->                          коза       ([волк;капуста],[])"
+            "<-                                     ([волк;капуста], [коза])"
+            "->                          капуста    ([волк], [коза])"
+            "<-                          коза       ([волк], [капуста])"
+            "->                          волк       ([коза], [капуста])"
+            "<-                                     ([коза], [волк;капуста])"
+            "->                          коза       ([], [волк;капуста])"
+            "([],[волк;коза;капуста])"
+        ] |> String.concat "\n"
+    let act = xs |> createTable 4
+    exp = act
