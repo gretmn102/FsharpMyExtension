@@ -22,13 +22,21 @@ do
                 if ((flagsValue &&& 0x1000000) <> 0) then
                     flagsField.SetValue(parser, flagsValue &&& ~~~0x1000000);
         )
-        
+
 type Url = string
 type Content = string
 type Res = Url * Either<Exception, HttpStatusCode * Content>
-
+module Decription =
+    let gzip (encoding:System.Text.Encoding) (receiveStream:Stream) =
+        try
+            // use receiveStream = resp.GetResponseStream()
+            use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
+            use r = new System.IO.StreamReader(zl, encoding)
+            let str = r.ReadToEnd()
+            Right str
+        with e -> Left e
 let tryGet (encoding:System.Text.Encoding) (url:string) =
-    let req = WebRequest.Create(url) :?> HttpWebRequest
+    let req = System.Net.WebRequest.CreateHttp(url)
     req.CookieContainer <- cookies
     req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
     try
@@ -57,23 +65,23 @@ let tryGet (encoding:System.Text.Encoding) (url:string) =
 //     let xs = Seq.init 10000 (fun i -> async { c.SetCookies(uri, sprintf "PHPSESSID=%d" i) })
 //     Async.Parallel xs |> Async.RunSynchronously |> ignore
 //     c.GetCookieHeader uri
-    
-    
+
+
 //     let monitor = Object()
 //     let a = ref 4
 
 //     printfn "1) a = %i" !a
 
-//     let t1 = System.Threading.Thread (fun () ->  
-//         printfn "locked in thread 1"    
+//     let t1 = System.Threading.Thread (fun () ->
+//         printfn "locked in thread 1"
 //         lock monitor (fun () -> a:= !a + 2)
-//         printfn "unlocked in thread 1"    
+//         printfn "unlocked in thread 1"
 //         )
 
-//     let t2 = System.Threading.Thread (fun () ->  
-//         printfn "locked in thread 2"    
+//     let t2 = System.Threading.Thread (fun () ->
+//         printfn "locked in thread 2"
 //         lock monitor (fun () -> a:= !a - 3)
-//         printfn "unlocked in thread 2"    
+//         printfn "unlocked in thread 2"
 //         )
 
 //     t1.Start()
@@ -81,13 +89,13 @@ let tryGet (encoding:System.Text.Encoding) (url:string) =
 
 //     System.Threading.Thread.Sleep 1000 // wait long enough to get the correct value
 //     printfn "2) a = %i" !a
-    
+
 //     true
 
 /// CookieContainer небезопастно использовать в паралельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
 let getAsync (encoding:System.Text.Encoding) (urls: Url list) =
-    let get url = 
-        let req = WebRequest.Create(url:string) :?> HttpWebRequest
+    let get url =
+        let req = System.Net.WebRequest.CreateHttp(url:string)
         req.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
         req.Accept <- "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         req.Headers.Add (System.Net.HttpRequestHeader.AcceptLanguage, "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3")
@@ -117,8 +125,8 @@ let getAsync (encoding:System.Text.Encoding) (urls: Url list) =
     |> Seq.collect webPages
 
 /// раньше стояла кодировка "windows-1251"
-let tryPost (encoding:System.Text.Encoding) (url:string) (postData:string) = 
-    let request = WebRequest.Create(url) :?> HttpWebRequest
+let tryPost (encoding:System.Text.Encoding) (url:string) (postData:string) =
+    let request = System.Net.WebRequest.CreateHttp(url)
 
     request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
     request.CookieContainer <- cookies;
@@ -128,19 +136,19 @@ let tryPost (encoding:System.Text.Encoding) (url:string) (postData:string) =
     let data = Text.Encoding.ASCII.GetBytes(postData)
     request.ContentLength <- int64 data.Length
 
-    try 
+    try
         using (request.GetRequestStream())
             (fun stream -> stream.Write(data, 0, data.Length))
         use resp = request.GetResponse() :?> HttpWebResponse
-       
+
         use stream = resp.GetResponseStream()
         use reader = new StreamReader(stream, encoding)
 
         url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
     with e -> url, Left e
-let tryPost2 (encoding:System.Text.Encoding) changeReq (url:string) (postData:string) = 
-    // let request = request() :?> 
-    let request = WebRequest.Create(url) :?> HttpWebRequest
+let tryPost2 (encoding:System.Text.Encoding) changeReq (url:string) (postData:string) =
+    // let request = request() :?>
+    let request = System.Net.WebRequest.CreateHttp(url)
     changeReq request
     // request.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
     request.CookieContainer <- cookies;
@@ -150,11 +158,11 @@ let tryPost2 (encoding:System.Text.Encoding) changeReq (url:string) (postData:st
     let data = Text.Encoding.ASCII.GetBytes(postData)
     request.ContentLength <- int64 data.Length
 
-    try 
+    try
         using (request.GetRequestStream())
             (fun stream -> stream.Write(data, 0, data.Length))
         use resp = request.GetResponse() :?> HttpWebResponse
-       
+
         use stream = resp.GetResponseStream()
         use reader = new StreamReader(stream, encoding)
 
@@ -185,7 +193,7 @@ List.zip fileNames pages |> List.iter (File.WriteAllText)
 // let getToFile (url:string) path rawPath =
 //     if not rawPath && path <> "" then
 //         Directory.CreateDirectory(path) |> ignore
-//     let webReq = WebRequest.Create(url) :?> HttpWebRequest
+//     let webReq = System.Net.WebRequest.CreateHttp(url)
 
 //     //webReq.CookieContainer = cookie;
 
@@ -195,18 +203,18 @@ List.zip fileNames pages |> List.iter (File.WriteAllText)
 //     /// <summary>
 //     /// Copies the contents of input to output. Doesn't close either stream.
 //     /// </summary>
-//     let streamToStream ((input:Stream), (output:Stream)) = 
+//     let streamToStream ((input:Stream), (output:Stream)) =
 //         let buffer = Array.create (8 * 1024) (byte 0)
-//         let rec f () = 
+//         let rec f () =
 //             let len = input.Read(buffer, 0, buffer.Length)
 //             if len > 0 then
 //                 output.Write(buffer, 0, len)
 //                 f()
 //         f()
-    
-//     let path = 
-//         if rawPath then path 
-//         else 
+
+//     let path =
+//         if rawPath then path
+//         else
 //             let segments = response.ResponseUri.Segments;
 //             let segmentLast = segments.[segments.Length - 1];
 //             let segmentLast = HttpUtility.UrlDecode(segmentLast);
@@ -227,16 +235,16 @@ module DownThemAll =
     //     |> fun cont -> System.IO.File.WriteAllLines("output/outputTemp.txt", cont)
     /// DownThemAll! 3.0v
     /// (path * url) list
-    let metalink (xs:(string * string) seq) = 
+    let metalink (xs:(string * string) seq) =
         let now = System.DateTime.Now
-        let nowStr = 
+        let nowStr =
             now
             |> FsharpMyExtension.DateTime.Unix.toMSec
             |> string
         // let now = System.DateTime.Now
         // now.ToString("R")
 
-        let file i (name, url) = 
+        let file i (name, url) =
             Node
               ("file",
                [("name", name)

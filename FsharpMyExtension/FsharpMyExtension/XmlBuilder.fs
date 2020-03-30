@@ -49,6 +49,7 @@ module Node =
         // sb.AppendLine "<!DOCTYPE html>" |> ignore
         // sprint sb x
         // sb.ToString()
+    /// обязательно должно быть: `<html xmlns="http://www.w3.org/1999/xhtml">`
     let sprintNodeXDT =
         let doctypeXhtml =
             // Не знаю в чем отличия.

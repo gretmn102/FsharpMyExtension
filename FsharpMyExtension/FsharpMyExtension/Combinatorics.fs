@@ -47,17 +47,17 @@ module Comb =
         combAllLazy [1..3]
         |> LazyTreeEmpty.unpack |> Seq.map List.ofSeq |> List.ofSeq 
         |> (=) [[]; [1]; [1; 2]; [1; 2; 3]; [1; 3]; [2]; [2; 3]; [3]]
-//    let rec permm xs =
-//        let fn = function
-//            | [] -> None
-//            | h::t as xs -> Some(LT(h, seq{ yield Nil; yield! permm t}), t)
-//        Seq.unfold fn xs
-//    assert
-//        
-//        permm [0..3] |> LazyTree.unpack
-//    let xs = Seq.init 10 (printfn "%d")
-//    Seq.take 2 xs
-//    Seq.skip 2 xs
+    //    let rec permm xs =
+    //        let fn = function
+    //            | [] -> None
+    //            | h::t as xs -> Some(LT(h, seq{ yield Nil; yield! permm t}), t)
+    //        Seq.unfold fn xs
+    //    assert
+    //        
+    //        permm [0..3] |> LazyTree.unpack
+    //    let xs = Seq.init 10 (printfn "%d")
+    //    Seq.take 2 xs
+    //    Seq.skip 2 xs
     /// Бесконечные сочетания с повторениями:
     /// 
     /// `f [1..3]` -&gt; (если отсеять до 2-ух в ширину) `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`

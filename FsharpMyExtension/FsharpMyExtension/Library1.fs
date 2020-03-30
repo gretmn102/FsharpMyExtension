@@ -1,6 +1,6 @@
 ﻿namespace FsharpMyExtension
 
-module Pair = 
+module Pair =
     let fold f (st:'State) (x, y) = f st x y
     /// `curry`
     let reduce f (x,y) = f x y
@@ -25,9 +25,23 @@ module FSharpExt =
     let rec for' fromInclusive toInclusive f st =
         if fromInclusive > toInclusive then st
         else for' (fromInclusive + 1) toInclusive f (f st fromInclusive)
-
+    let while' f =
+        // if f() then () else while' f
+        let mutable x = true
+        while x do
+            if not (f ()) then
+                x <- false
+    assert
+        let x = ref 0
+        while' (fun () ->
+            if !x < 10 then
+                incr x
+                true
+            else false
+            )
+        !x = 10
     let flip f x y = f y x
-    assert 
+    assert
         let f b s = if b then sprintf "view: %s" s else sprintf "not view"
         let s = "some text"
         let b = true
@@ -35,7 +49,7 @@ module FSharpExt =
     /// (<||)
     let curry = (<||)
     let uncurry f x y = f(x, y)
-    
+
     let konst f x _ = f x
     let konts f _ y = f y
     // let mapFst fn (x, y) = fn x, y
@@ -113,25 +127,24 @@ module Show =
     let showChar c = Seq.append (Seq.singleton c) : ShowS
     let showString xs = Seq.append xs : ShowS
 
-//    assert
-//        let s = Seq.append (seq{printfn "eval1"; yield ();}) (seq{printfn "eval2"; yield (); printfn "eval3"; yield ();})
-//        let cons = seq{ printfn "eval1"; yield (); yield! (seq{printfn "eval2"; yield (); printfn "eval3"; yield ();}) }
-//        
-//        Seq.take 2 cons
-//        true
+    // assert
+    //    let s = Seq.append (seq{printfn "eval1"; yield ();}) (seq{printfn "eval2"; yield (); printfn "eval3"; yield ();})
+    //    let cons = seq{ printfn "eval1"; yield (); yield! (seq{printfn "eval2"; yield (); printfn "eval3"; yield ();}) }
+    //    Seq.take 2 cons
+    //    true
     let empty = id : ShowS
-    
+
     let (nl:ShowS) = showString System.Environment.NewLine
-        
+
     let between (opened:ShowS) (closed:ShowS) (p:ShowS) = (opened << p << closed):ShowS
-    
+
     //let showParen b = (fun p -> if b then showChar '(' << p << showChar ')' else p):(ShowS -> ShowS)
     let showParen b = (cond (k b) (between (showChar '(') (showChar ')')) id):(ShowS -> ShowS)
-    
+
     let bet opened closed (p:ShowS) = (showString opened << p << showString closed):ShowS
     let show (x:ShowS) = System.String.Concat(x Seq.empty)
     let shows x = (showString (x.ToString())):ShowS
-        
+
     let showAutoParen parOpen : (_ -> ShowS) =
         let parClose = function
             | "(" -> ")"
@@ -145,11 +158,11 @@ module Show =
         let s = showAutoParen "("
         show (s (showChar 'a') << s (showChar 'b')) = "(a)(b)"
 
-    let join s = 
+    let join s =
         let join s =
             cond List.isEmpty (k empty) (List.reduce (fun x y -> x << (s << y)))
         join (showString s) : ShowS list -> ShowS
-        
+
     assert
         [
         join " + " [] |> show = ""
@@ -158,7 +171,7 @@ module Show =
         show (join " + " [ showString "someVar"; showChar '1'; showAutoParen "(" <| showString "2 + 3" ]) = "someVar + 1 + (2 + 3)" ] |> List.forall id
 
     let replicate count c = seq{1..count} |> Seq.fold (konst ((>>) (showChar c))) empty : ShowS
-    
+
     assert
         let f n = replicate n 'a' |> show = String.replicate n "a"
         [0..10] |> List.map f |> List.forall id
@@ -172,13 +185,9 @@ module ShowList =
     let showString (xs:char seq) = List.append (List.ofSeq xs) : ShowS
 
     let empty = id : ShowS
+    let show (x:ShowS) = System.String.Concat(x List.empty)
 
-    /// Это все замечательно конечно, но как мне получить:
-    /// joins (showChar '\n') [showChar 'a'; showString ""; showChar 'b'] -> "a\n\nb"
-    /// Конечно я совсем не против получить из этого:
-    /// joins (showChar '\n') [showChar 'a'; id; showChar 'b'] -> "a\nb"
-    /// Но как мне получить пустую строку?
-    /// Кто ж виноват, что 'id' здесь тоже самое что и showString ""?
+    /// Соединяет строки с помощью разделителя. Пропускает пустые элементы.
     let joins (sep:ShowS) (xs:ShowS list) =
         let rec loop acc = function
             | x::xs ->
@@ -194,25 +203,30 @@ module ShowList =
                 else loop (List.append x) xs
             | [] -> id
         loop2 xs : ShowS
-    assert
-        joins (showString ", ") [id;id;showString "Abram";showString "Lyouis";id;id;showString "Loid";id;id] []
-        |> System.String.Concat = "Abram, Lyouis, Loid"
     let join sep = joins (showString sep)
+
+    /// Соединяет строки с помощью разделителя.
+    let joinsEmpty s : ShowS list -> ShowS =
+        let join s =
+            cond List.isEmpty (k empty) (List.reduce (fun x y -> x << (s << y)))
+        join s
+    let joinEmpty s = joinsEmpty (showString s)
+
     let (nl:ShowS) = showString System.Environment.NewLine
     let lines = joins nl
     let between (opened:ShowS) (closed:ShowS) (p:ShowS) = (opened << p << closed):ShowS
-    
+
     let showParen =
         let l, r = showChar '(', showChar ')'
         fun b ->
             if b then between l r
             else id
             : ShowS -> ShowS
-    
+
     let bet opened closed =
         between (showString opened) (showString closed)
         // : _ -> ShowS
-    let show (x:ShowS) = System.String.Concat(x List.empty)
+
     let shows x = showString (x.ToString()) :ShowS
 
     let showAutoParen parOpen : (_ -> ShowS) =
@@ -228,11 +242,11 @@ module ShowList =
         let s = showAutoParen "("
         show (s (showChar 'a') << s (showChar 'b')) = "(a)(b)"
 
-    // let join s (xs: ShowS list) = 
+    // let join s (xs: ShowS list) =
     //     let join s =
     //         cond List.isEmpty (k empty) (List.reduce (fun x y -> x << (s << y)))
     //     join (showString s) xs : ShowS
-        
+
     // assert
     //     [
     //     join " + " [] |> show = ""
@@ -241,7 +255,7 @@ module ShowList =
     //     show (join " + " [ showString "someVar"; showChar '1'; showAutoParen "(" <| showString "2 + 3" ]) = "someVar + 1 + (2 + 3)" ] |> List.forall id
 
     let replicate count c = seq{1..count} |> Seq.fold (konst ((>>) (showChar c))) empty : ShowS
-    
+
     assert
         let f n = replicate n 'a' |> show = String.replicate n "a"
         [0..10] |> List.map f |> List.forall id

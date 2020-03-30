@@ -46,3 +46,48 @@ let indexOf patt startIndex xs =
     f startIndex
 // 1 = indexOf [| 1; 2 |] 0 [| 0..10 |]
 // 1 = indexOf [|2;3|] 0 [|1..6|]
+
+/// Ведет себя почти так же, как и `System.String.Split`, за исключением:
+/// ```fsharp
+/// let sep = "<>"
+/// let str = "<>"
+/// str.Split([|str|], System.StringSplitOptions.None) // -> [|""; ""|]
+/// split (sep.ToCharArray()) (str.ToCharArray())
+/// |> Array.map System.String.Concat // -> [|""|]
+/// ```
+/// Еще пример:
+/// ```fsharp
+/// let sep = "<>"
+/// let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
+/// split (sep.ToCharArray()) (str.ToCharArray())
+/// |> Array.map System.String.Concat
+/// // -> [|"asdfg"; " s aff"; "a"; "fa"; "f"; ""; "dsf"|]
+/// ```
+let split (sep:_ []) (xs:_ []) =
+    Array.unfold (fun i ->
+        if i < xs.Length then
+            let i' = indexOf sep i xs
+            if i' = -1 then Some(xs.[i..], xs.Length)
+            else
+                Some(xs.[i..i' - 1], i' + sep.Length)
+        else
+            None
+        ) 0
+open FsharpMyExtension
+let testSplit () =
+    let sep = "<>"
+    let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
+    let exp = String.split sep str
+    let act =
+        split (sep.ToCharArray()) (str.ToCharArray())
+        |> Array.map System.String.Concat
+    exp = act
+    
+    let sep = "<>"
+    let str = "<>"
+    
+    let exp = String.split sep str
+    let act =
+        split (sep.ToCharArray()) (str.ToCharArray())
+        |> Array.map System.String.Concat
+    exp = act // [|""; ""|] <> [|""|]

@@ -72,7 +72,10 @@ module ListZ =
     let set x (lz:ListZ<_>) = { lz with Current = x }
     let hole lst = lst.Current
     let update f (lz:ListZ<_>) = { lz with Current = f lz.Current }
-    
+    let updateFold f (st:'State) (lz:ListZ<_>) =
+        let x, (st:'State) = f st lz.Current
+        { lz with Current = x }, st
+
     let rec toStart lz =
         match prev lz with
         | Some x -> toStart x

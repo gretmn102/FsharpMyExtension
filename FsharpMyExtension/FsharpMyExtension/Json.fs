@@ -2,7 +2,7 @@ namespace FsharpMyExtension
 [<RequireQualifiedAccess>]
 module Json =
     open Newtonsoft.Json
-    // open System.Xml
+
     let ser x = Newtonsoft.Json.JsonConvert.SerializeObject(x, Formatting.Indented)
     let serf path x = ser x |> fun x -> System.IO.File.WriteAllText(path, x)
     let serNotIndent x = Newtonsoft.Json.JsonConvert.SerializeObject x
@@ -10,18 +10,18 @@ module Json =
     let des x = JsonConvert.DeserializeObject<_> x
     let desf path = System.IO.File.ReadAllText path |> des
 
-    let bsonDesf path = 
+    let bsonDesb (bytes:byte []) =
+        use m = new System.IO.MemoryStream(bytes)
+        use x = new Bson.BsonDataReader(m)
+        let json = JsonSerializer()
+        json.Deserialize<_> x
+    let bsonDesf path =
         let txt = System.IO.File.OpenRead path
         use x = new Bson.BsonDataReader(txt)
         let json = JsonSerializer()
-        // let s = json.Deserialize<_> x
         json.Deserialize<_> x
-        // let txt = JsonConvert.SerializeObject(s, Formatting.Indented)
-        // txt
-    // bson @"c:\Downloads\pascal\WorkshopUpload" |> fun x -> System.IO.File.WriteAllText(@"c:\Downloads\pascal\sabouter.json", x)
-    // desf @"c:\Downloads\pascal\red dragon inn.json" |> serf @"c:\Downloads\pascal\red dragon inn ident.json"
 module JToken =
-    let ofFile (path:string)=
+    let ofFile (path:string) =
         use st = System.IO.File.OpenText path
         use r = new Newtonsoft.Json.JsonTextReader(st)
         Newtonsoft.Json.Linq.JToken.ReadFrom(r)
@@ -36,12 +36,13 @@ module FSharpJsonType =
     open FsharpMyExtension
     open FsharpMyExtension.Reflection
     open Newtonsoft.Json.Linq
-    // Что есть Json с точки мира F#?
+
     type JsonFType =
         | BoolTyp     of bool
         | IntegerTyp  of int
         | StringTyp   of string
         | FloatTyp    of float
+        | DateTimeTyp of System.DateTime
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     [<RequireQualifiedAccess>]
     module JsonFType =
@@ -62,7 +63,7 @@ module FSharpJsonType =
         | Null
         | Obj       of Map<string, JsonF>
         | Sequence  of JsonF []
-    // Вроде бы так. Ужасно, что `Sequence` вмещает произвольные типы (вот же шл!..). Вот если бы она была бы одного типа, ах!
+    // Вроде бы, так. Ужасно, что `Sequence` вмещает произвольные типы (вот же шл!..). Вот если бы она была бы одного типа, ах!
     [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
     [<RequireQualifiedAccess>]
     module JsonF =
@@ -96,6 +97,7 @@ module FSharpJsonType =
             | JTokenType.String  -> Scalar(StringTyp(x.ToObject()))
             | JTokenType.Null    -> Null
             | JTokenType.Float   -> Scalar(FloatTyp(x.ToObject()))
+            | JTokenType.Date    -> Scalar(DateTimeTyp(x.ToObject()))
             | t ->
                 failwithf "unknown %A" (t, x.ToString())
             // | JTokenType.None -> failwith ""
@@ -112,7 +114,7 @@ module FSharpJsonType =
         // System.Enum.GetNames(typeof<JTokenType>)
         // |> Array.map (sprintf "JTokenType.%s")
         // |> String.concat "\n"
-        // |> Clipboard.setText        
+        // |> Clipboard.setText
         let rec toJToken = function
             | Scalar x ->
                 match x with
@@ -120,6 +122,7 @@ module FSharpJsonType =
                 | IntegerTyp x -> JToken.FromObject x
                 | StringTyp x -> JToken.FromObject x
                 | FloatTyp x -> JToken.FromObject x
+                | DateTimeTyp x -> JToken.FromObject x
             | Null -> JValue.CreateNull() :> JToken
             | Obj m ->
                 let o = JObject()
@@ -135,6 +138,29 @@ module FSharpJsonType =
         //     let fs = ofJToken json
         //     let act = toJToken fs |> ofJToken
         //     fs = act
+    let objToFSharpType x =
+        x
+        |> JsonF.getObj
+        |> flip (Map.foldBack (fun k v st ->
+            let x =
+                match v with
+                | JsonF.Scalar x ->
+                    match x with
+                    | JsonFType.BoolTyp _ -> "bool"
+                    | JsonFType.FloatTyp _ -> "double"
+                    | JsonFType.IntegerTyp _ -> "int"
+                    | JsonFType.StringTyp _ -> "string"
+                    | JsonFType.DateTimeTyp(_) -> "System.DateTime"
+                | JsonF.Null -> "null"
+                | JsonF.Sequence _ -> "FSharpJsonType.JsonF []"
+                | JsonF.Obj _ -> "FSharpJsonType.JsonF"
+                // | _ -> "FSharpJsonType.JsonF"
+            (k, x)::st
+            )) []
+        |> List.map (curry (sprintf "    %s : %s"))
+        |> String.concat "\n"
+        |> sprintf "{\n%s\n}"
+
     [<RequireQualifiedAccess>]
     module Serialize =
         type Converter() =
@@ -146,14 +172,14 @@ module FSharpJsonType =
                                  serializer: Newtonsoft.Json.JsonSerializer) =
                 serializer.Deserialize<Newtonsoft.Json.Linq.JToken>(reader)
                 |> JsonF.ofJToken
-                
+
             override __.WriteJson(writer: Newtonsoft.Json.JsonWriter,
                                   value:JsonF,
                                   serializer: Newtonsoft.Json.JsonSerializer) =
                 // let xs = value :?> FsharpMyExtension.Json.FSharpJsonType.JsonF
                 JsonF.toJToken value
                 |> fun x -> serializer.Serialize(writer, x)
-        let converter = new Converter()
+        let converter = Converter()
         let ser x =
             let indent = Newtonsoft.Json.Formatting.Indented
             Newtonsoft.Json.JsonConvert.SerializeObject(x, indent, converter)
@@ -162,7 +188,7 @@ module FSharpJsonType =
             use file = System.IO.File.CreateText(path)
             use st = new Newtonsoft.Json.JsonTextWriter(file)
             st.Formatting <- Newtonsoft.Json.Formatting.Indented
-            let ser = new Newtonsoft.Json.JsonSerializer()
+            let ser = Newtonsoft.Json.JsonSerializer()
             ser.Converters.Add converter
             ser.Serialize(st, x)
         let serNotIndent x =
@@ -173,14 +199,74 @@ module FSharpJsonType =
             use file = System.IO.File.CreateText(path)
             use st = new Newtonsoft.Json.JsonTextWriter(file)
             // st.Formatting <- Newtonsoft.Json.Formatting.None
-            let ser = new Newtonsoft.Json.JsonSerializer()
+            let ser = Newtonsoft.Json.JsonSerializer()
             ser.Converters.Add converter
             ser.Serialize(st, x)
         let des x = Newtonsoft.Json.JsonConvert.DeserializeObject<_>(x, converter)
         let desf path =
             use st = System.IO.File.OpenText path
             use r = new Newtonsoft.Json.JsonTextReader(st)
-            let ser = new Newtonsoft.Json.JsonSerializer()
+            let ser = Newtonsoft.Json.JsonSerializer()
+            ser.Converters.Add converter
+            ser.Deserialize<_>(r)
+            // Newtonsoft.Json.Linq.JToken.ReadFrom(r)
+            // System.IO.File.ReadAllText path |> des
+    [<RequireQualifiedAccess>]
+    module SerializeOption =
+        open System
+        open Microsoft.FSharp.Reflection
+        open Newtonsoft.Json
+        /// Взято [отсюда](https://stackoverflow.com/a/29629215)
+        type OptionConverter() =
+            inherit JsonConverter()
+            override x.CanConvert(t) =
+                t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+
+            override x.WriteJson(writer, value, serializer) =
+                let value =
+                    if isNull value then null
+                    else
+                        let _,fields = FSharpValue.GetUnionFields(value, value.GetType())
+                        fields.[0]
+                serializer.Serialize(writer, value)
+
+            override x.ReadJson(reader, t, existingValue, serializer) =
+                let innerType = t.GetGenericArguments().[0]
+                let innerType =
+                    if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
+                    else innerType
+                let value = serializer.Deserialize(reader, innerType)
+                let cases = FSharpType.GetUnionCases(t)
+                if isNull value then FSharpValue.MakeUnion(cases.[0], [||])
+                else FSharpValue.MakeUnion(cases.[1], [|value|])
+        let converter = OptionConverter()
+        let ser x =
+            let indent = Newtonsoft.Json.Formatting.Indented
+            Newtonsoft.Json.JsonConvert.SerializeObject(x, indent, converter)
+        let serf path x =
+            // ser x |> fun x -> System.IO.File.WriteAllText(path, x)
+            use file = System.IO.File.CreateText(path)
+            use st = new Newtonsoft.Json.JsonTextWriter(file)
+            st.Formatting <- Newtonsoft.Json.Formatting.Indented
+            let ser = Newtonsoft.Json.JsonSerializer()
+            ser.Converters.Add converter
+            ser.Serialize(st, x)
+        let serNotIndent x =
+            Newtonsoft.Json.JsonConvert.SerializeObject(x, converter)
+        let serfNotIdent path x =
+            // serNotIndent x
+            // |> fun x -> System.IO.File.WriteAllText(path, x)
+            use file = System.IO.File.CreateText(path)
+            use st = new Newtonsoft.Json.JsonTextWriter(file)
+            // st.Formatting <- Newtonsoft.Json.Formatting.None
+            let ser = Newtonsoft.Json.JsonSerializer()
+            ser.Converters.Add converter
+            ser.Serialize(st, x)
+        let des x = Newtonsoft.Json.JsonConvert.DeserializeObject<_>(x, converter)
+        let desf path =
+            use st = System.IO.File.OpenText path
+            use r = new Newtonsoft.Json.JsonTextReader(st)
+            let ser = Newtonsoft.Json.JsonSerializer()
             ser.Converters.Add converter
             ser.Deserialize<_>(r)
             // Newtonsoft.Json.Linq.JToken.ReadFrom(r)

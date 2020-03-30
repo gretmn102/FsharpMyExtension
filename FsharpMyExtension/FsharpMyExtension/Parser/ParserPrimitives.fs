@@ -28,13 +28,13 @@ let pend lab =
     in fn : Pars<'Elem,_>
 let praw =
     let fn = function
-        | [] -> Left "expected one or more nodes"
         | h::t -> Right(h, t)
+        | [] -> Left "expected one or more nodes"
     in fn : Pars<'Elem,_>
 let satisfy f note noteExpected = 
     let fn = function
-        | [] -> Left <| sprintf "expected:\n%s\nactual: stream is empty" noteExpected
         | h::t -> if f h then Right(h, t) else Left <| sprintf "expected:\n%s\nactual:\n%s" noteExpected (note h)
+        | [] -> Left <| sprintf "expected:\n%s\nactual: stream is empty" noteExpected
     fn : Pars<'Elem,'Elem>
 let rec many (p:Pars<'Elem,'State>) : Pars<'Elem,'State list> = 
     let rec fn acc xs = 

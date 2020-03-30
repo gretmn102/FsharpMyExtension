@@ -1,15 +1,28 @@
 ﻿[<RequireQualifiedAccess>]
 module FsharpMyExtension.Map
-//module Map =
 open FsharpMyExtension.FSharpExt
 
-(*let choiceFold fn m = Seq.fold (fun st (k:'key, v:'value) -> fn k v |> function Some x -> Map.add k x st | None -> Map.remove k st ) m (Map.toSeq m) *)
-let choose fn (m:Map<_,_>) =
-    m |> Seq.choose (function KeyValue(k:'key, v:'value) -> fn k v |> Option.map (fun x -> k, x))
-    |> Map.ofSeq
-
-let values (m:Map<_,_>) = m |> Seq.map (function KeyValue(k:'key, v:'value) -> v )
-let keys (m:Map<_,_>) = m |> Seq.map (function KeyValue(k:'key, v:'value) -> k )
+let chooseFold mapping state =
+    Map.fold (fun (m, (st:'State)) (k:'Key) (v:'Value) ->
+        let v, st = mapping st k v
+        match v with
+        | Some (v:'Result) ->
+            Map.add k v m, st
+        | None -> m, st
+    ) (Map.empty, state)
+let choose fn =
+    Seq.choose (fun (KeyValue(k:'Key, v:'Value)) ->
+        fn k v |> Option.map (fun x -> k, x))
+    >> Map.ofSeq
+let mapFold mapping state =
+    Map.fold (fun (m, (st:'State)) (k:'Key) (v:'Value) ->
+        let (v:'Result), st = mapping st k v
+        Map.add k v m, st
+    ) (Map.empty, state)
+let values (m:Map<_,_>) =
+    m |> Seq.map (function KeyValue(k:'key, v:'value) -> v )
+let keys (m:Map<_,_>) =
+    m |> Seq.map (function KeyValue(k:'key, v:'value) -> k )
 let chooseS fn (m:Map<_,_>) =
     m |> Seq.choose (function KeyValue(k:'key, v:'value) -> fn k v)
 let filterS (fn:'key -> 'value -> _) (m:Map<_,_>) =
@@ -34,7 +47,7 @@ let addOrModWith key def modify db =
 
 
 (*
-let chooseFilMap fn m = 
+let chooseFilMap fn m =
     let acc = ref []
     m |> Map.filter (fun k x -> fn k x |> function Some x -> acc := x :: !acc; true | None -> false)
     |> fun xs -> acc := List.rev !acc; xs |> Map.map (fun _ _ -> List.head !acc |> fun x -> acc := List.tail !acc; x )
@@ -45,14 +58,14 @@ assert
     let s = chooseSeq fn m
     let fil = chooseFilMap fn m
     s = fil *)
-    
+
 /// reducef id (fun k v -> k::v) [] Map.empty [1;2;2;3;4;5;-1] = map [(-1, [-1]); (1, [1]); (2, [2; 2]); (3, [3]); (4, [4]); (5, [5])]
-let reducef key fn def =
+let reducef (keyf: _ -> 'Key) fn (def:'Val) =
     Seq.fold (fun st x ->
         // x |> (key
         //     >> s (fun k v -> Map.add k (fn x v) st)
         //         (flip Map.tryFind st >> flip defaultArg def)))
-        key x
+        keyf x
         |> s (fun k v -> Map.add k (fn x v) st)
             (flip Map.tryFind st >> flip defaultArg def))
 

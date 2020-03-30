@@ -15,7 +15,7 @@ let testPath = !! "**/test.fsproj" |> Seq.tryHead
 // --------------------------------------------------------------------------------------
 open Fake.DotNet
 let buildConf = DotNet.BuildConfiguration.Debug
-let dotnetSdk = lazy DotNet.install DotNet.Versions.Release_2_1_4
+let dotnetSdk = lazy DotNet.install DotNet.Versions.Release_2_1_402
 let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 
 // --------------------------------------------------------------------------------------
@@ -28,11 +28,26 @@ Target.create "BuildTest" (fun _ ->
     |> DotNet.build (fun x ->
         { x with Configuration = buildConf }
         |> dtntSmpl)
-    // appReferences
-    // |> Seq.iter (fun p ->
-    //     let dir = System.IO.Path.GetDirectoryName p
-    //     DotNet.build (dtntWorkDir root) dir
-    // )
+)
+let mainProjPath = !! "**/FsharpMyExtension.fsproj" |> Seq.tryHead
+Target.create "NuGet" (fun _ ->
+    mainProjPath
+    |> Option.defaultWith (fun () -> failwith "'**/FsharpMyExtension.fsproj' not found")
+    |> System.IO.Path.GetDirectoryName
+    |> DotNet.pack (fun x ->
+        { x with Configuration = DotNet.BuildConfiguration.Release }
+        |> dtntSmpl
+    )
+)
+
+Target.create "PushNuGetToGithub" (fun _ ->
+    let packPath = !! "**/*.nupkg" |> Seq.tryHead
+    packPath
+    |> Option.defaultWith (fun () -> failwith "'**/*.nupkg' not found")
+    |> DotNet.nugetPush (fun x ->
+        { x with
+            PushParams = { x.PushParams with Source = Some "github" }}
+    )
 )
 
 Target.create "Test" (fun _ ->
@@ -52,6 +67,7 @@ Target.create "Test" (fun _ ->
     |> Option.defaultWith (fun () -> failwith "test not found" )
 )
 
+// Target "Release" DoNothing
 // --------------------------------------------------------------------------------------
 // Build order
 // --------------------------------------------------------------------------------------
@@ -61,6 +77,8 @@ open Fake.Core.TargetOperators
 //   ==> "Build"
 //   ==> "Test"
 
+"NuGet"
+  ==> "PushNuGetToGithub"
 
 "BuildTest"
   ==> "Test"

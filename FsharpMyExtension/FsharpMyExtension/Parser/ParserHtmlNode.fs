@@ -12,7 +12,7 @@ module XPathPar =
         let bind next = function
             | None -> next()
             | Some x -> x && next()
-    
+
         let fn =
             node.Attributes |> function
                 | null -> fun _ -> false
@@ -21,13 +21,13 @@ module XPathPar =
                     | Some name, Some v -> match att.Item name with null -> false | x -> x.Value = v
                     | None, Some v -> att |> Seq.exists (fun x -> x.Value = v)
                     | None, None -> true
-        
+
         Option.map ((=) node.Name) r.Name
         |> bind (fun () ->
             if List.forall fn r.Att then
                 match r.Text with
                 | None -> true
-                | Some txt -> 
+                | Some txt ->
                     let xs = node.ChildNodes
                     if xs.Count = 1 then
                         match xs.[0] with
@@ -42,10 +42,10 @@ module XPathPar =
 
         //let name = (pchar '*' >>% None) <|> (pstr |>> Some)
         //manyChars (p)
-        
+
         let name = (pchar '*' >>% None) <|> (manySatisfy (isNoneOf " []=") |>> Some)
         let val' = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''
-        let patt = 
+        let patt =
             pchar '@' >>. name >>= fun name -> opt val' |>> fun att -> name,att
         let ptext = pstring "text()" >>. val'
         let attempt x = x
@@ -54,12 +54,12 @@ module XPathPar =
             let patts = many (brackets patt)
             name >>= fun name ->
             pipe2 patts (pipe2 (opt (brackets ptext)) patts comma )
-                (fun xs (txt, ys) -> 
+                (fun xs (txt, ys) ->
                     let atts = match ys with [] -> xs | y -> xs @ y
                     { Name = name; Att = atts; Text = txt }) .>> pend (sprintf "%A")
-    let parse xs = 
+    let parse xs =
         run xs Parser.res |> Either.map (fst >> exec)
-    let show (x:Req) = 
+    let show (x:Req) =
         let name = x.Name |> Option.defaultValue "*"
         let atts =
             x.Att
@@ -68,17 +68,17 @@ module XPathPar =
                     (Option.defaultValue "*")
                     (Option.map (sprintf "='%s'") >> Option.defaultValue "")
                 >> curry (sprintf "@%s%s"))
-        
+
         let all =
             x.Text
             |> Option.map (sprintf "text()=%s" >> fun x -> x::atts)
             |> Option.defaultValue atts
-        
-        // let xs = 
+
+        // let xs =
         List.map (sprintf "[%s]") (all) |> String.concat ""
         |> sprintf "%s%s" name
-    
-module ParHtmlNode = 
+
+module ParHtmlNode =
     open Primitives
     open FsharpMyExtension
     open FsharpMyExtension.HtmlAgilityPackExt
@@ -123,7 +123,7 @@ module ParHtmlNode =
         satisfy (HtmlNode.nodeType >> (=) HtmlNodeType.Comment)
             nodePrint
             "comment node"
-    
+
     let takeNC name content =
         satisfy (fun x -> HtmlNode.name x = name && HtmlNode.innerText x = content)
             (sprintf "expected node with name: '%s' and content:\n'%s', but take %A"
@@ -142,4 +142,61 @@ module ParHtmlNode =
         .>> ws
     let sub (p:Pars<_,_>) (x:HtmlNode) =
         preturn (run x.ChildNodes (ws >>. p)) |> trav : Pars<_,_>
+    let (>>@) p x = p >>= sub x
+module ParHtmlNode2 =
+    open Primitives2
+    open FsharpMyExtension
+    open FsharpMyExtension.HtmlAgilityPackExt
+    open FsharpMyExtension.Either
+    open HtmlAgilityPack
+
+    // let private satisfy f note =
+    //     satisfy f note : Pars<HtmlNode, _, _>
+
+    // /// empty or contains only System.Char.IsWhiteSpace
+    // let isEmptyInnerText (node:HtmlNode) =
+    //     let x = node.InnerText
+    //     String.length x = 0 || String.forall System.Char.IsWhiteSpace x
+    let inline textEmpty<'u> : Pars<_, _, 'u>  =
+        satisfy (fun node ->
+                match HtmlNode.nodeType node with
+                | HtmlNodeType.Text -> ParHtmlNode.isEmptyInnerText node
+                | _ -> false)
+            // (fun x -> sprintf "type: %A\ncontent: %s" x.NodeType x.InnerText)
+            "text node or empty"
+    let inline br<'u> : Pars<_, _, 'u>  =
+        satisfy (HtmlNode.name >> (=) "br") "node with name \"br\""
+
+
+    let inline ptext<'u> : Pars<_, _, 'u> =
+        satisfy
+            (cond (HtmlNode.nodeType >> (=) HtmlNodeType.Text)
+                (not << ParHtmlNode.isEmptyInnerText)
+                (k false))
+            "text node"
+
+    let inline pcomm<'u> : Pars<_, _, 'u>  =
+        satisfy (HtmlNode.nodeType >> (=) HtmlNodeType.Comment)
+            // nodePrint
+            "comment node"
+
+    let takeNC name content =
+        satisfy (fun x -> HtmlNode.name x = name && HtmlNode.innerText x = content)
+            // (sprintf "expected node with name: '%s' and content:\n'%s', but take %A"
+            //     name content)
+    let takeN name =
+        satisfy (fun (x:HtmlNode) -> x.Name = name)
+            // (sprintf "expected node with name: '%s', but take %A" name)
+    let takeC content =
+        satisfy (fun x -> HtmlNode.innerText x = content)
+            // (sprintf "expected node with content:\n'%s', but take %A" content)
+
+    let inline ws<'u> : Pars<_, _, 'u>  = many textEmpty
+    let takr (xpathReq:string) =
+        satisfy (XPathPar.parse xpathReq |> Either.getOrDef' (failwithf "%A"))
+            // nodePrint
+            xpathReq
+        .>> ws
+    let sub (p:Pars<_,_,_>) (x:HtmlNode) =
+        preturn (run x.ChildNodes (ws >>. p)) |> trav : Pars<_,_,_>
     let (>>@) p x = p >>= sub x

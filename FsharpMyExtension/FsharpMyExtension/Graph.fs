@@ -5,8 +5,7 @@ type 'a Leaf = 'a * 'a
 // type 'a Graph when 'a : comparison = Set<'a Leaf>
 type 'a Graph = 'a Leaf list
 
-/// Списки инцидентности (Adjacency list)
-/// https://ru.wikipedia.org/wiki/Список_смежности
+/// Списки [инцидентности (Adjacency list)](https://ru.wikipedia.org/wiki/Список_смежности)
 let toAdjacencys xs =
     xs
     |> List.fold (fun st (x, y) ->
@@ -15,7 +14,7 @@ let toAdjacencys xs =
         |> Map.addOrModWith y (fun _ -> Set.singleton x) (Set.add x)
     ) Map.empty
 /// https://en.wikipedia.org/wiki/Connected_component_(graph_theory)
-/// Имеется неориентированный граф, несвязный и возможно цикличный. Нужно перечислить все "компоненты связности".
+/// Имеется неориентированный граф, несвязный и, возможно, цикличный. Нужно перечислить все "компоненты связности".
 /// Зачем? Положим следующий список уравнений:
 /// `[a = b; a = c; e = d; d = f;]`
 /// Вдруг захотелось узнать, что `[[a = b = c]; [d = e = f]]` — этот алгоритм самое то для решения такой задачи.

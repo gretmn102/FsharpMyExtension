@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- <?xml version="1.0" encoding="utf-8"?> -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -6,6 +6,13 @@
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <DocumentationFile>bin\Debug\net461\FsharpMyExtension.xml</DocumentationFile>
+    <PackageId>FSharpMyExt</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Fering</Authors>
+    <Company>Home</Company>
+    <PackageDescription>This package adds an Octocat!</PackageDescription>
+    <RepositoryUrl>https://github.com/gretmn102/FsharpMyExtension</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -15,6 +22,7 @@
     <Compile Include="Containers/List1.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Containers/Option.fs" />
+    <Compile Include="String.fs" />
     <Compile Include="Containers/Array.fs" />
     <Compile Include="Containers/LazyList.fs" />
     <Compile Include="Containers/LZ.fs" />
@@ -29,7 +37,6 @@
     <Compile Include="Tree.fs" />
     <Compile Include="Containers/TreeZipper.fs" />
     <Compile Include="Map.fs" />
-    <Compile Include="String.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="HtmlAgilityPackExt.fs" />
     <Compile Include="Parser/ParserPrimitives2.fs" />

@@ -432,13 +432,22 @@ let inline splitIntoRange64 size length =
     |> List.scan
         (fun (_,i) x -> succ i, i + x)
         (LanguagePrimitives.GenericZero, pred (List.head xs))
-/// `List.chunkBySize size [0..length - 1] |> List.map (on List.head List.last)`
+/// ```fsharp
+/// List.chunkBySize size [0..length - 1]
+/// |> List.map (on List.head List.last)
+/// ```
+/// `chunkBySizeRange 3 14 = [(0, 2); (3, 5); (6, 8); (9, 11); (12, 13)]`
 let inline chunkBySizeRange size length =
-    // let length, parts = 9, 5
+    // let size, length = 3, 15
+    // let size, length = 9, 5
+    // let size, length = 3, 14
     let parts = int size
     let len = int (float length / float parts)
     let n = length - parts * len
-    let xs = List.replicate len parts @ [n]
+    let xs =
+        let xs = List.replicate len parts
+        if n = 0 then xs
+        else xs @ [n]
 
     // List.chunkBySize parts [0..length - 1] |> List.map List.length
 
@@ -447,8 +456,14 @@ let inline chunkBySizeRange size length =
         (fun (_,i) x -> succ i, i + x)
         (LanguagePrimitives.GenericZero, pred (List.head xs))
 assert
-    let length, size = 9, 5
-    List.chunkBySize size [0..length - 1] |> List.map (on List.head List.last) = chunkBySizeRange size length
+    let f size len = 
+        (List.chunkBySize size [0..len - 1] |> List.map (on List.head List.last), chunkBySizeRange size len)
+        |> Pair.reduce (=)
+    [
+        f 3 15 
+        f 3 14
+        f 9 5
+    ] |> List.forall id
 let concatSep sep =
     let rec f acc = function
         | [x] -> x::acc
@@ -456,3 +471,34 @@ let concatSep sep =
             f (sep::x::acc) xs
         | _ -> []
     f [] >> List.rev
+let chooseFold fn st =
+    let rec loop (acc, (st:'State)) = function
+        | x::xs -> 
+            let x, st = fn st x
+            let acc =
+                match x with
+                | Some x -> x::acc
+                | None -> acc
+            loop (acc, st) xs
+        | [] -> List.rev acc, st
+    loop ([], st)
+let sepBy sep = 
+    let rec loop acc = function
+        | x::y::xs ->
+            loop (y::sep::x::acc) xs
+        | x::xs -> loop (x::acc) xs
+        | [] -> List.rev acc
+    loop []
+let mapStartMidEnd start mid fend = function
+    | x::xs ->
+        let rec loop acc = function
+            | [x] ->
+                fend x :: acc |> List.rev
+            | x::xs ->
+                loop (mid x :: acc) xs
+            | [] -> List.rev acc
+        start x :: loop [] xs
+    | [] -> []
+assert
+    let xs = [1..3]
+    mapStartMidEnd ((-) 1) ((+) 1) ((+) 2) xs = [0; 3; 5]

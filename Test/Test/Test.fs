@@ -214,6 +214,19 @@ module ListTests =
             yield gen '+' ""
         }
         |> testList "concatSepTest"
+    [<Tests>]
+    let chooseFoldTest =
+        let xs = [1..10]
+        let stExp = List.sum xs
+        let xsExp = List.filter isEven xs
+        let act =
+            xs
+            |> List.chooseFold (fun st x ->
+                let x' = if isEven x then Some x else None
+                x', st + x
+                ) 0
+        testCase "chooseFoldTest base" <| fun _ ->
+            Assert.Equal("", (xsExp, stExp), act)
 module EitherTests =
     open FsharpMyExtension.Either
 
@@ -566,6 +579,33 @@ module WebDownloader =
     open FsharpMyExtension
     open FsharpMyExtension.WebDownloader
 
+module Show =
+    open FsharpMyExtension
+    open FsharpMyExtension.ShowList
+    [<Tests>]
+    let joinTest =
+        testList "joinTest" [
+            testCase "base case" <| fun () ->
+                let exp = "Abram, Lyouis, Loid"
+                let xs = [empty;empty;showString "Abram";showString "Lyouis";empty;empty;showString "Loid";empty;empty]
+                let act =
+                    joins (showString ", ") xs
+                    |> show
+                    |> System.String.Concat
+                Assert.Equal("", exp, act)
+       ]
+    [<Tests>]
+    let joinEmptyTest =
+        testList "joinTest" [
+            testCase "base case" <| fun () ->
+                let exp = ", , Abram, Lyouis, , , Loid, , "
+                let xs = [empty;empty;showString "Abram";showString "Lyouis";empty;empty;showString "Loid";empty;empty]
+                let act =
+                    joinEmpty ", " xs
+                    |> show
+                    |> System.String.Concat
+                Assert.Equal("", exp, act)
+       ]
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

@@ -1,19 +1,18 @@
 ﻿namespace FsharpMyExtension.HtmlAgilityPackExt
 open HtmlAgilityPack
 
-module HtmlDocument = 
-    let loadHtml x = 
+module HtmlDocument =
+    let loadHtml x =
         let d = new HtmlDocument()
         d.LoadHtml x
         d
 module HtmlNode =
-    // open FsharpMyExtension.Option
     let createNode html = HtmlNode.CreateNode html
     let getAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null)
     assert
         [ HtmlNode.CreateNode "<div att='val'></div>" |> getAttVal "att" = "val"
           HtmlNode.CreateNode "<div att='val'></div>" |> getAttVal "att2" |> isNull ] |> List.forall id
-    
+
     let tryGetAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null) |> Option.ofObj
     assert
         [ HtmlNode.CreateNode "<div att='val'></div>" |> tryGetAttVal "att" = Some "val"
@@ -25,18 +24,21 @@ module HtmlNode =
     let ofString x =
         let d = HtmlDocument.loadHtml x
         d.DocumentNode
-    ///**Exceptions**
+    /// **Exceptions**
+    ///
     /// `System.Xml.XPath.XPathException`
-    let selectSingle (s:string) (node:HtmlNode) = node.SelectSingleNode s |> Option.ofObj    
-    
+    let selectSingle (s:string) (node:HtmlNode) =
+        node.SelectSingleNode s |> Option.ofObj
+
     ///**Description**
+    ///
     /// If `HtmlNode.SelectNodes` is nothing found, then he return `null`.
-    /// 
+    ///
     ///**Exceptions**
+    ///
     /// `System.Xml.XPath.XPathException`
     let selectNodes (s:string) (node:HtmlNode) =
         node.SelectNodes s |> Option.ofObj |> Option.map (Seq.cast<HtmlNode>)
     assert
         let nd = HtmlNode.CreateNode "<a><b /><c /></a>"
         selectNodes "d" nd = None
-        
