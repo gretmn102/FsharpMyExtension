@@ -6,7 +6,7 @@ let cons x xs = x::xs
 let consFlip xs x = x::xs
 
 [<System.ObsoleteAttribute("use 'List.splitAt' in Fsharp.Core 4.0")>]
-let trunc n xs = 
+let trunc n xs =
     let rec f n acc = function
         | [] -> acc, []
         | h::t as xs ->
@@ -23,7 +23,7 @@ let trunc n xs =
 
 /// takeWhile = truncWhile ?
 [<System.ObsoleteAttribute("use 'takeWhileRest'")>]
-let truncWhile p xs = 
+let truncWhile p xs =
     failwith "use 'takeWhileRest'"
 //     let rec f acc = function
 //         | [] -> acc, []
@@ -86,7 +86,7 @@ let takeWhileRest p =
     //     let xs = [1..10000000]
     //     takeWhileRest p xs = takeWhileRest2 p xs
     //     ((fun () -> takeWhileRest p xs) |> sw) - ((fun () -> takeWhileRest2 p xs) |> sw)
-        
+
     //     true
     takeWhileRest2 p
 assert
@@ -103,7 +103,7 @@ assert
 ///**Output Type**
 ///  * `'a list list`
 [<System.ObsoleteAttribute("use 'List.chunkBySize' in Fsharp.Core 4.0, and 'n' must be >0")>]
-let truncList n xs = 
+let truncList n xs =
     let rec f acc = function
         | [] -> acc
         | xs -> let (h, t) = List.splitAt n xs in f (h::acc) t
@@ -154,11 +154,11 @@ let transposeOpt xss =
         | xs, _ when List.forall Option.isNone xs -> None
         | xs, yss -> Some(xs, f yss))
 assert
-    let input = 
+    let input =
         [[1; 2; 3];
          [1; 2; 3; 4; 5; 6; 7; 8; 9; 10];
          [1; 2; 3; 4; 5]]
-    let expepected = 
+    let expepected =
         [[Some 1; Some 1;  Some 1]
          [Some 2; Some 2;  Some 2]
          [Some 3; Some 3;  Some 3]
@@ -172,25 +172,6 @@ assert
 
     let actual = transposeOpt input
     actual = expepected
-[<System.ObsoleteAttribute("use 'transposeOpt'")>]
-
-let transpose (L:'a list list) : ('a option list list) = 
-    failwith "use 'transposeOpt'"
-    // let f1 x = List.map (function | hd::tl -> Some hd, tl | [] -> None, []) x
-
-    // let f2 x = 
-    //     List.foldBack (fun x (ls, Ls) ->
-    //                         match x with
-    //                         | Some a, l -> Some a :: ls, l :: Ls
-    //                         | None, l -> None :: ls, l :: Ls) x ([], [])
-    // let res = ref []
-    // let f3 (l, ls) = res := l :: !res; f1 ls
-
-    // let l1 = f1 L
-    // let rec f l = 
-    //     if l |> List.exists (function _, x -> not (List.isEmpty x)) then f (f3 (f2 l)) else l
-    // in f l1 |> ignore
-    // !res |> List.rev
 
 ///**Description**
 ///  * transpose matrix
@@ -204,8 +185,8 @@ let transpose (L:'a list list) : ('a option list list) =
 ///  * System.ArgumentException: Throw then the lists tail of `xss` has different lengths.
 ///  * trans [[1;2]; [3;4;5]] -> [[1; 3]; [2; 4]]
 ///  * but trans [[1;2]; [3]] -> Exception
-let trans xss = 
-    let f = function 
+let trans xss =
+    let f = function
         | []::_ -> [], []
         | xss ->
             List.foldBack (fun x (xs, yss) ->
@@ -231,11 +212,11 @@ let trans2 xss = failwith "use 'transposeOpt'"
 //     let r = System.Random()
 //     let rec f acc = function
 //         | [] -> acc
-//         | xs -> 
+//         | xs ->
 //             let l = List.length xs
 //             let curr = r.Next(0, l)
 //             let rec f' i acc = function
-//                 | h::t -> 
+//                 | h::t ->
 //                     if i = curr then h, List.append (List.rev acc) t
 //                     else f' (i+1) (h::acc) t
 //                 | [] -> failwith "empty lst"
@@ -276,7 +257,7 @@ let groupBySeq f = function
     | x::xs ->
         List.fold (fun (prev, xs) x ->
             match xs with
-            | h::t -> 
+            | h::t ->
                 if f prev x then x, (x::h)::t
                 else x, [x]::h::t
             | [] -> failwith "")
@@ -322,24 +303,24 @@ module Alt =
         | [] -> []
     // span (fun x -> true) [1..2000]
     // let xs = [1,1; 2,1; 3,1]
-    
+
     // groupBy (fun x y -> snd x = snd y) xs = [xs]
-    let timer f = 
+    let timer f =
         let s = System.Diagnostics.Stopwatch()
         s.Start()
         f() |> ignore
         s.Stop()
         s.Elapsed
-    let f() = 
+    let f() =
         let xs = List.init 10000 (List.replicate 5000)
         timer (fun () -> xs |> groupBySeq2 (=)), timer (fun () -> xs |> groupBySeq (=))
 /// Группирует подряд повторяющиеся элементы с их количеством.
-/// 
+///
 /// `f [2;3;3;6;4;5;6]` -> `[(2, 1); (3, 2); (6, 1); (4, 1); (5, 1); (6, 1)]`
-/// 
+///
 /// **Рекурсивно!**
 let groupRep = function
-    | x::xs -> 
+    | x::xs ->
         let rec f item n = function
             | x::xs ->
                 if item = x then
@@ -359,20 +340,20 @@ let rec fold' f st = function
     | x::xs -> f x (lazy (fold' f st xs))
     | [] -> st
 ///**Description**
-/// 
+///
 /// `[1..3]` -> `[1;2;3; 1;2;3; 1...]`
-/// 
+///
 ///**Parameters**
 ///  * `xs` - parameter of type `list<'a>`
-/// 
+///
 /// Why not `seq` in input? Because `seq` - potential infinity structure and
 /// it `list` cache structure.
-/// 
+///
 ///**Output Type**
 ///  * `seq<'a>`
-/// 
+///
 ///**Exceptions**
-/// 
+///
 /// System.ArgumentException: Thrown when the list is empty.
 let circle (xs: _ list) =
     if List.isEmpty xs then raise (System.ArgumentException "The input list was empty.")
@@ -381,23 +362,23 @@ let circle (xs: _ list) =
 
 
 ///**Description**
-/// 
+///
 /// Цель: преобразовать элементы в строковое значение так, чтобы
 /// после сортировки полученных строковых значений, последовательность
 /// была такой же как у исходного списка.
-/// 
+///
 /// Решение: в начале каждого элемента нумерацию в стиле:
 /// "01, 02,..., 10, 11,..." и прибавить к этому по-умолчанию `sprintf "_A"`.
-/// 
+///
 ///**Parameters**
 ///  * `fn` - parameter of type `('a -> string) option`
 ///  * `xs` - parameter of type `seq<'a>`
-/// 
+///
 ///**Output Type**
 ///  * `seq<'a * string>`
 let numerate fn xs =
     let print = defaultArg fn (sprintf "_%A")
-    let capacityNum = 
+    let capacityNum =
         List.length xs - 1 |> fun x -> x.ToString() |> String.length
     xs
     |> List.mapi (fun i num ->
@@ -456,11 +437,11 @@ let inline chunkBySizeRange size length =
         (fun (_,i) x -> succ i, i + x)
         (LanguagePrimitives.GenericZero, pred (List.head xs))
 assert
-    let f size len = 
+    let f size len =
         (List.chunkBySize size [0..len - 1] |> List.map (on List.head List.last), chunkBySizeRange size len)
         |> Pair.reduce (=)
     [
-        f 3 15 
+        f 3 15
         f 3 14
         f 9 5
     ] |> List.forall id
@@ -473,7 +454,7 @@ let concatSep sep =
     f [] >> List.rev
 let chooseFold fn st =
     let rec loop (acc, (st:'State)) = function
-        | x::xs -> 
+        | x::xs ->
             let x, st = fn st x
             let acc =
                 match x with
@@ -482,7 +463,7 @@ let chooseFold fn st =
             loop (acc, st) xs
         | [] -> List.rev acc, st
     loop ([], st)
-let sepBy sep = 
+let sepBy sep =
     let rec loop acc = function
         | x::y::xs ->
             loop (y::sep::x::acc) xs
