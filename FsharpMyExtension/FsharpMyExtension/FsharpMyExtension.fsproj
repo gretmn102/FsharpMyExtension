@@ -60,6 +60,7 @@
     <Compile Include="Int32.fs" />
     <Compile Include="Regex.fs" />
     <Compile Include="Proc.fs" />
+    <Compile Include="StringsMatcher.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
