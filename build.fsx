@@ -2,14 +2,26 @@
 // FAKE build script
 // --------------------------------------------------------------------------------------
 
-#r "./packages/FAKE/tools/FakeLib.dll"
-open System
+#r "./packages/build/FAKE/tools/FakeLib.dll"
 open Fake.IO.Globbing.Operators
 open Fake.Core
 // --------------------------------------------------------------------------------------
 // Build variables
 // --------------------------------------------------------------------------------------
-let testPath = !! "**/test.fsproj" |> Seq.tryHead
+let f projName =
+    let pattern = sprintf @"**\%s.fsproj" projName
+    let xs = !! pattern
+    xs
+    |> Seq.tryExactlyOne
+    |> Option.defaultWith (fun () ->
+        xs
+        |> List.ofSeq
+        |> failwithf "'%s' expected exactly one but:\n%A" pattern
+    )
+let testProjName = "Test"
+let testProjPath = f testProjName
+let mainProjName = "FsharpMyExtension"
+let mainProjPath = f mainProjName
 // --------------------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------------------
@@ -22,17 +34,15 @@ let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 // Targets
 // --------------------------------------------------------------------------------------
 Target.create "BuildTest" (fun _ ->
-    testPath
-    |> Option.defaultWith (fun () -> failwith "'**/test.fsproj' not found")
-    |> System.IO.Path.GetDirectoryName
+    testProjPath
+    |> Fake.IO.Path.getDirectory
     |> DotNet.build (fun x ->
         { x with Configuration = buildConf }
         |> dtntSmpl)
 )
-let mainProjPath = !! "**/FsharpMyExtension.fsproj" |> Seq.tryHead
+
 Target.create "NuGet" (fun _ ->
     mainProjPath
-    |> Option.defaultWith (fun () -> failwith "'**/FsharpMyExtension.fsproj' not found")
     |> System.IO.Path.GetDirectoryName
     |> DotNet.pack (fun x ->
         { x with Configuration = DotNet.BuildConfiguration.Release }
@@ -50,21 +60,22 @@ Target.create "PushNuGetToGithub" (fun _ ->
     )
 )
 
+let run projName projPath =
+    let dir = Fake.IO.Path.getDirectory projPath
+    let localpath = sprintf "bin/%A/net461/%s.exe" buildConf projName
+    let path = Fake.IO.Path.combine dir localpath
+    if not <| Fake.IO.File.exists path then
+        failwithf "not found %s" path
+
+    Command.RawCommand(path, Arguments.Empty)
+    |> CreateProcess.fromCommand
+    |> CreateProcess.withWorkingDirectory (Fake.IO.Path.getDirectory path)
+    |> Proc.run
+
 Target.create "Test" (fun _ ->
-    testPath
-    |> Option.bind (fun p ->
-        let dir = System.IO.Path.GetDirectoryName p
-        let d = sprintf @"bin\%A\net461\test.exe" buildConf
-        let dir = System.IO.Path.Combine(dir, d)
-        if System.IO.File.Exists dir then Some dir else None
-    )
-    |> Option.map (fun dir ->
-        let result =
-            Process.execSimple (fun info ->
-                info.WithFileName dir) TimeSpan.MaxValue
-        if result <> 0 then failwith "tests failed"
-    )
-    |> Option.defaultWith (fun () -> failwith "test not found" )
+    let x = run testProjName testProjPath
+    if x.ExitCode <> 0 then
+        raise <| Fake.Testing.Common.FailedTestsException "test error"
 )
 
 // Target "Release" DoNothing
@@ -72,10 +83,6 @@ Target.create "Test" (fun _ ->
 // Build order
 // --------------------------------------------------------------------------------------
 open Fake.Core.TargetOperators
-// "Clean"
-//   ==> "Restore"
-//   ==> "Build"
-//   ==> "Test"
 
 "NuGet"
   ==> "PushNuGetToGithub"

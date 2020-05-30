@@ -1,3 +1,4 @@
+storage: none
 source https://www.nuget.org/api/v2
 
 framework: >= net461
@@ -9,3 +10,8 @@ nuget HtmlAgilityPack
 nuget Newtonsoft.Json
 nuget Newtonsoft.Json.Bson
 nuget YamlDotNet
+
+group Build
+  source https://nuget.org/api/v2
+
+  nuget FAKE
