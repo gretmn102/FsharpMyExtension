@@ -2,29 +2,31 @@ module Parser.Primitives2
 open FsharpMyExtension
 open FsharpMyExtension.Either
 open FsharpMyExtension.Tree
-open FsharpMyExtension.FSharpExt
-type T<'Elem> =
+
+type 'Elem T =
     // `seq` как раз избавит от проблем с пожиранием памяти, хотя каждый раз применять `Seq.ofList` на поток...
     | Back of 'Elem seq * string
     | NotBack of string
     | Or
-type Change = bool
+type IsChanged = bool
 type Result<'Elem, 'State, 'UState> =
-    ('Elem list * 'UState) * Either<Change * Tree<T<'Elem>>, 'State>
+    ('Elem list * 'UState) * Either<IsChanged * Tree<'Elem T>, 'State>
 type Pars<'Elem, 'State, 'UState> =
     'Elem list * 'UState -> Result<'Elem, 'State, 'UState>
 
-let notChange lab = Left(false, Node(NotBack lab, []) )
-//let cat (x: Pars<'Elem, Result<_, 'State>>) = x >> Either.concat
+let notChange lab : Either<IsChanged * Tree<'Elem T>, 'State> =
+    Left(false, Node(NotBack lab, []) )
+
 let pzero : Pars<_,_,_> = let fn xs = (xs, notChange "") in fn
 let (>>=) (p: Pars<'Elem,'a,'u>) (f:'a -> Pars<'Elem,'b,'u>) : Pars<'Elem,'b,'u> =
-    p >> fun (xs, x) ->
+    p >>
+    fun (xs, x) ->
         x
         |> Either.either (fun y -> xs, Left y )
-                (fun st ->
-                    match f st xs with
-                    | xs, Left y -> xs, Left(true, snd y)
-                    | x -> x)
+            (fun st ->
+                match f st xs with
+                | xs, Left y -> xs, Left(true, snd y)
+                | x -> x)
 
 let attempt (p:Pars<_,_,'u>) : Pars<_,_,_> =
     let fn xs =
@@ -36,7 +38,6 @@ let attempt (p:Pars<_,_,'u>) : Pars<_,_,_> =
     fn
 
 let trav (p: Pars<_,Result<_,'State,_>,'UState1>) : Pars<'Elem,'State,'UState1> =
-    // p >> mapSnd (Either.bind snd)
     p
     >> fun ((xs, u), res) ->
         match res with
@@ -66,16 +67,19 @@ let praw : Pars<'Elem,'Elem,'u> =
         xs
         |> steamEmpty (
             on (mapFst List.tail)
-               (fst >> List.head >> Right)) "expected any element, but stream is empty"
+               (fst >> List.head >> Right)
+        ) "expected any element, but stream is empty"
     fn
 let satisfy f note : Pars<'Elem,'Elem,'u> =
     let fn xs =
-        xs |> steamEmpty (
+        xs
+        |> steamEmpty (
             s (fun xs ->
                 cond (snd >> f)
                     (mapSnd Right)
                     (k (xs, notChange note)))
-                (on (mapFst List.tail) (fst >> List.head) ) ) (sprintf "expected '%s', but stream is empty" note)
+                (on (mapFst List.tail) (fst >> List.head) )
+            ) (sprintf "expected '%s', but stream is empty" note)
     fn
 /// Не знаю, противоречит ли оно главной концепции...
 let satisfym f note : Pars<'Elem,_,'u> =
@@ -86,9 +90,8 @@ let satisfym f note : Pars<'Elem,_,'u> =
                 match f x with
                 | Some x -> ys, Right x
                 | None -> xs, notChange note
-                )
-              (on (mapFst List.tail) (fst >> List.head) ) )
-            (sprintf "expected '%s', but stream is empty" note)
+            ) (on (mapFst List.tail) (fst >> List.head))
+        ) (sprintf "expected '%s', but stream is empty" note)
     fn
 
 let getUserState =
@@ -141,7 +144,7 @@ let pipe3 p1 p2 p3 f = pipe2 p1 p2 comma >>= ((|>>) p3 << curry f)
 let pipe4 p1 p2 p3 p4 f = pipe3 p1 p2 p3 ((<<) comma << comma) >>= ((|>>) p4 << curry (curry f))
 let pipe5 p1 p2 p3 p4 p5 f = pipe4 p1 p2 p3 p4 ((<<) ((<<) comma << comma) << comma) >>= (*fun (((a, b), c), d) -> p5 |>> f a b c d *) ((|>>) p5 << curry (curry (curry f)))
 let many (p:Pars<'Elem,'State,_>) : Pars<'Elem,'State list,_> =
-    //(p >>= fun x -> many p |>> fun xs -> x::xs ) <|> preturn []
+    // (p >>= fun x -> many p |>> fun xs -> x::xs ) <|> preturn []
     let rec fn acc xs =
         let (xs, r) = p xs
         match r with
@@ -165,3 +168,18 @@ let createParserForwardedToRef() =
 
 let run s (p:Pars<_,_,_>) = (List.ofSeq s, ()) |> p
 let runs s (st:'u) (p:Pars<_,_,_>) = (List.ofSeq s, st) |> p
+
+module FParsecExt =
+    open FsharpMyExtension.Either
+
+    let runFParsec fParsecParser p =
+        p .>>. getUserState
+        |>> fun (x, u) ->
+            match FParsec.CharParsers.runParserOnString fParsecParser u "" x with
+            | FParsec.CharParsers.Success(x, u, _) -> ([], u), Right x
+            | FParsec.CharParsers.Failure(x, _, u) -> ([], u), notChange x
+        |> trav
+
+    let pfloat p = runFParsec FParsec.CharParsers.pfloat p
+    let pint64 p = runFParsec FParsec.CharParsers.pint64 p
+    let pint32 p = runFParsec FParsec.CharParsers.pint32 p

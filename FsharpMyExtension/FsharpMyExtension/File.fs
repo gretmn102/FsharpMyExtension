@@ -2,14 +2,15 @@ module FsharpMyExtension.File
 open System.IO
 open FsharpMyExtension.FSharpExt
 
-/// если на диске существует `dir + fileName`, тогда `dir + changeFileName fileName 0`
-/// если и он существует, тогда `dir + changeFileName fileName 1`
-/// ...
+/// * Если на диске существует `dir + fileName`, тогда `dir + changeFileName fileName 0`
+/// * Если и он существует, тогда `dir + changeFileName fileName 1`
+/// * ...
+///
 /// возвращает полный путь
 let getUniqFile dir fileName =
     until (snd >> File.Exists >> not)
         (fun (i, _) ->
-            let path = 
+            let path =
                 let name = Path.changeFileNameWithoutExt (flip (+) (string i)) fileName
                 Path.Combine(dir, name)
             i + 1, path
@@ -35,9 +36,10 @@ let writeAllTextUniqS (dir, fileName) cont =
 let writeAllSeqUniqS (dir, fileName) (cont:_ seq) =
     uniq (fun path -> File.WriteAllLines(path, cont)) (dir, fileName)
 
-let splitPath = on Path.GetDirectoryName Path.GetFileName
-let moveUniq src = splitPath >> moveUniqS src
-let copyUniq src = splitPath >> copyUniqS src
-let writeAllTextUniq path = writeAllTextUniqS (splitPath path)
-let writeAllSeqUniq path = writeAllSeqUniqS (splitPath path)
+/// Делит путь на папку и файл
+let splitOnDirAndFilename = on Path.GetDirectoryName Path.GetFileName
+let moveUniq src = splitOnDirAndFilename >> moveUniqS src
+let copyUniq src = splitOnDirAndFilename >> copyUniqS src
+let writeAllTextUniq path = writeAllTextUniqS (splitOnDirAndFilename path)
+let writeAllSeqUniq path = writeAllSeqUniqS (splitOnDirAndFilename path)
 

@@ -336,9 +336,29 @@ assert
 // let xs = List.init 5000 (List.replicate 2)
 // xs |> groupBySeq2 (=)
 // xs |> groupBySeq (=)
-let rec fold' f st = function
+let rec fold' f (st:'State) = function
     | x::xs -> f x (lazy (fold' f st xs))
     | [] -> st
+/// Порой свёртке незачем проходить весь массив, и эта функция как раз для этого.
+/// Она работает как обычный `.fold`, только возвращает последнее состояние, если указанная функция вернула `None`.
+let rec scrappyFold fn (st:'State) =
+    let rec f st = function
+        | x::xs ->
+            match fn st x with
+            | Some st -> f st xs
+            | None -> st
+        | [] -> st
+    f st
+/// Делает то же самое, что и `scrappyFold`, только можно вернуть именно это состояние, если аргумент у функции — `true`.
+let exactlyFold fn (st:'State) =
+    let rec f st = function
+        | x::xs ->
+            match fn st x with
+            | false, st -> f st xs
+            | true, st -> st
+        | [] -> st
+    f st
+
 ///**Description**
 ///
 /// `[1..3]` -> `[1;2;3; 1;2;3; 1...]`

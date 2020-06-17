@@ -92,7 +92,7 @@ let tryGet (encoding:System.Text.Encoding) (url:string) =
 
 //     true
 
-/// CookieContainer небезопастно использовать в паралельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
+/// CookieContainer небезопасно использовать в параллельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
 let getAsync (encoding:System.Text.Encoding) (urls: Url list) =
     let get url =
         let req = System.Net.WebRequest.CreateHttp(url:string)

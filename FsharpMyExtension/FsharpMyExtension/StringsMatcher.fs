@@ -40,62 +40,58 @@ let toDic xs =
     |> List.map (fun (x, y) -> List.ofSeq x, [y])
     |> slow
     |> fun (Dic(_, m)) -> m
-assert
-    let input =
-        [
-            "a", "first"
-            "ab", "second"
-            "ac", "third"
-        ]
-
-    let output =
-        Map
-          [('a',
-            Dic
-              (Some "first",
-               Map
-                 [('b', Dic (Some "second", Map []));
-                  ('c', Dic (Some "third", Map []))]))]
-    let input2 =
-        [
-            "second", "second"
-            "first", "first"
-            "firmest", "firmest"
-            "sec", "sec"
-        ]
-    // toDic input2
-
-    toDic input = output
 
 /// Не жадный способ.
 ///
 /// Например, если правила `["ab"; "abc"]`,
 /// а входная последовательность — `abc`,
 /// то функция вернет первое правило.
-let rec runOnList m = function
+let rec runOnListNotGreedy m = function
     | curr::xs ->
-        m
-        |> Seq.tryPick (fun (KeyValue(k, (Dic(v, m)))) ->
+        match Map.tryFind curr m with
+        | Some (Dic(v, m)) ->
             match v with
             | None ->
-                if k = curr then runOnList m xs
-                else None
-            | Some x -> Some x)
+                xs |> runOnListNotGreedy m
+            | Some value -> Some value
+        | None -> None
     | [] -> None
+
+/// Жадный способ.
+///
+/// Например, если заданы правила как `["ab"; "abc"]`,
+/// а входная последовательность — `abc`,
+/// то функция вернет второе правило.
+let runOnListGreedy m =
+    let rec f last m = function
+        | curr::xs ->
+            match Map.tryFind curr m with
+            | Some (Dic(v, m)) ->
+                match v with
+                | None ->
+                    match last with
+                    | None ->
+                        f None m xs
+                    | Some last -> Some last
+                | Some value ->
+                    f (Some value) m xs
+            | None -> last
+        | [] -> last
+    f None m
 
 open FsharpMyExtension
 // OPTIMIZE
-let rec runOnSeq m (xs:_ seq) =
+let rec runOnSeqNotGreedy m (xs:_ seq) =
     if Seq.isEmpty xs then None
     else
         let curr, xs = Seq.headTail xs
-        m
-        |> Seq.tryPick (fun (KeyValue(k, (Dic(v, m)))) ->
+        match Map.tryFind curr m with
+        | Some (Dic(v, m)) ->
             match v with
             | None ->
-                if k = curr then runOnSeq m xs
-                else None
-            | Some x -> Some x)
+                xs |> runOnSeqNotGreedy m
+            | Some value -> Some value
+        | None -> None
 
 open FsharpMyExtension.Tree
 let toTree keyf xs =
@@ -111,3 +107,34 @@ let toTree keyf xs =
     |> Seq.map (fun (KeyValue(k, v)) ->
         Node(keyf k, f v))
     |> List.ofSeq
+
+module FParsec =
+    open FParsec
+    let keywordsL m label : FParsec.Primitives.Parser<'Result, 'UserState> =
+        fun stream ->
+            let rec f last m =
+                if stream.IsEndOfStream then
+                    last
+                else
+                    let curr = stream.Peek()
+                    match Map.tryFind curr m with
+                    | Some (Dic(v, m)) ->
+                        match v with
+                        | None ->
+                            match last with
+                            | None ->
+                                stream.Read()
+                                f None m
+                            | Some last ->
+                                Some last
+                        | Some value ->
+                            stream.Read()
+                            f (Some value) m
+                    | None -> last
+            match f None m with
+            | Some x ->
+                FParsec.Reply(x)
+            | None ->
+                let errorMsg =
+                    FParsec.Error.expected label
+                FParsec.Reply(FParsec.ReplyStatus.Error, errorMsg)

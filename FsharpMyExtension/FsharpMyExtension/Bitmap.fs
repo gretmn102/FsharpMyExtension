@@ -15,6 +15,8 @@ let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
 
 /// not working
 let iteriP f = toT >> TwoDOp.Parallel.iter f
+
+// https://github.com/thomerow/png2bmp32/blob/master/ImageConverter.cs#L95
 let mapP f (bmp:Bitmap) =
     let bmpData =
         bmp.LockBits(Rectangle(0, 0, bmp.Width, bmp.Height),
@@ -54,7 +56,6 @@ let ofArray' xss =
     ofArray width height xss
 
 let toArray (img : System.Drawing.Bitmap) =
-    // let s = img.Size
     let w, h = img.Width, img.Height
     let xss: System.Drawing.Color [] [] =
         Array.create h [||]

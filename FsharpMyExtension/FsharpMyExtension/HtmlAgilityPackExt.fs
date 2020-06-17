@@ -3,8 +3,12 @@ open HtmlAgilityPack
 
 module HtmlDocument =
     let loadHtml x =
-        let d = new HtmlDocument()
+        let d = HtmlDocument()
         d.LoadHtml x
+        d
+    let load (path:string) =
+        let d = HtmlAgilityPack.HtmlDocument()
+        d.Load(path)
         d
 module HtmlNode =
     let createNode html = HtmlNode.CreateNode html
@@ -42,3 +46,8 @@ module HtmlNode =
     assert
         let nd = HtmlNode.CreateNode "<a><b /><c /></a>"
         selectNodes "d" nd = None
+
+    /// `System.String.IsNullOrWhiteSpace`
+    let IsNullOrWhiteSpace (node:HtmlNode) =
+        node.InnerText
+        |> System.String.IsNullOrWhiteSpace

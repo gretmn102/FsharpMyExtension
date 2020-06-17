@@ -9,7 +9,34 @@ let changeFileNameWithoutExt fname path =
     |] |> System.String.Concat
 
 let escapingFileName =
-    let xs = 
+    let xs =
         System.IO.Path.GetInvalidFileNameChars()
         |> Set.ofArray
     String.filter (flip Set.contains xs >> not)
+
+/// Строит относительный путь из текущей папки к внешнему файлу или папке.
+/// Все пути должны быть абсолютными, иначе ничего не получится.
+/// Разделитель путей — `\`
+/// Примеры — в тестовом файле.
+let relative path dir =
+    let dir =
+        if System.IO.Path.GetExtension dir = "" then
+            let last = String.last dir
+            if last = '\\' then
+                dir.[..dir.Length - 2]
+            else
+                dir
+        else
+            System.IO.Path.GetDirectoryName dir
+
+    let rec f = function
+        | x::xs, y::ys ->
+            if x = y then
+                f (xs, ys)
+            else
+                List.replicate (List.length (x::xs)) ".." @ (y::ys)
+        | _, ys -> ys
+    (dir, path)
+    |> mapBoth (String.split "\\" >> List.ofArray)
+    |> f
+    |> String.concat "\\"

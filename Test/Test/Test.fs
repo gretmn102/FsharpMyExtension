@@ -1,7 +1,7 @@
 open Fuchu
 open FsharpMyExtension.FSharpExt
 
-let ran = System.Random() |> fun x k n-> x.Next(k, n)
+let ran = System.Random() |> fun x k n -> x.Next(k, n)
 module FsharpExt =
     [<Tests>]
     let For'Test =
@@ -13,32 +13,47 @@ module FsharpExt =
                 Assert.Equal("", List.reduce (*) [1..12], for' 1 12 (*) 1)
        ]
 module ParserXpath =
-    open Parser.Primitives
+    open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
-    open Parser.XPathPar
-
+    open FParsec
+    open FsharpMyExtension.XPathLimited
     [<Tests>]
     let ExecTest =
-        testList "ExecTest" [
+        testList "HtmlNode.isMatch" [
             testCase "base case" <| fun () ->
                 let txt = "some text"
                 let nod = HtmlAgilityPack.HtmlNode.CreateNode (sprintf "<a>%s</a>" txt)
-                let p : HtmlAgilityPack.HtmlNode -> _ = exec { Name = None; Att = []; Text = Some txt }
-                
+                let p : HtmlAgilityPack.HtmlNode -> _ =
+                    HtmlNode.isMatchRaw { Name = None; Att = []; Text = Some txt }
                 Assert.Equal("'*[text()='%s']' = '<a>%s</a>'", true, p nod)
-            testCase "" <| fun () ->
-
-                Assert.Equal("", true, true)
+            testCase "2 case" <| fun () ->
+                let htmlContent =
+                    [
+                        "<root>"
+                        "  <a atr=\"attrVal\">a1</a>"
+                        "  <a atr=\"attrVal\">a2</a>"
+                        "</root>"
+                    ] |> String.concat "\n"
+                let act =
+                    htmlContent
+                    |> HtmlDocument.loadHtml
+                    |> fun x ->
+                        x.DocumentNode.SelectSingleNode "//*[text()='a2']"
+                        |> HtmlNode.isMatch "a[@atr='attrVal'][text()='a2']"
+                Assert.Equal("", true, act)
        ]
-
+    let run str p =
+        match run p str with
+        | Success(x, _, _) -> Right x
+        | Failure(x, _, _) -> Left x
     [<Tests>]
     let parserTest =
         testList "xpath parse" [
             testCase "empty req" <| fun () ->
-                let k = run "" Parser.name |> Either.isRight
+                let k = run "" Parser.pname |> Either.isRight
                 Assert.Equal("some", false, not k)
             testCase "only name tag without attributes" <| fun () ->
-                let k = run "a" Parser.name |> Either.isRight
+                let k = run "a" Parser.pname |> Either.isRight
                 Assert.Equal("some", true, k)
             testCase "a[@href]" <| fun () ->
                 let xpath = "a[@href]"
@@ -46,23 +61,23 @@ module ParserXpath =
                 Assert.Equal(sprintf "%A" act, true, Either.isRight act)
             testCase "*[@att='value'][@*='value'][@*]" <| fun () ->
                 let xpath = "*[@att='value'][@*='value'][@*]"
-                let exp = Right({ Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)]; Text = None}, [])
+                let exp = Right { Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)]; Text = None}
                 let act = run xpath Parser.res
                 Assert.Equal("some", exp, act)
 
             testCase "any tag with some text: *[text()='some text in node']" <| fun () ->
                 let xpath = "*[text()='some text in node']"
-                let exp = Right({ Name = None; Att = []; Text = Some "some text in node"}, [])
+                let exp = Right { Name = None; Att = []; Text = Some "some text in node"}
                 let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "*[@att='value'][text()='some text in node']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node']"
-                let exp = Right({ Name = None; Att = [(Some "att", Some "value");]; Text = Some "some text in node"}, [])
+                let exp = Right { Name = None; Att = [(Some "att", Some "value");]; Text = Some "some text in node"}
                 let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "text between attributes: *[@att='value'][text()='some text in node'][@att2='val']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node'][@att2='val']"
-                let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
+                let exp = Right { Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}
                 let act = run xpath Parser.res
                 Assert.Equal("", exp, act)
             testCase "two text: *[text()='some text in node'][text()='txt2']" <| fun () ->
@@ -70,20 +85,43 @@ module ParserXpath =
                 //let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
                 let act = run xpath Parser.res
                 Assert.Equal("", true, Either.isLeft act)
-               ]
+        ]
+    open FsharpMyExtension
+    [<Tests>]
+    let showsTest =
+        testList "xpath parse" [
+            testCase "first" (fun () ->
+                let exp = "self::node()[name()='a'][@atr][text()='a1']"
+                let act =
+                    Parser.run "a[@atr][text()='a1']"
+                    |> Either.getOrDef' (failwithf "%A")
+                    |> ShowReq.showSelf
+                Assert.Equal("", exp, act)
+            )
+            testCase "second" (fun () ->
+                let exp = "self::node()[name()='tag'][@attrname1][@attrname2='attrVal2'][@*='attrVal3'][text()='text in node']"
+                let act =
+                    Parser.run "tag[@attrname1][@attrname2='attrVal2'][@*='attrVal3'][text()='text in node']"
+                    |> Either.getOrDef' (failwithf "%A")
+                    |> ShowReq.showSelf
+                Assert.Equal("", exp, act)
+            )
+        ]
+
 module ParserHtmlNodeTest =
     open HtmlAgilityPack
+    open FsharpMyExtension.HtmlAgilityPackExt
     open Parser.ParHtmlNode
     [<Tests>]
     let isEmptyInnerTextTest =
         testList "isEmptyInnerTextTest" [
             testCase "base case" <| fun () ->
                 let emptyNode = HtmlNode.CreateNode " \n \r \n\r"
-                let act = isEmptyInnerText emptyNode
+                let act = HtmlNode.IsNullOrWhiteSpace emptyNode
                 Assert.Equal(@"expected ' \n \r \n\r' is empty", true, act)
             testCase "" <| fun () ->
                 let emptyNode = HtmlNode.CreateNode " \n \r \n\rb"
-                let act = isEmptyInnerText emptyNode
+                let act = HtmlNode.IsNullOrWhiteSpace emptyNode
                 Assert.Equal(@"expected ' \n \r \n\rb' is not empty", false, act)
        ]
 module ParserStringTest =
@@ -396,7 +434,7 @@ module TreeTest =
     let VisualizeTest =
         testList "VisualizeTest" [
             testCase "base case" <| fun () ->
-                let dummy = 
+                let dummy =
                   LT
                     ("1",
                      seq
@@ -491,21 +529,49 @@ module LZCTests =
        ]
 
 module Path =
-    open FsharpMyExtension
+    open FsharpMyExtension.Path
     [<Tests>]
     let ChangeFileNameWithoutExtTest =
         testList "ChangeFileNameWithoutExtTest" [
             testCase "base case" <| fun () ->
                 Assert.Equal("", "file1",
-                    Path.changeFileNameWithoutExt (sprintf "%s1") "file")
+                    changeFileNameWithoutExt (sprintf "%s1") "file")
             testCase "" <| fun () ->
                 Assert.Equal("", "dir\\file1.fs",
-                    Path.changeFileNameWithoutExt (sprintf "%s1") "dir\\file.fs")
+                    changeFileNameWithoutExt (sprintf "%s1") "dir\\file.fs")
             testCase "" <| fun () ->
                 Assert.Equal("", "e:\\dir\\file1.fs",
-                    Path.changeFileNameWithoutExt (sprintf "%s1") "e:\\dir\\file.fs")
+                    changeFileNameWithoutExt (sprintf "%s1") "e:\\dir\\file.fs")
        ]
+    [<Tests>]
+    let relativeTest =
+        testList "relativeTest" [
+            testCase "test 1" <| fun _ ->
+                let path = @"E:\Project\SteamFeedsToDiscord\SteamFeedsToDiscord\SteamFeedsToDiscord\SteamFeedsToDiscord.fsproj"
+                let currentDir = @"E:\Project\SteamFeedsToDiscord\Test\Test"
 
+                let exp = @"..\..\SteamFeedsToDiscord\SteamFeedsToDiscord\SteamFeedsToDiscord.fsproj"
+                let act = relative path currentDir
+                Assert.Equal("", exp, act)
+            testCase "test 2" <| fun _ ->
+                let path = @"E:\Project\SteamFeedsToDiscord\Test\Test\bin\Debug\net461\FParsec.dll"
+                let dir = @"E:\Project\SteamFeedsToDiscord\Test\Test\bin\Debug\net461"
+                let exp = "FParsec.dll"
+                let act = relative path dir
+                Assert.Equal("", exp, act)
+            testCase "test 3" <| fun _ ->
+                let path = @"e:\Project\Parsers\Expr evaluation\Expr evaluation.suo"
+                let dir = @"e:\Project\RenpyPseudo\Test\"
+                let exp = @"..\..\Parsers\Expr evaluation\Expr evaluation.suo"
+                let act = relative path dir
+                Assert.Equal("", exp, act)
+            testCase "test 4" <| fun _ ->
+                let path = @"e:\Project\Parsers\Expr evaluation"
+                let dir = @"e:\Project\RenpyPseudo\Test\"
+                let exp = @"..\..\Parsers\Expr evaluation"
+                let act = relative path dir
+                Assert.Equal("", exp, act)
+        ]
 module DateTimeTest =
     open FsharpMyExtension
     [<Tests>]
@@ -539,7 +605,7 @@ module Comb =
         testList "paTest" [
             testCase "base case" <| fun () ->
                 // let exp = Comb.comb 3 [1..6] |> LazyTree.unpack |> List.ofSeq
-                let exp = 
+                let exp =
                     [[1; 2; 3]; [1; 2; 4]; [1; 2; 5]; [1; 2; 6]; [1; 3; 4]; [1; 3; 5]; [1; 3; 6];
                      [1; 4; 5]; [1; 4; 6]; [1; 5; 6]; [2; 3; 4]; [2; 3; 5]; [2; 3; 6]; [2; 4; 5];
                      [2; 4; 6]; [2; 5; 6]; [3; 4; 5]; [3; 4; 6]; [3; 5; 6]; [4; 5; 6]]
@@ -548,6 +614,7 @@ module Comb =
        ]
 module SeqTests =
     open FsharpMyExtension
+
     [<Tests>]
     let concatSepTest =
         let inline gen (sep: char) xs =
@@ -573,9 +640,37 @@ module SeqTests =
         //         printfn "b"; yield 'd';
         //         failwith ""
         //         printfn "e"; yield 'e';
-        //     } 
+        //     }
         // concatSepSeqSeq '+' xs |> List.ofSeq
-module WebDownloader = 
+
+    [<Tests>]
+    let concatSepTest2 =
+        testList "concatSepTest" [
+            testCase "testCase1" (fun _ ->
+                let exp = Array.ofSeq "a"
+                let act = Array.ofSeq (Seq.concatSep '+' "a")
+                Assert.Equal("", exp, act)
+            )
+            testCase "testCase2" (fun _ ->
+                let exp = Array.ofSeq "a+b"
+                let act = Array.ofSeq (Seq.concatSep '+' "ab")
+                Assert.Equal("", exp, act)
+            )
+            testCase "testCase3" (fun _ ->
+                let exp = Array.ofSeq "a+b+c"
+                let act = Array.ofSeq (Seq.concatSep '+' "abc")
+                Assert.Equal("", exp, act)
+            )
+            testCase "test consistency" (fun _ ->
+                let xs = Seq.concatSep '+' "abcdef"
+                Seq.head xs |> ignore
+                let exp = "a+b+c+d+e+f".ToCharArray()
+                let act = Array.ofSeq xs
+                Assert.Equal("", exp, act)
+            )
+        ]
+
+module WebDownloader =
     open FsharpMyExtension
     open FsharpMyExtension.WebDownloader
 
@@ -606,6 +701,122 @@ module Show =
                     |> System.String.Concat
                 Assert.Equal("", exp, act)
        ]
+
+module StringsMatcherTest =
+    open FsharpMyExtension.StringsMatcher
+    open FsharpMyExtension.Either
+    [<Tests>]
+    let toDicTest =
+        testList "toDicTest" [
+            testCase "first" <| fun () ->
+                let input =
+                    [
+                        "a", "first"
+                        "ab", "second"
+                        "ac", "third"
+                    ]
+
+                let exp =
+                    Map
+                      [('a',
+                        Dic
+                          (Some "first",
+                           Map
+                             [('b', Dic (Some "second", Map []));
+                              ('c', Dic (Some "third", Map []))]))]
+                let input2 =
+                    [
+                        "second", "second"
+                        "first", "first"
+                        "firmest", "firmest"
+                        "sec", "sec"
+                    ]
+                Assert.Equal("", exp, toDic input)
+        ]
+    [<Tests>]
+    let runOnListNotGreedyTest =
+        let input =
+            [
+                "abc", "third"
+                "a", "first"
+                "ab", "second"
+                "c", "fourth"
+            ]
+        let dic = toDic input
+        [
+            Some "first", runOnListNotGreedy dic (List.ofSeq "as")
+            Some "first", runOnListNotGreedy dic (List.ofSeq "ab")
+            Some "first", runOnListNotGreedy dic (List.ofSeq "ac")
+            None, runOnListNotGreedy dic (List.ofSeq "b")
+            Some "fourth", runOnListNotGreedy dic (List.ofSeq "c")
+        ]
+        |> List.mapi (fun i (exp, act) ->
+            testCase (sprintf "%d" i) <| fun () ->
+                Assert.Equal("", exp, act) )
+        |> testList "runOnListNotGreedyTest"
+    [<Tests>]
+    let runOnListGreedyTest =
+        let input =
+            [
+                "abc", "third"
+                "a", "first"
+                "ab", "second"
+                "c", "fourth"
+            ]
+        let dic = toDic input
+        [
+            Some "third", runOnListGreedy dic (List.ofSeq "abc")
+            Some "first", runOnListGreedy dic (List.ofSeq "a")
+            Some "second", runOnListGreedy dic (List.ofSeq "ab")
+            Some "fourth", runOnListGreedy dic (List.ofSeq "c")
+            Some "first", runOnListGreedy dic (List.ofSeq "ac")
+            None, runOnListGreedy dic (List.ofSeq "b")
+        ]
+        |> List.mapi (fun i (exp, act) ->
+            testCase (sprintf "%d" i) <| fun () ->
+                Assert.Equal("", exp, act) )
+        |> testList "runOnListGreedyTest"
+
+    open FParsec
+    [<Tests>]
+    let keywordsLTest =
+        let input =
+            [
+                "abc", "third"
+                "a", "first"
+                "ab", "second"
+                "c", "fourth"
+                "xyzSome", "xyz"
+            ]
+        let dic = toDic input
+
+        let p = FParsec.keywordsL dic "keywords"
+        let run p str =
+            match FParsec.CharParsers.run p str with
+            | Success(x, _, _) -> Right x
+            | Failure(x, _, _) -> Left x
+        let run' str =
+            match FParsec.CharParsers.run p str with
+            | Success(x, _, _) -> Right x
+            | Failure(x, _, _) -> Left x
+
+
+        [
+            Right "third", run' "abc"
+            Right "first", run' "a"
+            Right "second", run' "ab"
+            Right "fourth", run' "c"
+            Right "first", run (p .>> pchar 'c') "ac"
+            Right "xyz", run' "xyzSome"
+            Right "xyzSom", run (attempt p <|> pstring "xyzSom") "xyzSom"
+            Left "", (run' "b" |> Either.mapLeft (fun _ -> ""))
+            Right "fourth", run' "c"
+        ]
+        |> List.mapi (fun i (exp, act) ->
+            testCase (sprintf "%d" i) <| fun () ->
+                Assert.Equal("", exp, act) )
+        |> testList "keywordsLTest"
+
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg
