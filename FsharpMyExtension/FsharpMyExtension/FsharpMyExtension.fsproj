@@ -48,8 +48,7 @@
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
     <Compile Include="DateTime.fs" />
-    <Compile Include="WebDownloader.fs" />
-    <Compile Include="WebDownloaderParallel.fs" />
+
     <Compile Include="Numeric.fs" />
     <Compile Include="Json.fs" />
     <Compile Include="Containers/TwoDSeq.fs" />
@@ -64,6 +63,8 @@
     <Compile Include="StringsMatcher.fs" />
 
     <Compile Include="Net/ContentType.fs" />
+    <Compile Include="WebDownloader.fs" />
+    <Compile Include="WebDownloaderParallel.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
