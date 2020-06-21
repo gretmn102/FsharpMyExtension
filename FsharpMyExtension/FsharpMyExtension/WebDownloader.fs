@@ -1,8 +1,5 @@
 module FsharpMyExtension.WebDownloader
-// open System
 open System.Net
-// open System.IO
-// open Microsoft.FSharp.Control.WebExtensions
 open FsharpMyExtension.Either
 
 let cookies = CookieContainer()
@@ -15,23 +12,26 @@ type Res = Url * Either<System.Exception, HttpStatusCode * Content>
 module Decryption =
     let gzip (encoding:System.Text.Encoding) (receiveStream:System.IO.Stream) =
         try
-            // use receiveStream = resp.GetResponseStream()
             use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
             use r = new System.IO.StreamReader(zl, encoding)
             let str = r.ReadToEnd()
             Right str
         with e -> Left e
 let createHttpReq (url:string) =
-    // let url = "https://google.com/some"
+    // let url = "https://google.com"
     let uri = System.Uri url
     let req = System.Net.WebRequest.CreateHttp(uri)
     req.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-    req.Accept <-
-        match System.IO.Path.GetExtension url with
-        | ".webp" -> "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
-        | ".mp4" -> "video/mp4,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
-        | _ -> "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-    req.Headers.Add (System.Net.HttpRequestHeader.AcceptLanguage, "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3")
+    match System.IO.Path.GetExtension url with
+    | ".webp" ->
+        req.Accept <- "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
+    | ".mp4" ->
+        req.Accept <- "video/mp4,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
+    | ".gif" ->
+        req.Accept <- "image/gif"
+    | _ ->
+        req.Accept <- "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        req.Headers.Add (System.Net.HttpRequestHeader.AcceptLanguage, "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3")
     req.Referer <- sprintf "%s://%s" uri.Scheme uri.Host
     req.CookieContainer <- cookies
     req.Timeout <- 2500
