@@ -817,6 +817,75 @@ module StringsMatcherTest =
                 Assert.Equal("", exp, act) )
         |> testList "keywordsLTest"
 
+module ContentTypeTests =
+    open FsharpMyExtension.Net.ContentType
+    open FsharpMyExtension.Either
+    // #load "ContentType.fs"
+    // open Net.ContentType.Types
+    // open Types
+
+    [<Tests>]
+    let contentTypeTest =
+        testList "contentTypeTest" [
+            testCase "1" (fun () ->
+                let enc = System.Text.Encoding.UTF8
+                let exp =
+                  Right
+                    { Typ = Application
+                      Subtype = "sub"
+                      Parameter = Some (Charset enc) }
+                let act = Parser.start (sprintf "application/sub; charset=%s" enc.WebName)
+                Assert.Equal("", exp, act) )
+            testCase "2" (fun () ->
+                let enc = System.Text.Encoding.UTF8
+                let exp =
+                  Right
+                    { Typ = Text
+                      Subtype = "css"
+                      Parameter = Some (Charset enc) }
+                let act = Parser.start (sprintf "text/css; charset=%s" enc.WebName)
+                Assert.Equal("", exp, act) )
+            testCase "3" (fun () ->
+                let exp =
+                  Right
+                    { Typ = Text
+                      Subtype = "css"
+                      Parameter = None }
+                let act = Parser.start "text/css"
+                Assert.Equal("", exp, act) )
+            testCase "3" (fun () ->
+                let enc = System.Text.Encoding.UTF8
+                let exp =
+                  Right
+                    { Typ = Text
+                      Subtype = "html"
+                      Parameter = Some (Charset enc) }
+                let act = Parser.start (sprintf "text/html; charset=%s" enc.WebName)
+                Assert.Equal("", exp, act) )
+            testCase "3" (fun () ->
+                let exp =
+                  Right
+                    { Typ = Image
+                      Subtype = "svg+xml"
+                      Parameter = None }
+                let act = Parser.start "image/svg+xml"
+                Assert.Equal("", exp, act) )
+            testCase "unknown encoding" (fun () ->
+                let act = Parser.start "text/html; charset=utf-82"
+                Assert.Equal(".isLeft", true, Either.isLeft act) )
+            testCase "custom parameter" (fun () ->
+                let prmName, prmVal = "customParameter", "someValue"
+                let exp =
+                  Right
+                    { Typ = Text
+                      Subtype = "html"
+                      Parameter = Some (CustomParameter (prmName, prmVal)) }
+                let act = Parser.start (sprintf "text/html; %s=%s" prmName prmVal)
+                Assert.Equal("", exp, act) )
+        ]
+
+    // run contentTypeTest
+
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

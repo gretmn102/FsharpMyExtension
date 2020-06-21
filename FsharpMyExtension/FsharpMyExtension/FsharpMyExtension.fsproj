@@ -5,7 +5,7 @@
     <TargetFramework>net461</TargetFramework>
     <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
-    <DocumentationFile>bin\Debug\net461\FsharpMyExtension.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FSharpMyExt</PackageId>
     <Version>1.0.0</Version>
     <Authors>Fering</Authors>
@@ -62,6 +62,8 @@
     <Compile Include="Regex.fs" />
     <Compile Include="Proc.fs" />
     <Compile Include="StringsMatcher.fs" />
+
+    <Compile Include="Net/ContentType.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
