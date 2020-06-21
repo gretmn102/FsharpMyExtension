@@ -109,9 +109,11 @@ module ParHtmlNode2 =
     let takr (xpath:string) =
         satisfy (XPathLimited.HtmlNode.isMatch xpath) xpath
         .>> ws
-    let sub (p:Pars<_,_,_>) (x:HtmlNode) =
-        preturn (run x.ChildNodes (ws >>. p)) |> trav : Pars<_,_,_>
-    let (>>@) p x = p >>= sub x
+    let sub (p:Pars<_,_,_>) (x:HtmlNode, st) =
+        preturn (runs x.ChildNodes st (ws >>. p)) |> trav : Pars<_,_,_>
+    let (>>@) p x = p .>>. getUserState >>= sub x
+
+    let (/*) p x = p .>>. getUserState >>= sub (x ())
 
     open FsharpMyExtension.XmlBuilder
     let run p nodes =
@@ -129,38 +131,70 @@ module ParHtmlNode2 =
             |> Left
 
     // Tree.Tree.visualize (sprintf "%s")
-module XmlBuilder =
+
     open FsharpMyExtension
     open FsharpMyExtension.XmlBuilder
     open FsharpMyExtension.ShowList
     open FsharpMyExtension.Either
     let generateHtmlParser (node:Node) =
-        let tabs = replicate 4 ' '
-        let sub = showString " >>@"
-        let next = showString " >>."
-        let rec f = function
+        let tab = replicate 4 ' '
+        let sub = showString "/* fun () ->"
+        let nextOpName = ".>>."
+        let next = showString nextOpName
+        let rec f isSecond xs =
+            let showText (name:string) str =
+                let next = if isSecond then next << showSpace else id
+                match List.ofArray (String.lines str) with
+                | x::xs ->
+                    let x =
+                        next
+                        << showString name
+                        << showSpace << showString "//"
+                        << showSpace << showString x
+                    let xs =
+                        let showIdent =
+                            let count =
+                                if isSecond then
+                                    nextOpName.Length + 1 + name.Length + 1
+                                else
+                                    name.Length + 1
+                            replicate count ' '
+                        xs
+                        |> List.map (fun x ->
+                            showIdent << showString "//"
+                            << showSpace << showString x)
+                    x :: xs
+                | _ -> []
+            match xs with
             | Node(name, atts, body) ->
                 let atts =
                     let x =
                         {
                             XPathLimited.Name = Some name
                             XPathLimited.Att = atts |> List.map (mapBoth Some)
-                            XPathLimited.Text = None // лучше не надо. Лучше в комментарий вынести текст.
+                            XPathLimited.Text = None
                         }
                     XPathLimited.ShowReq.show x |> showString
-                // [
-                //     yield showString "takr " << showAutoParen "\"" atts
-                //     // let xs = List.collect (f >> List.map ((<<) tabs)) body
-                //     let xs = List.collect f body |> List.map ((<<) tabs)
-                //     yield! xs
-                // ]
-                // let xs = List.collect f body |> List.map ((<<) tabs)
-                let xs = List.collect f body |> List.map ((<<) tabs)
-                let f' x = showString "takr " << showAutoParen "\"" atts << x
-                f' (if List.isEmpty xs then next else sub) :: xs
-            | Text s | Comment s | TextStr s->
-                // List.map (fun x -> showString "// " << showString x)
-                //     (List.ofArray (String.lines s))
-                List.map ((<<) (showString "// ") << showString)
-                    (List.ofArray (String.lines s))
-        f node : ShowS list
+                let next = if isSecond then next << showSpace else id
+                let xs =
+                    match body with
+                    | [x] ->
+                        f false x
+                    | x::xs ->
+                        f false x @ List.collect (f true) xs
+                    | [] -> []
+                    |> List.map ((<<) tab)
+                if List.isEmpty xs then
+                    next << showString "takr"
+                    << showSpace << showAutoParen "\"" atts
+                    |> List.singleton
+                else
+                    next << showString "takr"
+                    << showSpace << showAutoParen "\"" atts
+                    << showSpace << sub
+                    |> fun x -> x :: xs
+            | Text s | TextStr s ->
+                showText "ptext" s
+            | Comment s ->
+                showText "pcomm" s
+        f false node : ShowS list
