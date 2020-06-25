@@ -72,7 +72,7 @@ let runOnListGreedy m =
                     match last with
                     | None ->
                         f None m xs
-                    | Some last -> Some last
+                    | Some last -> f (Some last) m xs
                 | Some value ->
                     f (Some value) m xs
             | None -> last
@@ -110,8 +110,9 @@ let toTree keyf xs =
 
 module FParsec =
     open FParsec
-    let keywordsL m label : FParsec.Primitives.Parser<'Result, 'UserState> =
-        fun stream ->
+    let keywordsL m label : Primitives.Parser<'Result, 'UserState> =
+        fun (stream : CharStream<'UserState>) ->
+            let st = stream.State
             let rec f last m =
                 if stream.IsEndOfStream then
                     last
@@ -119,22 +120,18 @@ module FParsec =
                     let curr = stream.Peek()
                     match Map.tryFind curr m with
                     | Some (Dic(v, m)) ->
+                        stream.Read() |> ignore
                         match v with
                         | None ->
-                            match last with
-                            | None ->
-                                stream.Read()
-                                f None m
-                            | Some last ->
-                                Some last
+                            f last m
                         | Some value ->
-                            stream.Read()
                             f (Some value) m
                     | None -> last
             match f None m with
             | Some x ->
-                FParsec.Reply(x)
+                Reply(x)
             | None ->
+                stream.BacktrackTo st
                 let errorMsg =
                     FParsec.Error.expected label
-                FParsec.Reply(FParsec.ReplyStatus.Error, errorMsg)
+                Reply(ReplyStatus.Error, errorMsg)

@@ -776,8 +776,17 @@ module StringsMatcherTest =
             testCase (sprintf "%d" i) <| fun () ->
                 Assert.Equal("", exp, act) )
         |> testList "runOnListGreedyTest"
-
+    [<Tests>]
+    let runOnListGreedyTest2 =
+        let dic =
+            ["ab"; "abcd"]
+            |> List.map (fun x -> x, x)
+            |> toDic
+        testCase "runOnListGreedyTest2" (fun () ->
+            Assert.Equal("", Some "abcd", runOnListGreedy dic (List.ofSeq "abcd"))
+        )
     open FParsec
+    open FsharpMyExtension.StringsMatcher.FParsec
     [<Tests>]
     let keywordsLTest =
         let input =
@@ -816,6 +825,63 @@ module StringsMatcherTest =
             testCase (sprintf "%d" i) <| fun () ->
                 Assert.Equal("", exp, act) )
         |> testList "keywordsLTest"
+
+    [<Tests>]
+    let keywordsLTest2 =
+        let p dic =
+            keywordsL dic "keyword" .>>. manySatisfy (fun _ -> true)
+            <|> (many1Satisfy (fun _ -> true) |>> fun x -> "", x)
+
+        let run p str =
+            match FParsec.CharParsers.run p str with
+            | Success(x, _, _) -> Right x
+            | Failure(x, _, _) -> Left x
+
+        testList "keywordsLTest2" [
+            let dic =
+                [ "bb" ]
+                |> List.map (fun x -> x, x)
+                |> toDic
+            testCase "1" (fun () ->
+                Assert.Equal("", Right ("", "b"), run (p dic) "b")
+            )
+            testCase "2" (fun () ->
+                Assert.Equal("", Right ("bb", ""), run (p dic) "bb")
+            )
+            testCase "3" (fun () ->
+                Assert.Equal("", Right ("bb", "b"), run (p dic) "bbb")
+            )
+            let dic =
+                [
+                    "ab"
+                    "abc"
+                ]
+                |> List.map (fun x -> x, x)
+                |> toDic
+            testCase "test on greedy" (fun () ->
+                Assert.Equal("", Right ("abc", ""), run (p dic) "abc")
+            )
+            testCase "test on greedy 2" (fun () ->
+                Assert.Equal("", Right ("abc", "d"), run (p dic) "abcd")
+            )
+            let dic =
+                [
+                    "ab"
+                    "abcd"
+                ]
+                |> List.map (fun x -> x, x)
+                |> toDic
+            testCase "test on greedy 3" (fun () ->
+                Assert.Equal("", Right ("ab", ""), run (p dic) "ab")
+            )
+            testCase "test on greedy 4" (fun () ->
+                Assert.Equal("", Right ("abcd", ""), run (p dic) "abcd")
+            )
+            testCase "test on greedy 5" (fun () ->
+                Assert.Equal("", Right ("abcd", "e"), run (p dic) "abcde")
+            )
+
+        ]
 
 module ContentTypeTests =
     open FsharpMyExtension.Net.ContentType
