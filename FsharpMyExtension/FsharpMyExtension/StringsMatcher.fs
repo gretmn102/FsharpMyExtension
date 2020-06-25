@@ -125,10 +125,11 @@ module FParsec =
                         | None ->
                             f last m
                         | Some value ->
-                            f (Some value) m
+                            f (Some (stream.State, value)) m
                     | None -> last
             match f None m with
-            | Some x ->
+            | Some(st, x) ->
+                stream.BacktrackTo st
                 Reply(x)
             | None ->
                 stream.BacktrackTo st

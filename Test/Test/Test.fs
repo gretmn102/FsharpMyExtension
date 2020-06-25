@@ -880,7 +880,15 @@ module StringsMatcherTest =
             testCase "test on greedy 5" (fun () ->
                 Assert.Equal("", Right ("abcd", "e"), run (p dic) "abcde")
             )
-
+            let dic =
+                [
+                    "поз"
+                    "поза"
+                    "поздр"
+                ] |> List.map (fun x -> x, x) |> toDic
+            testCase "test on  5" (fun () ->
+                Assert.Equal("", Right ("поз", "д"), run (p dic) "позд")
+            )
         ]
 
 module ContentTypeTests =
