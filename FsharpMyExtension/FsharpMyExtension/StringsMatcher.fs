@@ -33,14 +33,13 @@ let toDic xs =
                     | xs -> failwithf "в списке есть одинаковые ключи:\n%A" xs
             others
             |> List.groupBy (fst >> List.head)
-            |> List.map (fun (k, v) ->
-                (k, slow <| List.map (mapFst List.tail) v))
-            |> fun m -> Dic(emptys, Map.ofList m)
+            |> List.fold (fun m (k, v) ->
+                Map.add k (slow <| List.map (mapFst List.tail) v) m) Map.empty
+            |> fun m -> Dic(emptys, m)
     xs
     |> List.map (fun (x, y) -> List.ofSeq x, [y])
     |> slow
     |> fun (Dic(_, m)) -> m
-
 /// Не жадный способ.
 ///
 /// Например, если правила `["ab"; "abc"]`,
