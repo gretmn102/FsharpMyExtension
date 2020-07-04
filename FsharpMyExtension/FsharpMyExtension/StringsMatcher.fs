@@ -14,8 +14,10 @@ module FsharpMyExtension.StringsMatcher
 //     | DicValue of 'Value * Map<'Key, Dic2<'Key, 'Value>>
 //     | Dic of Map<'Key, Dic<'Key, 'Value>>
 //     | Leaf of 'Value
-type Dic<'Key, 'Value> when 'Key : comparison =
-    | Dic of 'Value option * Map<'Key, Dic<'Key, 'Value>>
+type Container<'Key, 'Value> when 'Key : comparison =
+    Map<'Key, Dic<'Key, 'Value>>
+and Dic<'Key, 'Value> when 'Key : comparison =
+    | Dic of 'Value option * Container<'Key, 'Value>
 
 // OPTIMIZE
 let toDic xs =
@@ -40,6 +42,33 @@ let toDic xs =
     |> List.map (fun (x, y) -> List.ofSeq x, [y])
     |> slow
     |> fun (Dic(_, m)) -> m
+
+/// Значительно быстрее обобщенной реализации, да и память меньше ест
+let toDicStrings xs =
+    let dicEmpty = Dic(None, Map.empty)
+    let rec slow i (xs:list<string * _ list>) =
+        if Seq.isEmpty xs then dicEmpty
+        else
+            let emptys, others =
+                xs
+                |> List.partition (
+                    fst >> (fun (x:string) -> not (i < x.Length) ) )
+            let emptys =
+                List.collect snd emptys
+                |> function
+                    | [x] -> Some x
+                    | [] -> None
+                    | xs -> failwithf "в списке есть одинаковые ключи:\n%A" xs
+            others
+            |> List.groupBy (fst >> (fun x -> x.[i]))
+            |> List.fold (fun m (k, v) ->
+                Map.add k (slow (i + 1) v) m) Map.empty
+            |> fun m -> Dic(emptys, m)
+    xs
+    |> List.map (fun (x, y) -> x, [y])
+    |> slow 0
+    |> fun (Dic(_, m)) -> m
+
 /// Не жадный способ.
 ///
 /// Например, если правила `["ab"; "abc"]`,
