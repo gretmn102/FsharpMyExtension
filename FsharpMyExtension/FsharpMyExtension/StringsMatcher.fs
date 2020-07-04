@@ -69,6 +69,97 @@ let toDicStrings xs =
     |> slow 0
     |> fun (Dic(_, m)) -> m
 
+module Serializator =
+    let leftChar = '←'
+    let rightChar = '→'
+    let upChar = '↑'
+    let downChar = '↓'
+
+    open FsharpMyExtension.ShowList
+    let serialize (dic:Container<_,_>) =
+        let rec f (dic:Container<_,_>) =
+            dic
+            |> Map.fold (fun st k v ->
+                let rests =
+                    v
+                    |> fun (Dic(k, v)) ->
+                        match k with
+                        | Some word ->
+                            showChar '<' << showString word << showChar '>'
+                        | None -> empty
+                        << if Map.isEmpty v then empty
+                           else
+                               showChar rightChar
+                               << f v
+                               << showChar leftChar
+                st << showChar k << rests
+            ) empty
+        f dic
+        |> show
+    let test () =
+        let dic =
+            [
+                "a"
+                "abc"
+                "b"
+                "c"
+                "cab"
+            ] |> List.map (fun x -> x, x)
+        toDicStrings dic
+        |> serialize
+    open FParsec
+
+    type State = {
+        PrevIndent : char * char list
+    }
+    let pdeserialize: Parser<Container<_,_>, _> =
+        let pleft =
+            pchar leftChar
+            >>. updateUserState (fun x ->
+                { PrevIndent = let _, x::xs = x.PrevIndent in x, xs })
+        let pright c =
+            pchar rightChar
+            >>. updateUserState (fun x ->
+                { PrevIndent = let x, xs = x.PrevIndent in c, x::xs })
+        let p, pref = createParserForwardedToRef()
+        let p2 =
+            satisfy (fun c -> not (c = leftChar || c = rightChar))
+            .>>. opt (pchar '<' >>. manySatisfy ((<>) '>') .>> pchar '>')
+            >>= fun (c, word) ->
+                opt (between (pright c) pleft p)
+                >>= function
+                    | Some xs ->
+                        (c, Dic(word, Map.ofList xs))
+                        |> preturn
+                    | None ->
+                        (c, Dic(word, Map.empty))
+                        |> preturn
+
+        pref := many1 p2
+        p |>> Map.ofList
+    let deserialize str =
+        match runParserOnString (pdeserialize .>> eof) { PrevIndent = '\000', [] } "" str with
+        | Success(x, _, _) -> x
+        | Failure(x, _, _) -> failwithf "%A" x
+    let deserializeFile path =
+        match runParserOnFile (pdeserialize .>> eof) { PrevIndent = '\000', [] } path System.Text.Encoding.UTF8 with
+        | Success(x, _, _) -> x
+        | Failure(x, _, _) -> failwithf "%A" x
+    let test2 () =
+        let dic =
+            [
+                "a"
+                "abc"
+                "b"
+                "c"
+                "cab"
+            ] |> List.map (fun x -> x, x)
+        let exp = toDicStrings dic
+        let data = exp |> serialize
+        let act = deserialize data
+
+        exp = act
+
 /// Не жадный способ.
 ///
 /// Например, если правила `["ab"; "abc"]`,
