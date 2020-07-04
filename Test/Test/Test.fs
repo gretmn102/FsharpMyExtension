@@ -890,7 +890,27 @@ module StringsMatcherTest =
                 Assert.Equal("", Right ("поз", "д"), run (p dic) "позд")
             )
         ]
+    module Serializator =
+        open FsharpMyExtension.StringsMatcher
+        open FsharpMyExtension.StringsMatcher.Serializator
+        [<Tests>]
+        let serializatorTest =
+            testList "StringsMatcher.Serializator test" [
+                testCase "serialize and deserialize" <| fun () ->
+                    let dic =
+                        [
+                            "a"
+                            "abc"
+                            "b"
+                            "c"
+                            "cab"
+                        ] |> List.map (fun x -> x, x)
+                    let exp = toDicStrings dic
+                    let data = exp |> serialize
+                    let act = deserialize data
 
+                    Assert.Equal("", exp, act)
+            ]
 module ContentTypeTests =
     open FsharpMyExtension.Net.ContentType
     open FsharpMyExtension.Either

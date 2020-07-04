@@ -84,8 +84,8 @@ module Serializator =
                     v
                     |> fun (Dic(k, v)) ->
                         match k with
-                        | Some word ->
-                            showChar '<' << showString word << showChar '>'
+                        | Some _ ->
+                            showChar upChar
                         | None -> empty
                         << if Map.isEmpty v then empty
                            else
@@ -96,69 +96,51 @@ module Serializator =
             ) empty
         f dic
         |> show
-    let test () =
-        let dic =
-            [
-                "a"
-                "abc"
-                "b"
-                "c"
-                "cab"
-            ] |> List.map (fun x -> x, x)
-        toDicStrings dic
-        |> serialize
+
     open FParsec
 
     type State = {
-        PrevIndent : char * char list
+        PrevIndent : System.Text.StringBuilder
     }
     let pdeserialize: Parser<Container<_,_>, _> =
         let pleft =
             pchar leftChar
-            >>. updateUserState (fun x ->
-                { PrevIndent = let _, x::xs = x.PrevIndent in x, xs })
-        let pright c =
+
+        let pright  =
             pchar rightChar
-            >>. updateUserState (fun x ->
-                { PrevIndent = let x, xs = x.PrevIndent in c, x::xs })
+
         let p, pref = createParserForwardedToRef()
         let p2 =
             satisfy (fun c -> not (c = leftChar || c = rightChar))
-            .>>. opt (pchar '<' >>. manySatisfy ((<>) '>') .>> pchar '>')
-            >>= fun (c, word) ->
-                opt (between (pright c) pleft p)
-                >>= function
-                    | Some xs ->
-                        (c, Dic(word, Map.ofList xs))
-                        |> preturn
-                    | None ->
-                        (c, Dic(word, Map.empty))
-                        |> preturn
-
+            >>= fun c ->
+                updateUserState (fun x ->
+                    { PrevIndent = x.PrevIndent.Append c })
+                >>. preturn c
+            .>>. opt (pchar upChar
+                      >>. getUserState
+                      |>> fun x -> x.PrevIndent.ToString())
+            .>>. opt (between pright pleft p)
+            .>> updateUserState (fun x ->
+                let sb = x.PrevIndent
+                { PrevIndent = sb.Remove(sb.Length - 1, 1) })
+            |>> fun ((c, word), x) ->
+                match x with
+                | Some xs ->
+                    (c, Dic(word, Map.ofList xs))
+                | None ->
+                    (c, Dic(word, Map.empty))
         pref := many1 p2
         p |>> Map.ofList
     let deserialize str =
-        match runParserOnString (pdeserialize .>> eof) { PrevIndent = '\000', [] } "" str with
+        let emptyState = { PrevIndent = System.Text.StringBuilder() }
+        match runParserOnString (pdeserialize .>> eof) emptyState "" str with
         | Success(x, _, _) -> x
         | Failure(x, _, _) -> failwithf "%A" x
     let deserializeFile path =
-        match runParserOnFile (pdeserialize .>> eof) { PrevIndent = '\000', [] } path System.Text.Encoding.UTF8 with
+        let emptyState = { PrevIndent = System.Text.StringBuilder() }
+        match runParserOnFile (pdeserialize .>> eof) emptyState path System.Text.Encoding.UTF8 with
         | Success(x, _, _) -> x
         | Failure(x, _, _) -> failwithf "%A" x
-    let test2 () =
-        let dic =
-            [
-                "a"
-                "abc"
-                "b"
-                "c"
-                "cab"
-            ] |> List.map (fun x -> x, x)
-        let exp = toDicStrings dic
-        let data = exp |> serialize
-        let act = deserialize data
-
-        exp = act
 
 /// Не жадный способ.
 ///
