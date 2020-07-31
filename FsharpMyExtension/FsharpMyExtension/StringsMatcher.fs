@@ -102,6 +102,14 @@ module Serializator =
     type State = {
         PrevIndent : System.Text.StringBuilder
     }
+    let many1Map p =
+        Inline.Many(
+           stateFromFirstElement = (fun x -> Map [x]), // : 'T -> 'State  *
+           foldState             = (fun st (k, v) -> Map.add k v st),  // 'State -> 'T -> 'State  *
+           resultFromState       = id,  // 'State -> 'Result  *
+           elementParser         = p  // Parser<'T,'U>  *
+        )
+
     let pdeserialize: Parser<Container<_,_>, _> =
         let pleft =
             pchar leftChar
@@ -126,11 +134,11 @@ module Serializator =
             |>> fun ((c, word), x) ->
                 match x with
                 | Some xs ->
-                    (c, Dic(word, Map.ofList xs))
+                    (c, Dic(word, xs))
                 | None ->
                     (c, Dic(word, Map.empty))
-        pref := many1 p2
-        p |>> Map.ofList
+        pref := many1Map p2
+        p
     let deserialize str =
         let emptyState = { PrevIndent = System.Text.StringBuilder() }
         match runParserOnString (pdeserialize .>> eof) emptyState "" str with
@@ -195,7 +203,7 @@ let rec runOnSeqNotGreedy m (xs:_ seq) =
         | None -> None
 
 open FsharpMyExtension.Tree
-let toTree keyf xs =
+let toTree keyf (xs: Container<_, _>) =
     let rec f (Dic(v, m)) =
         match v with
         | None ->
@@ -237,3 +245,33 @@ module FParsec =
                 let errorMsg =
                     FParsec.Error.expected label
                 Reply(ReplyStatus.Error, errorMsg)
+
+    /// Пытается сопоставить первый символ хоть с чем-то из словаря.
+    let pcharFromDic mapping label (m: Container<_, _>) : Parser<_, _> =
+        let f =
+            fun (stream : CharStream<'UserState>) ->
+                let curr = stream.Peek() |> mapping
+                match Map.tryFind curr m with
+                | Some(x) ->
+                    stream.Read() |> ignore
+                    Reply((curr, x))
+                | None ->
+                    // ```fsharp
+                    // let label =
+                    //     m
+                    //     |> Seq.map (fun (KeyValue(k, _)) -> sprintf "%A" k)
+                    //     |> String.concat " or "
+                    // ```
+                    // — это хорошая мысль, но `mapping` всё портит.
+                    // Например, если словарь — `["a"]`, mapping задан как `fun _ -> 'b'` и на вход подаем `"a"`, то функция вернет:
+                    // ```
+                    //  Error in Ln: 1 Col: 1
+                    //  a
+                    //  ^
+                    //  Expecting: 'a'
+                    // ```
+                    // Правда, обескураживает? То-то же.
+                    let errorMsg =
+                        FParsec.Error.expected label
+                    Reply(ReplyStatus.Error, errorMsg)
+        f

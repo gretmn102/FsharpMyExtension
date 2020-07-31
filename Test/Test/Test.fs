@@ -795,6 +795,10 @@ module StringsMatcherTest =
         )
     open FParsec
     open FsharpMyExtension.StringsMatcher.FParsec
+    let runEither p str =
+        match FParsec.CharParsers.run p str with
+        | Success(x, _, _) -> Right x
+        | Failure(x, _, _) -> Left x
     [<Tests>]
     let keywordsLTest =
         let input =
@@ -808,24 +812,18 @@ module StringsMatcherTest =
         let dic = toDic input
 
         let p = FParsec.keywordsL dic "keywords"
-        let run p str =
-            match FParsec.CharParsers.run p str with
-            | Success(x, _, _) -> Right x
-            | Failure(x, _, _) -> Left x
-        let run' str =
-            match FParsec.CharParsers.run p str with
-            | Success(x, _, _) -> Right x
-            | Failure(x, _, _) -> Left x
 
+        let run' str =
+            runEither p str
 
         [
             Right "third", run' "abc"
             Right "first", run' "a"
             Right "second", run' "ab"
             Right "fourth", run' "c"
-            Right "first", run (p .>> pchar 'c') "ac"
+            Right "first", runEither (p .>> pchar 'c') "ac"
             Right "xyz", run' "xyzSome"
-            Right "xyzSom", run (attempt p <|> pstring "xyzSom") "xyzSom"
+            Right "xyzSom", runEither (attempt p <|> pstring "xyzSom") "xyzSom"
             Left "", (run' "b" |> Either.mapLeft (fun _ -> ""))
             Right "fourth", run' "c"
         ]
@@ -840,24 +838,19 @@ module StringsMatcherTest =
             keywordsL dic "keyword" .>>. manySatisfy (fun _ -> true)
             <|> (many1Satisfy (fun _ -> true) |>> fun x -> "", x)
 
-        let run p str =
-            match FParsec.CharParsers.run p str with
-            | Success(x, _, _) -> Right x
-            | Failure(x, _, _) -> Left x
-
         testList "keywordsLTest2" [
             let dic =
                 [ "bb" ]
                 |> List.map (fun x -> x, x)
                 |> toDic
             testCase "1" (fun () ->
-                Assert.Equal("", Right ("", "b"), run (p dic) "b")
+                Assert.Equal("", Right ("", "b"), runEither (p dic) "b")
             )
             testCase "2" (fun () ->
-                Assert.Equal("", Right ("bb", ""), run (p dic) "bb")
+                Assert.Equal("", Right ("bb", ""), runEither (p dic) "bb")
             )
             testCase "3" (fun () ->
-                Assert.Equal("", Right ("bb", "b"), run (p dic) "bbb")
+                Assert.Equal("", Right ("bb", "b"), runEither (p dic) "bbb")
             )
             let dic =
                 [
@@ -867,10 +860,10 @@ module StringsMatcherTest =
                 |> List.map (fun x -> x, x)
                 |> toDic
             testCase "test on greedy" (fun () ->
-                Assert.Equal("", Right ("abc", ""), run (p dic) "abc")
+                Assert.Equal("", Right ("abc", ""), runEither (p dic) "abc")
             )
             testCase "test on greedy 2" (fun () ->
-                Assert.Equal("", Right ("abc", "d"), run (p dic) "abcd")
+                Assert.Equal("", Right ("abc", "d"), runEither (p dic) "abcd")
             )
             let dic =
                 [
@@ -880,13 +873,13 @@ module StringsMatcherTest =
                 |> List.map (fun x -> x, x)
                 |> toDic
             testCase "test on greedy 3" (fun () ->
-                Assert.Equal("", Right ("ab", ""), run (p dic) "ab")
+                Assert.Equal("", Right ("ab", ""), runEither (p dic) "ab")
             )
             testCase "test on greedy 4" (fun () ->
-                Assert.Equal("", Right ("abcd", ""), run (p dic) "abcd")
+                Assert.Equal("", Right ("abcd", ""), runEither (p dic) "abcd")
             )
             testCase "test on greedy 5" (fun () ->
-                Assert.Equal("", Right ("abcd", "e"), run (p dic) "abcde")
+                Assert.Equal("", Right ("abcd", "e"), runEither (p dic) "abcde")
             )
             let dic =
                 [
@@ -895,7 +888,41 @@ module StringsMatcherTest =
                     "поздр"
                 ] |> List.map (fun x -> x, x) |> toDic
             testCase "test on  5" (fun () ->
-                Assert.Equal("", Right ("поз", "д"), run (p dic) "позд")
+                Assert.Equal("", Right ("поз", "д"), runEither (p dic) "позд")
+            )
+        ]
+
+    [<Tests>]
+    let pcharFromDicTest =
+        let m =
+            [
+                "a"
+                "ab"
+                "abc"
+                "b"
+            ]
+            |> List.map (fun x -> x, x)
+            |> toDicStrings
+        testList "pcharFromDicTest" [
+            testCase "`pcharFromDic id \"label\" m`" (fun () ->
+                let act = runEither (pcharFromDic id "label" m) "a"
+                let exp =
+                  ('a',
+                   Dic
+                     (Some "a",Map [('b', Dic (Some "ab",Map [('c', Dic (Some "abc",Map []))]))]))
+                Assert.Equal("", Right exp, act)
+            )
+            testCase "`pcharFromDic (fun x -> 'c') \"label\" m`" (fun () ->
+                let act = runEither (pcharFromDic (fun x -> 'c') "label" m) "a"
+                let exp =
+                    [
+                        "Error in Ln: 1 Col: 1"
+                        "a"
+                        "^"
+                        "Expecting: label"
+                        ""
+                    ] |> String.concat "\r\n"
+                Assert.Equal("", Left exp, act)
             )
         ]
     module Serializator =
