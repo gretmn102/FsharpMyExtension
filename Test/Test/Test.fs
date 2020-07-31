@@ -106,6 +106,14 @@ module ParserXpath =
                     |> ShowReq.showSelf
                 Assert.Equal("", exp, act)
             )
+            testCase "second" <| fun () ->
+                let input =
+                    { Name = Some "tbody"
+                      Att = [(Some "id", Some "post_20422607"); (Some "class", Some "row2")]
+                      Text = None }
+                let exp = "tbody[@id='post_20422607'][@class='row2']"
+                let act = ShowReq.show input
+                Assert.Equal("", exp, act)
         ]
 
 module ParserHtmlNodeTest =

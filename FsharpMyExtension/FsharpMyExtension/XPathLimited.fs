@@ -61,13 +61,13 @@ module ShowReq =
         )
         |> joins empty
     let showsText str =
-        showAutoParen "[" (
-            str
-            |> Option.map (fun x ->
-                showString "text()"
-                << showChar '=' << showsArg x)
-            |> Option.defaultValue empty
-        )
+        str
+        |> Option.map (fun str ->
+            showAutoParen "[" (
+                    showString "text()"
+                    << showChar '=' << showsArg str)
+            )
+        |> Option.defaultValue empty
     /// Чтобы обратиться к собственному узлу, нужно преобразовать, к примеру, `a[@atr][text()='a1']` в `self::node()[name()='a'][@atr][text()='a1']`, что функция и делает.
     let showSelf (x:Req) =
         let name =
