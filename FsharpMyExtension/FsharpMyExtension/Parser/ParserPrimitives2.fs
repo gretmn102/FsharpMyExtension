@@ -18,6 +18,8 @@ let notChange lab : Either<IsChanged * Tree<'Elem T>, 'State> =
     Left(false, Node(NotBack lab, []) )
 
 let pzero : Pars<_,_,_> = let fn xs = (xs, notChange "") in fn
+let fail lab : Pars<_,_,_> = let fn xs = (xs, notChange lab) in fn
+
 let (>>=) (p: Pars<'Elem,'a,'u>) (f:'a -> Pars<'Elem,'b,'u>) : Pars<'Elem,'b,'u> =
     p >>
     fun (xs, x) ->
