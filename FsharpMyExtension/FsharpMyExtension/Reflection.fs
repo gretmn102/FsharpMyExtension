@@ -2,21 +2,21 @@ module FsharpMyExtension.Reflection
 
 module Reflection =
     /// **Description**
-    /// 
+    ///
     /// In module declared:
     /// ```fsharp
     /// type internal IMarker = interface end
     /// let t = typeof<IMarker>.DeclaringType
     /// ```
     /// after that, send in this function `%ModuleName%.t`
-    /// 
+    ///
     /// **Output Type**
     ///  * `System.Type -> values:string [] * functions:string []`
     ///  * `values` - function without arguments
-    /// 
+    ///
     /// **Exceptions**
     /// `System.ArgumentException` if arg is not module
-    let getFnNamesFromModule = 
+    let getFnNamesFromModule =
         let xs = set["ToString"; "Equals"; "GetHashCode"; "GetType"]
         fun (t:System.Type) ->
         if Reflection.FSharpType.IsModule t then
@@ -39,32 +39,27 @@ module Reflection =
         let xs = Reflection.FSharpType.GetRecordFields typeof<'T>
         xs |> Array.map (fun x -> sprintf "    %s = failwith \"Not implemented\"" x.Name)
         |> String.concat "\n" |> sprintf "{\n%s\n}"
-    // recordInitS<Сharacteristics>
+
     let inline recordInit<'T> f =
         let t = typedefof< 'T>
         let xs = Reflection.FSharpType.GetRecordFields t
         let ys = Array.init (Array.length xs) f
         Reflection.FSharpValue.MakeRecord(t, ys)
         |> unbox< 'T>
-    // recordInit<Сharacteristics> (fun i -> box (float32 i))
+
     /// Init all unions in Map with GenericZero<'Typ>
-    let inline initUnionMap< ^Union, ^Typ when ^Typ : (static member Zero : ^Typ) and ^Union : comparison > =
+    let inline initUnionMap< 'Union, ^Typ when ^Typ : (static member Zero : ^Typ) and 'Union : comparison > =
         let z = LanguagePrimitives.GenericZero< 'Typ>
-        // (^Typ:(get_Zero))
-        //let z = failwith ""
         unionEnum<'Union>
         |> Array.map (fun x -> x, z)
         |> Map.ofArray
 
-    //let inline initUnionMapV< ^Union, ^Typ when ^Typ : (static member Zero : ^Typ) and ^Union : comparison > =
-    //let inline initUnionMapV< ^Union when ^Union : comparison > (z: ^Typ) =
     let inline initUnionMapV (v: ^Typ) =
-        //let z = LanguagePrimitives.GenericZero< 'Typ>
         unionEnum< ^Union>
         |> Array.map (fun x -> x, v)
         |> Map.ofArray
-  
-    let recordEq cond (x:'a) (y:'a) = 
+
+    let recordEq cond (x:'a) (y:'a) =
         let t = x.GetType()
         if not <| Reflection.FSharpType.IsRecord t then
             failwith "arg is not record"
@@ -75,7 +70,7 @@ module Reflection =
         let ys = Reflection.FSharpValue.GetRecordFields y
         Array.map3 (fun x y z -> x, (y, z)) fs xs ys
         |> Array.filter cond
-  
+
     let printProperties main =
         let t = main.GetType()
         t.GetMembers()
