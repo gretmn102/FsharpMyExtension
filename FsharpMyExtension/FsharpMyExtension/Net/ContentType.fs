@@ -105,6 +105,10 @@ module Parser =
             pstring "charset" >>. pchar '=' >>. token
             >>= fun x ->
                 try
+                    let x =
+                        match x with
+                        | "cp1251" -> "windows-1251"
+                        | x -> x
                     let enc = System.Text.Encoding.GetEncoding x
                     preturn (Charset enc)
                 with e ->
