@@ -181,7 +181,7 @@ module ShowList =
     type ShowS = String -> String
 
     let showChar c = let f xs = c :: xs in f : ShowS
-
+    let showSpace = showChar ' '
     let showString (xs:char seq) = List.append (List.ofSeq xs) : ShowS
 
     let empty = id : ShowS
@@ -255,6 +255,8 @@ module ShowList =
     //     show (join " + " [ showString "someVar"; showChar '1'; showAutoParen "(" <| showString "2 + 3" ]) = "someVar + 1 + (2 + 3)" ] |> List.forall id
 
     let replicate count c = seq{1..count} |> Seq.fold (konst ((>>) (showChar c))) empty : ShowS
+    let showReplicate count (c:ShowS) =
+        seq{1..count} |> Seq.fold (konst ((>>) c)) empty : ShowS
 
     assert
         let f n = replicate n 'a' |> show = String.replicate n "a"
