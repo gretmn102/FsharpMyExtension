@@ -27,7 +27,7 @@ let mainProjPath = f mainProjName
 // --------------------------------------------------------------------------------------
 open Fake.DotNet
 let buildConf = DotNet.BuildConfiguration.Debug
-let dotnetSdk = lazy DotNet.install DotNet.Versions.Release_2_1_402
+let dotnetSdk = lazy DotNet.install DotNet.Versions.FromGlobalJson
 let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 
 // --------------------------------------------------------------------------------------
