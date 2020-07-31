@@ -3,12 +3,13 @@ open System.Net
 open FsharpMyExtension.Either
 
 let cookies = CookieContainer()
+// А еще есть `System.Net.Http`, который надежнее будет всей моей писанины.
+
 let defaultEncoding = System.Text.Encoding.UTF8
 ServicePointManager.DefaultConnectionLimit <- System.Int32.MaxValue
 
 type Url = string
-type Content = string
-type Res = Url * Either<System.Exception, HttpStatusCode * Content>
+
 module Decryption =
     let gzip (encoding:System.Text.Encoding) (receiveStream:System.IO.Stream) =
         try
@@ -18,11 +19,11 @@ module Decryption =
             Right str
         with e -> Left e
 let createHttpReq (url:string) =
-    // let url = "https://google.com"
+    // let url = "https://google.com/someimage.gif?query=20"
     let uri = System.Uri url
     let req = System.Net.WebRequest.CreateHttp(uri)
     req.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-    match System.IO.Path.GetExtension url with
+    match System.IO.Path.GetExtension uri.LocalPath with
     | ".webp" ->
         req.Accept <- "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
     | ".mp4" ->
@@ -38,6 +39,9 @@ let createHttpReq (url:string) =
     req
 
 open FsharpMyExtension.Net
+open FsharpMyExtension.Net.ContentType
+
+type Content = Text of string | Binary of byte []
 
 let defineEncoding contentType =
     match contentType with
@@ -53,68 +57,194 @@ let defineEncoding contentType =
         | Left x ->
             printfn "ContentTypeParser error:\n%A" x
             defaultEncoding
+type ExnType =
+    | WebException of System.Net.WebException
+    | AnotherException of exn
+    | NotFound
+    | Forbidden
+    | PostException of exn
+    | ContentTypeParserError of string
+[<Literal>]
+let TooManyRequests : System.Net.HttpStatusCode = enum 429
+let waitBeforeTrying = 2000
+let waitWhenTooManyRequests = 10000
+let countAttempts = 20
+
+type ReturnStatus =
+    {
+        StatusCode : System.Net.HttpStatusCode
+        Location : string option
+        ContentType : ContentType.ContentType option
+        Content : Content
+    }
+let getResp reqf url =
+    let rec getResp attemptsNum =
+        async {
+            let! res = reqf (createHttpReq url)
+            match res with
+            | Right (req : System.Net.HttpWebRequest) ->
+                // Reflection.Reflection.printProperties req.CookieContainer |> printfn "%A"
+                try
+                    let! resp = req.AsyncGetResponse()
+                    return Right (resp :?> System.Net.HttpWebResponse)
+                with
+                    | :? System.Net.WebException as e ->
+                        if e.Status = System.Net.WebExceptionStatus.ProtocolError then
+                            use resp = e.Response :?> System.Net.HttpWebResponse
+                            match resp.StatusCode with
+                            | System.Net.HttpStatusCode.NotFound ->
+                                return Left(NotFound)
+                            | System.Net.HttpStatusCode.Forbidden ->
+                                return Left(Forbidden)
+                            | TooManyRequests ->
+                                printfn "%s" e.Message
+                                if attemptsNum < countAttempts then
+                                    System.Threading.Thread.Sleep waitWhenTooManyRequests
+                                    printfn "trying again..."
+                                    return! getResp (attemptsNum + 1)
+                                else
+                                    return Left(WebException e)
+                            | _ ->
+                                printfn "%s" e.Message
+                                if attemptsNum < countAttempts then
+                                    System.Threading.Thread.Sleep waitBeforeTrying
+                                    printfn "trying again..."
+                                    return! getResp (attemptsNum + 1)
+                                else
+                                    return Left(WebException e)
+                        elif e.Status = System.Net.WebExceptionStatus.Timeout then
+                            printfn "%s" e.Message
+                            if attemptsNum < countAttempts then
+                                System.Threading.Thread.Sleep waitBeforeTrying
+                                printfn "trying again..."
+                                return! getResp (attemptsNum + 1)
+                            else
+                                return Left(WebException e)
+                        elif e.Status = System.Net.WebExceptionStatus.NameResolutionFailure then // случается, когда нет интернета
+                            return Left(WebException e)
+                        else
+                            return Left(WebException e)
+                    | e -> return Left(AnotherException e)
+            | Left x -> return Left x
+        }
+    getResp 0
+
 
 /// Если выбьет: дескать, не удалось создать защищенный канал SSL/TLS, — то:
 /// ```fsharp
 /// System.Net.ServicePointManager.SecurityProtocol <- System.Net.SecurityProtocolType.Tls12
 /// ```
+let tryGet2 reqf (url:string) =
+    async {
+        let! resp =
+            url
+            |> getResp (fun req ->
+                async {
+                    let! req = reqf req
+                    match req with
+                    | Left x -> return Left x
+                    | Right (req : System.Net.HttpWebRequest) ->
+                        // https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Accept-Encoding#Directives
+                        req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
+                        return Right req
+                }
+            )
+        match resp with
+        | Left x -> return Left x
+        | Right resp ->
+            use resp = resp
+            let just () =
+                match resp.Headers.["Content-Encoding"] with
+                | null -> ()
+                | x -> printfn "`Content-Encoding:%s` бывает" x
+                try
+                    use out = resp.GetResponseStream()
+                    use m = new System.IO.MemoryStream()
+                    out.CopyTo m
+                    Right( Binary(m.ToArray()) )
+                with e -> Left(AnotherException e)
+            let fn (encoding:System.Text.Encoding) =
+                match resp.Headers.["Content-Encoding"] with
+                | "gzip" ->
+                    try
+                        use receiveStream = resp.GetResponseStream()
+                        use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
+                        use r = new System.IO.StreamReader(zl, encoding)
+                        let str = r.ReadToEnd()
+                        Right(Text str)
+                    with e ->
+                        Left(AnotherException e)
+                | _ ->
+                    try
+                        use stream = resp.GetResponseStream()
+                        use reader = new System.IO.StreamReader(stream, encoding)
+                        Right(Text (reader.ReadToEnd()))
+                    with e ->
+                        Left(AnotherException e)
+            match resp.ContentType with
+            | null ->
+                let res =
+                    just ()
+                    |> Either.map (fun content ->
+                        {
+                            StatusCode = resp.StatusCode
+                            Location = resp.Headers.["Location"] |> Option.ofObj
+                            ContentType = None
+                            Content = content
+                        }
+                    )
+                return res
+            | contentType ->
+                let res = ContentType.Parser.start contentType
+                match res with
+                | Right contentType ->
+                    match contentType.Parameter with
+                    | Some (ContentType.Charset enc) ->
+                        let res =
+                            fn enc
+                            |> Either.map (fun content ->
+                                {
+                                    StatusCode = resp.StatusCode
+                                    Location = resp.Headers.["Location"] |> Option.ofObj
+                                    ContentType = Some contentType
+                                    Content = content
+                                }
+                            )
+                        return res
+                    | None | Some _ ->
+                        match contentType.Typ with
+                        | ContentType.Message
+                        | ContentType.Application
+                        | ContentType.Text ->
+                            let res =
+                                fn defaultEncoding
+                                |> Either.map (fun content ->
+                                    {
+                                        StatusCode = resp.StatusCode
+                                        Location = resp.Headers.["Location"] |> Option.ofObj
+                                        ContentType = Some contentType
+                                        Content = content
+                                    }
+                                )
+                            return res
+                        | _ ->
+                            let res =
+                                just ()
+                                |> Either.map (fun content ->
+                                    {
+                                        StatusCode = resp.StatusCode
+                                        Location = resp.Headers.["Location"] |> Option.ofObj
+                                        ContentType = Some contentType
+                                        Content = content
+                                    }
+                                )
+                            return res
+                | Left x ->
+                    return Left (ContentTypeParserError x)
+    }
+
 let tryGet reqf (url:string) =
-    let req : HttpWebRequest = reqf (createHttpReq url)
-    req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
-    try
-        use resp = req.GetResponse() :?> HttpWebResponse
-
-        let encoding = defineEncoding resp.ContentType
-        match resp.Headers.["Content-Encoding"] with
-        | "gzip" ->
-            try
-                use receiveStream = resp.GetResponseStream()
-                use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
-                use r = new System.IO.StreamReader(zl, encoding)
-                let str = r.ReadToEnd()
-                url, Right(resp.StatusCode, str) : Res
-            with e -> url, Left e
-        | _ -> // `null` возьмет?
-            use stream = resp.GetResponseStream()
-            use reader = new System.IO.StreamReader(stream, encoding)
-            url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
-    with e -> url, Left e
-
-// assert
-//     let c = CookieContainer()
-//     let uri = Uri("https://www.google.com")
-//     c.SetCookies(uri, "PHPSESSID=1")
-//     c.GetCookieHeader(uri)
-//     let s f = lock c f
-//     let xs = Seq.init 10000 (fun i -> async { c.SetCookies(uri, sprintf "PHPSESSID=%d" i) })
-//     Async.Parallel xs |> Async.RunSynchronously |> ignore
-//     c.GetCookieHeader uri
-
-
-//     let monitor = Object()
-//     let a = ref 4
-
-//     printfn "1) a = %i" !a
-
-//     let t1 = System.Threading.Thread (fun () ->
-//         printfn "locked in thread 1"
-//         lock monitor (fun () -> a:= !a + 2)
-//         printfn "unlocked in thread 1"
-//         )
-
-//     let t2 = System.Threading.Thread (fun () ->
-//         printfn "locked in thread 2"
-//         lock monitor (fun () -> a:= !a - 3)
-//         printfn "unlocked in thread 2"
-//         )
-
-//     t1.Start()
-//     t2.Start()
-
-//     System.Threading.Thread.Sleep 1000 // wait long enough to get the correct value
-//     printfn "2) a = %i" !a
-
-//     true
+    tryGet2 (reqf >> (async.Return << Right)) url
 
 /// CookieContainer небезопасно использовать в параллельных вычислениях. Что делать? Включил, но использовать на свой страх и риск.
 let getAsync reqf (urls: Url list) =
@@ -134,49 +264,39 @@ let getAsync reqf (urls: Url list) =
                         use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
                         use r = new System.IO.StreamReader(zl, encoding)
                         let str = r.ReadToEnd()
-                        return (url, Right(resp.StatusCode, str) : Res)
+                        return (url, Right(resp.StatusCode, str))
                     with e -> return url, Left e
                 | _ -> // `null` возьмет?
                     use stream = resp.GetResponseStream()
                     use reader = new System.IO.StreamReader(stream, encoding)
-                    return (url, Right(resp.StatusCode, reader.ReadToEnd()) : Res)
-            with e -> return (url, Left e : Res)
+                    return (url, Right(resp.StatusCode, reader.ReadToEnd()))
+            with e -> return (url, Left e)
         }
     let webPages = List.map get >> Async.Parallel >> Async.RunSynchronously
     List.chunkBySize 8 urls
     |> Seq.collect webPages
 
-let tryPost reqf (postData:string) (url:string) =
-    let request : HttpWebRequest = reqf (createHttpReq url)
+[<System.ObsoleteAttribute("`postData` `url` -> `url` `postData`\nНе знал, каким еще способом это сказать", false)>]
+let tryPost reqf (url:string) (postData:string) =
+    url
+    |> tryGet2 (reqf >> fun (req:System.Net.HttpWebRequest) ->
+        req.Method <- "POST"
+        req.ContentType <- "application/x-www-form-urlencoded"
 
-    request.Method <- "POST"
-    request.ContentType <- "application/x-www-form-urlencoded"
+        let data = System.Text.Encoding.ASCII.GetBytes(postData)
+        req.ContentLength <- int64 data.Length
 
-    let data = System.Text.Encoding.ASCII.GetBytes(postData)
-    request.ContentLength <- int64 data.Length
-
-    request.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
-    try
-        using (request.GetRequestStream())
-            (fun stream -> stream.Write(data, 0, data.Length))
-
-        use resp = request.GetResponse() :?> HttpWebResponse
-        let encoding = defineEncoding resp.ContentType
-
-        match resp.Headers.["Content-Encoding"] with
-        | "gzip" ->
+        // https://developer.mozilla.org/ru/docs/Web/HTTP/Headers/Accept-Encoding#Directives
+        req.Headers.Add (System.Net.HttpRequestHeader.AcceptEncoding, "gzip")
+        async {
             try
-                use receiveStream = resp.GetResponseStream()
-                use zl = new System.IO.Compression.GZipStream(receiveStream,System.IO.Compression.CompressionMode.Decompress)
-                use r = new System.IO.StreamReader(zl, encoding)
-                let str = r.ReadToEnd()
-                url, Right(resp.StatusCode, str) : Res
-            with e -> url, Left e
-        | _ -> // `null` возьмет?
-            use stream = resp.GetResponseStream()
-            use reader = new System.IO.StreamReader(stream, encoding)
-            url, Right(resp.StatusCode, reader.ReadToEnd()) : Res
-    with e -> url, Left e
+                use stream = req.GetRequestStream()
+                stream.Write(data, 0, data.Length)
+
+                return Right req
+            with e -> return Left (PostException e)
+        }
+    )
 
 (*
 /// test
