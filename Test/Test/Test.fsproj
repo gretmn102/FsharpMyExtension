@@ -10,15 +10,6 @@
       <Name>FsharpMyExtension.fsproj</Name>
     </ProjectReference>
   </ItemGroup>
-  <!-- Почему не сделать так?
-  Зачем каждый раз компилировать ссылочный проект чтобы работало IntelliSence?
-  Если в ссылочном проекте, один из файлов `.fs` лежит в папке, то
-  InlliSence напрочь отказывается видеть содержимое файла в этом проекте.
-  Зато он строится и успешно запускается.
-  Не веришь? Раскоментируй и удали ниже
-    `<Reference Include="..\..\FsharpMyExtension\FsharpMyExtension\bin\debug\net45\FsharpMyExtension.dll" />`
-  Попробуй в данном проекте написать `Parser.trav`, скажет - `The namespace 'Parser' not defined`.
-  Такие дела. -->
   <ItemGroup>
     <Compile Include="ParserPrimitives.fs" />
     <Compile Include="Array2D.fs" />
@@ -32,7 +23,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime" />
-    <!-- <Reference Include="..\..\FsharpMyExtension\FsharpMyExtension\bin\debug\net45\FsharpMyExtension.dll" /> -->
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
