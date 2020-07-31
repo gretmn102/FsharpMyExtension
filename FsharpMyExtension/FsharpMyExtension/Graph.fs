@@ -131,26 +131,22 @@ module Group3 =
             |> List.collect (fun (Node(y, xs)) ->
                 (x, y)::List.collect f xs )
         f tree
-    type 'a T = Val of 'a | Ref of 'a * int
-    // open FsharpMyExtension.Map
+    type Kind =
+        | PointKind
+        | ValKind
+    type ValId = string
+    type PointId = string
+    type 'a X =
+        | Value of ValId * 'a
+        | Point of PointId * value:(Kind * ValId)
 
-    let leafs inputTree =
-        let rec f acc = function
-            | Node(x, []) -> Set.singleton x::acc
-            | Node(_, xs) ->
-                let isEmpty = function Node(_, []) -> true | _ -> false
-                // TODO: оптимизировать
-                if List.forall isEmpty xs then
-                    let xs =
-                        List.fold (fun st x ->
-                            Set.add (Tree.getValue x) st ) Set.empty xs
-                    xs::acc
-                else
-                    List.foldBack (fun x state -> f state x) xs acc
-        f [] inputTree
-    let leafs2 st inputTree =
+    type 'a T =
+        | Val of 'a
+        | Ref of 'a * int
+
+    let leafs st inputTree =
         let rec f st = function
-            | Node(x, []) -> Node(x, [] ), st //failwith "leaf" //Set.singleton x::acc
+            | Node(x, []) -> Node(x, []), st
             | Node(Val x, xs) ->
                 let isEmpty = function Node(_, []) -> true | _ -> false
                 // TODO: оптимизировать
@@ -167,7 +163,6 @@ module Group3 =
                 else
                     let xs, st =
                         xs
-                        // |> List.mapFold (fun (i, m) x -> f (i + 1, m) x) (i, m)
                         |> List.mapFold f st
                     Node(Val x, xs), st
             | Node(Ref _, _) as x -> failwithf "non empty ref: %A" x
@@ -178,7 +173,7 @@ module Group3 =
             | Node(x, []) ->
                 let i, m = st
                 i + 1, Map.add (Set.singleton x) i m
-            | _ -> f (leafs2 st tr)
+            | _ -> f (leafs st tr)
         let tree = Tree.map Val tree
         f (tree, (0, Map.empty))
     let toTgf (length, graph) =
@@ -197,13 +192,21 @@ module Group3 =
             ) (length, [])
         |> snd
         |> group2.toTgf
+
+    // type 'a Graph when 'a : comparison = Map<list<'a T>, int>
+    type 'a Graph = Map<int, list<'a T>>
+
     let toTree (length, graph) =
-        let m = graph |> Map.fold (fun st k v -> Map.add v k st) Map.empty
+        let m =
+            graph
+            |> Map.fold (fun st k v -> Map.add v k st) Map.empty
         let rec restore xs =
-            xs |> Seq.map (function
+            xs
+            |> Seq.map (function
                 | Ref (x, i) -> Node(x, restore (Map.find i m) )
                 | Val x -> Node(x, [])
-            ) |> List.ofSeq
+            )
+            |> List.ofSeq
         List.head <| restore (Map.find (length - 1) m)
     let test tree =
         let toGraph tree =
