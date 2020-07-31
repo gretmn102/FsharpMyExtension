@@ -79,12 +79,14 @@ module ParHtmlNode2 =
     let inline br<'u> : Pars<_, _, 'u>  =
         satisfy (HtmlNode.name >> (=) "br") "<br>"
 
-    let inline ptext<'u> : Pars<_, _, 'u> =
-        satisfy
-            (cond (HtmlNode.nodeType >> (=) HtmlNodeType.Text)
-                (not << HtmlNode.IsNullOrWhiteSpace)
-                (k false))
-            "not empty text node"
+    let ptext<'u> : Pars<_, _, 'u> =
+        satisfym (fun (node:HtmlNode) ->
+            if node.NodeType = HtmlNodeType.Text
+               && not (HtmlNode.IsNullOrWhiteSpace node) then
+                (node :?> HtmlTextNode).InnerText
+                |> Some
+            else None
+        ) "not empty text node"
 
     let pcomm<'u> : Pars<_, _, 'u>  =
         satisfy (HtmlNode.nodeType >> (=) HtmlNodeType.Comment)
@@ -148,12 +150,12 @@ module ParHtmlNode2 =
     open FsharpMyExtension.XmlBuilder
     open FsharpMyExtension.ShowList
     open FsharpMyExtension.Either
-    let generateHtmlParser (node:Node) =
+    let generateHtmlParserShow (node:Node) =
         let tab = replicate 4 ' '
         let sub = showString "/* ("
         let nextOpName = ".>>."
         let next = showString nextOpName
-        
+
         let rec f isSecond isLast nestingCount xs =
             let parens =
                 if isLast then
@@ -222,3 +224,10 @@ module ParHtmlNode2 =
             | Comment s ->
                 showText "pcomm" s
         f false false 0 node : ShowS list
+    let generateHtmlParser tabsCount node =
+        let tab = ShowList.replicate (4 * tabsCount) ' '
+        node
+        |> generateHtmlParserShow
+        |> List.map ((<<) tab)
+        |> ShowList.join "\n"
+        |> ShowList.show
