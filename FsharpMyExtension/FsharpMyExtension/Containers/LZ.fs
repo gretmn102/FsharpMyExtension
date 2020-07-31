@@ -11,7 +11,8 @@ module ListZ =
         | [] -> failwith "list is empty"
         | h::t -> { Left = t; Current = h; Right = []; Index = 0 }
     let toList { ListZ.Left = l; Current = h; Right = r } = List.rev r @ h::l
-
+    let toArray { ListZ.Left = l; Current = h; Right = r } =
+        List.rev r @ h::l |> Array.ofList // OPTIMIZE
     let next lst = //(Lz(xs, x, ys)) =
         match lst.Left with
         | h::t -> 
