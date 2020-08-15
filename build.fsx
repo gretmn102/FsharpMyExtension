@@ -1,8 +1,8 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
-
-#r "./packages/build/FAKE/tools/FakeLib.dll"
+#r "paket: groupref build //"
+#load ".fake/build.fsx/intellisense.fsx"
 open Fake.IO.Globbing.Operators
 open Fake.Core
 // --------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ let mainProjPath = f mainProjName
 // Helpers
 // --------------------------------------------------------------------------------------
 open Fake.DotNet
-let buildConf = DotNet.BuildConfiguration.Debug
+let buildConf = DotNet.BuildConfiguration.Release
 let dotnetSdk = lazy DotNet.install DotNet.Versions.FromGlobalJson
 let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 
@@ -75,7 +75,7 @@ let run projName projPath =
 Target.create "Test" (fun _ ->
     let x = run testProjName testProjPath
     if x.ExitCode <> 0 then
-        raise <| Fake.Testing.Common.FailedTestsException "test error"
+        failwith "test error"
 )
 
 // Target "Release" DoNothing

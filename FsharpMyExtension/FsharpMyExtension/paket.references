@@ -5,3 +5,5 @@ Fuchu
 Newtonsoft.Json
 Newtonsoft.Json.Bson
 YamlDotNet
+System.Drawing.Common
+TextCopy
