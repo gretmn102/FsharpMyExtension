@@ -9,7 +9,7 @@ open Fake.Core
 // Build variables
 // --------------------------------------------------------------------------------------
 let f projName =
-    let pattern = sprintf @"**\%s.fsproj" projName
+    let pattern = sprintf @"**/%s.fsproj" projName
     let xs = !! pattern
     xs
     |> Seq.tryExactlyOne
