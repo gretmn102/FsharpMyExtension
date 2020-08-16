@@ -37,7 +37,15 @@ Target.create "BuildTest" (fun _ ->
     testProjPath
     |> Fake.IO.Path.getDirectory
     |> DotNet.build (fun x ->
-        { x with Configuration = buildConf }
+        // Чтобы в Linux'е не компилировался net461, дан этот костыль:
+        { x with
+                Configuration = buildConf
+                Framework = 
+                    if not Environment.isWindows then
+                        Some "netcoreapp3.1"
+                    else
+                        None
+                }
         |> dtntSmpl)
 )
 
