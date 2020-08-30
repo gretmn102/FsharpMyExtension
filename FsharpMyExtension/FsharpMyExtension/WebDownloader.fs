@@ -3,7 +3,7 @@ open System.Net
 open FsharpMyExtension.Either
 
 let cookies = CookieContainer()
-// А еще есть `System.Net.Http`, который надежнее будет всей моей писанины.
+// А еще есть `System.Net.Http`, который понадежнее будет всей моей писанины.
 
 let defaultEncoding = System.Text.Encoding.UTF8
 ServicePointManager.DefaultConnectionLimit <- System.Int32.MaxValue
@@ -70,13 +70,31 @@ let waitBeforeTrying = 2000
 let waitWhenTooManyRequests = 10000
 let countAttempts = 20
 
+type ContentDisposition =
+    // /// ```
+    // /// attachment
+    // /// attachment; filename="filename.jpg"
+    // /// ```
+    // | Attachment of string option
+    // | Inline
+    // | ParserErr of raw:string * errMsg:string
+    Either<{|Raw:string; Err:string|}, Mime.ContentDisposition>
+
+let contentDispositionParse str : ContentDisposition =
+    try
+        Right (Mime.ContentDisposition(str))
+    with
+        e -> Left {| Raw = str; Err = e.Message |}
+
 type ReturnStatus =
     {
         StatusCode : System.Net.HttpStatusCode
         Location : string option
         ContentType : ContentType.ContentType option
         Content : Content
+        ContentDisposition:ContentDisposition
     }
+
 let getResp reqf url =
     let rec getResp attemptsNum =
         async {
@@ -182,7 +200,8 @@ let tryGet2 reqf (url:string) =
                     with e ->
                         Left(AnotherException e)
             match resp.ContentType with
-            | null ->
+            | null
+            | "" ->
                 let res =
                     just ()
                     |> Either.map (fun content ->
@@ -191,6 +210,8 @@ let tryGet2 reqf (url:string) =
                             Location = resp.Headers.["Location"] |> Option.ofObj
                             ContentType = None
                             Content = content
+                            ContentDisposition =
+                                contentDispositionParse (resp.Headers.["Content-Disposition"])
                         }
                     )
                 return res
@@ -198,6 +219,18 @@ let tryGet2 reqf (url:string) =
                 let res = ContentType.Parser.start contentType
                 match res with
                 | Right contentType ->
+                    let getBinary() =
+                        just ()
+                        |> Either.map (fun content ->
+                            {
+                                StatusCode = resp.StatusCode
+                                Location = resp.Headers.["Location"] |> Option.ofObj
+                                ContentType = Some contentType
+                                Content = content
+                                ContentDisposition =
+                                    contentDispositionParse (resp.Headers.["Content-Disposition"])
+                            }
+                        )
                     match contentType.Parameter with
                     | Some (ContentType.Charset enc) ->
                         let res =
@@ -208,37 +241,39 @@ let tryGet2 reqf (url:string) =
                                     Location = resp.Headers.["Location"] |> Option.ofObj
                                     ContentType = Some contentType
                                     Content = content
+                                    ContentDisposition =
+                                        contentDispositionParse (resp.Headers.["Content-Disposition"])
                                 }
                             )
                         return res
                     | None | Some _ ->
+                        let getText() =
+                            fn defaultEncoding
+                            |> Either.map (fun content ->
+                                {
+                                    StatusCode = resp.StatusCode
+                                    Location = resp.Headers.["Location"] |> Option.ofObj
+                                    ContentType = Some contentType
+                                    Content = content
+                                    ContentDisposition =
+                                        contentDispositionParse (resp.Headers.["Content-Disposition"])
+                                }
+                            )
                         match contentType.Typ with
+                        | ContentType.Application ->
+                            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+                            // TODO: define where is binary content and where is text
+                            match contentType.Subtype with
+                            | "vnd.rar"
+                            | "zip" ->
+                                return getBinary ()
+                            | _ ->
+                                return getText()
                         | ContentType.Message
-                        | ContentType.Application
                         | ContentType.Text ->
-                            let res =
-                                fn defaultEncoding
-                                |> Either.map (fun content ->
-                                    {
-                                        StatusCode = resp.StatusCode
-                                        Location = resp.Headers.["Location"] |> Option.ofObj
-                                        ContentType = Some contentType
-                                        Content = content
-                                    }
-                                )
-                            return res
+                            return getText()
                         | _ ->
-                            let res =
-                                just ()
-                                |> Either.map (fun content ->
-                                    {
-                                        StatusCode = resp.StatusCode
-                                        Location = resp.Headers.["Location"] |> Option.ofObj
-                                        ContentType = Some contentType
-                                        Content = content
-                                    }
-                                )
-                            return res
+                            return getBinary ()
                 | Left x ->
                     return Left (ContentTypeParserError x)
     }
