@@ -3,7 +3,7 @@ module Print
 let reader () =
     let s = System.Text.StringBuilder()
     printfn "for the exit, put line with in end ';;'"
-    
+
     let rec f () =
         let curr = System.Console.ReadLine()
         if curr.EndsWith(";;") then
@@ -68,3 +68,15 @@ let toSnippet s =
             | '\r' -> ""
             | x -> string x) >> sprintf "\"%s\"")
     |> String.concat ",\n" |> printfn "%s"
+
+module TreadSafe =
+    let mail = MailboxProcessor.Start (fun agent ->
+        let rec loop () =
+            async {
+                let! msg = agent.Receive()
+                printfn "%s" msg
+                return! loop ()
+            }
+        loop ()
+    )
+    let printfn fmt = Printf.ksprintf mail.Post fmt
