@@ -265,6 +265,7 @@ let tryGet2 reqf (url:string) =
                             // TODO: define where is binary content and where is text
                             match contentType.Subtype with
                             | "vnd.rar"
+                            | "x-rar" // but he is not here https://www.iana.org/assignments/media-types/media-types.xhtml
                             | "zip" ->
                                 return getBinary ()
                             | _ ->
