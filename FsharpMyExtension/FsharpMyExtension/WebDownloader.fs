@@ -23,7 +23,7 @@ let createHttpReq (url:string) =
     let uri = System.Uri url
     let req = System.Net.WebRequest.CreateHttp(uri)
     req.UserAgent <- "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0"
-    match System.IO.Path.GetExtension uri.LocalPath with
+    match Path.getExtension uri.LocalPath with
     | ".webp" ->
         req.Accept <- "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5"
     | ".mp4" ->
@@ -174,7 +174,10 @@ let tryGet2 reqf (url:string) =
             let just () =
                 match resp.Headers.["Content-Encoding"] with
                 | null -> ()
-                | x -> printfn "`Content-Encoding:%s` бывает" x
+                | x ->
+                    // TODO: действительно архивируют картинки, например, в https://www.instagram.com/static/images/homepage/screenshot2.jpg/6f03eb85463c.jpg на 12.10.2020 14:34:40 было
+                    // TODO: https://upload.wikimedia.org/wikipedia/commons/d/d6/URI_syntax_diagram.svg
+                    printfn "`Content-Encoding:%s` бывает" x
                 try
                     use out = resp.GetResponseStream()
                     use m = new System.IO.MemoryStream()

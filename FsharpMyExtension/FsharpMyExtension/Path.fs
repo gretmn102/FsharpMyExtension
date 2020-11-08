@@ -40,3 +40,16 @@ let relative path dir =
     |> mapBoth (String.split "\\" >> List.ofArray)
     |> f
     |> String.concat "\\"
+
+/// Works like `System.IO.Path.GetExtension`, but does not check through `System.IO.Path.GetInvalidPathChars`
+let getExtension (str:string) =
+    let rec f i =
+        if i < 0 then -1
+        else
+            if str.[i] = '.' then i
+            else
+                f (i - 1)
+    let i = f (str.Length - 1)
+    if i < 0 then ""
+    else
+        str.[i..]
