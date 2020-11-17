@@ -58,6 +58,11 @@ let eof lab =
             | [],_ -> Right ()
             | _  -> notChange lab)
     in fn
+let private steamEmpty2 (p: _ -> Result<_,_,'u>) lab =
+    let fn = function
+        | [], st -> ([], st), notChange lab
+        | x::xs, u -> p ((x, xs), u)
+    fn : Pars<'Elem,_,_>
 let private steamEmpty (p: Pars<_,_,'u>) lab =
     let fn = function
         | [], st -> ([], st), notChange lab
@@ -96,6 +101,19 @@ let satisfym f note : Pars<'Elem,_,'u> =
         ) (sprintf "expected '%s', but stream is empty" note)
     fn
 
+let satisfyRaw f note : Pars<'Elem,_,'u> =
+    let fn xs =
+        xs
+        |> steamEmpty2
+            (fun ((x, xs), u) ->
+                let u, res = f (x, u)
+                if Either.isRight res then
+                    (xs, u), res
+                else
+                    (x::xs, u), res
+            )
+            (sprintf "expected '%s', but stream is empty" note)
+    fn
 let getUserState =
     let fn x = x, Right(snd x)
     fn : Pars<'Elem,'u,'u>
@@ -145,6 +163,13 @@ let pipe2 p1 p2 f = p1 >>= fun a -> p2 >>= fun b -> preturn (f a b)
 let pipe3 p1 p2 p3 f = pipe2 p1 p2 comma >>= ((|>>) p3 << curry f)
 let pipe4 p1 p2 p3 p4 f = pipe3 p1 p2 p3 ((<<) comma << comma) >>= ((|>>) p4 << curry (curry f))
 let pipe5 p1 p2 p3 p4 p5 f = pipe4 p1 p2 p3 p4 ((<<) ((<<) comma << comma) << comma) >>= (*fun (((a, b), c), d) -> p5 |>> f a b c d *) ((|>>) p5 << curry (curry (curry f)))
+let tuple3 p1 p2 p3 =
+    pipe3 p1 p2 p3 (fun x y z -> x, y, z)
+let tuple4 p1 p2 p3 p4 =
+    pipe4 p1 p2 p3 p4 (fun w x y z -> w, x, y, z)
+let tuple5 p1 p2 p3 p4 p5 =
+    pipe5 p1 p2 p3 p4 p5 (fun v w x y z -> v, w, x, y, z)
+
 let many (p:Pars<'Elem,'State,_>) : Pars<'Elem,'State list,_> =
     // (p >>= fun x -> many p |>> fun xs -> x::xs ) <|> preturn []
     let rec fn acc xs =

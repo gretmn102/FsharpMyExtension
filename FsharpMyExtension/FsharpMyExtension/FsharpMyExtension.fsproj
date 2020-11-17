@@ -43,6 +43,7 @@
     <Compile Include="XPathLimited.fs" />
     <Compile Include="XmlBuilder.fs" />
     <Compile Include="Parser/ParserPrimitives2.fs" />
+    <Compile Include="Parser/FixedParser.fs" />
     <Compile Include="Parser/ParserPrimitives.fs" />
     <Compile Include="Parser/ParserString.fs" />
     <Compile Include="Parser/ParserHtmlNode.fs" />

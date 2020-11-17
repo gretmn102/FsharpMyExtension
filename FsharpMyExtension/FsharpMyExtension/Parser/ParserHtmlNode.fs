@@ -231,3 +231,39 @@ module ParHtmlNode2 =
         |> List.map ((<<) tab)
         |> ShowList.join "\n"
         |> ShowList.show
+
+module NodeParser =
+    open Primitives2
+    open FsharpMyExtension
+    open FsharpMyExtension.HtmlAgilityPackExt
+    open FsharpMyExtension.Either
+    open HtmlAgilityPack
+
+    open Parser.FixedParser
+    type NodeParser<'a,'u> = FixedParser<HtmlNode,'a,'u>
+    let pnodeName name : NodeParser<_,_> =
+        satisfy
+            (fun (x:HtmlNode) ->
+                x.NodeType = HtmlNodeType.Element && x.Name = name)
+            (sprintf "<%s>" name)
+    let patt attName : NodeParser<_,_> =
+        satisfym
+            (fun (node:HtmlNode) ->
+                if node.NodeType = HtmlNodeType.Element then
+                    HtmlNode.tryGetAttVal attName node
+                else None)
+            (sprintf "%s=*" attName)
+    let pattName attName attVal : NodeParser<_,_> =
+        satisfy
+            (fun (node:HtmlNode) ->
+                if node.NodeType = HtmlNodeType.Element then
+                    match HtmlNode.tryGetAttVal attName node with
+                    | Some v -> attVal = v
+                    | None -> false
+                else false)
+            (sprintf "%s='%s'" attName attVal)
+
+    let pbody p =
+        ofLinearParser
+            (fun (node:HtmlNode) -> node.ChildNodes)
+            (Primitives2.(>>.) ParHtmlNode2.ws p)
