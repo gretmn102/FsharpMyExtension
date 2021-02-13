@@ -507,6 +507,36 @@ module LZTests =
                 let e = ListZ.ofList [x;y] |> next
                 Assert.Equal("", e, act)
        ]
+
+    let mapiTest =
+        testList "mapiTest" [
+            testCase "base" <| fun () ->
+                let input = [0..9]
+                let lz = ListZ.ofList input
+                let act =
+                    lz
+                    |> ListZ.next |> Option.get
+                    |> ListZ.mapi (fun i x -> i)
+                    |> ListZ.toList
+                Assert.Equal("", input, act)
+        ]
+
+    let mapStartMidEndTest =
+        testList "mapStartMidEndTest" [
+            testCase "base" <| fun () ->
+                let lz = ListZ.ofList [1..4]
+                let act =
+                    lz
+                    |> ListZ.next |> Option.get
+                    |> ListZ.mapStartMidEnd
+                        (fun isCurrent x -> -1)
+                        (fun isCurrent x  -> 0)
+                        (fun isCurrent x -> 1)
+                    |> ListZ.toList
+                let exp = [-1; 0; 0; 1]
+                Assert.Equal("", exp, act)
+        ]
+
 module LZCTests =
     open FsharpMyExtension.ListZipperCircle2
     [<Tests>]
