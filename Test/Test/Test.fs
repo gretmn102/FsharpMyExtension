@@ -508,6 +508,7 @@ module LZTests =
                 Assert.Equal("", e, act)
        ]
 
+    [<Tests>]
     let mapiTest =
         testList "mapiTest" [
             testCase "base" <| fun () ->
@@ -521,6 +522,7 @@ module LZTests =
                 Assert.Equal("", input, act)
         ]
 
+    [<Tests>]
     let mapStartMidEndTest =
         testList "mapStartMidEndTest" [
             testCase "base" <| fun () ->
@@ -1065,7 +1067,44 @@ module ContentTypeTests =
         ]
 
     // run contentTypeTest
+module ArrayTests =
+    open FsharpMyExtension
 
+    [<Tests>]
+    let splitTests =
+        testList "splitTests" [
+            testCase "one" <| fun () ->
+                let sep = "<>"
+                let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
+                let exp = String.split sep str
+                let act =
+                    Array.split (sep.ToCharArray()) (str.ToCharArray())
+                    |> Array.map System.String.Concat
+                Assert.Equal("", exp, act)
+            testCase "two" <| fun () ->
+                let sep = "<>"
+                let str = "<>"
+
+                let exp = String.split sep str
+                let act =
+                    Array.split (sep.ToCharArray()) (str.ToCharArray())
+                    |> Array.map System.String.Concat
+                Assert.Equal("", exp, act) // [|""; ""|] <> [|""|]
+        ]
+
+    [<Tests>]
+    let mapStartMidEndTests =
+        testList "splitTests" [
+            testCase "one" <| fun () ->
+                let act =
+                    [|1..10|]
+                    |> Array.mapStartMidEnd
+                        (fun i -> i - 1)
+                        (fun i -> i + 1)
+                        (fun i -> i - 2)
+                let exp = [|0; 3; 4; 5; 6; 7; 8; 9; 10; 8|]
+                Assert.Equal("", exp, act)
+        ]
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

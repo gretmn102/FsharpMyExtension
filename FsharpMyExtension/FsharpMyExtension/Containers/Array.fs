@@ -1,11 +1,11 @@
 [<RequireQualifiedAccess>]
 module FsharpMyExtension.Array
 
-let transpose xss = 
+let transpose xss =
     let h = Array.length xss
     let w = Array.head xss |> Array.length
     let yss = Array.init w (fun _ -> Array.zeroCreate h)
-    
+
     // for i = 0 to Array2D.length1 xss - 1 do
     //     for j = 0 to Array2D.length2 xss - 1 do
     //         yss.[i].[j] <- xss.[i,j]
@@ -31,7 +31,7 @@ let indexOf patt startIndex xs =
         loop 0
     // isMatch [| 0..5 |] [| 0..4 |] 0
     // let len = Array.length xs
-    
+
     // let patt, startIndex, xs = [| 0..10 |], 0, [| 1; 2 |]
     let count = Array.length xs - Array.length patt + 1
     // printfn "count = %d" count
@@ -73,21 +73,15 @@ let split (sep:_ []) (xs:_ []) =
         else
             None
         ) 0
-open FsharpMyExtension
-let testSplit () =
-    let sep = "<>"
-    let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
-    let exp = String.split sep str
-    let act =
-        split (sep.ToCharArray()) (str.ToCharArray())
-        |> Array.map System.String.Concat
-    exp = act
-    
-    let sep = "<>"
-    let str = "<>"
-    
-    let exp = String.split sep str
-    let act =
-        split (sep.ToCharArray()) (str.ToCharArray())
-        |> Array.map System.String.Concat
-    exp = act // [|""; ""|] <> [|""|]
+
+let mapStartMidEnd start mid fend (xs: _ []) =
+    let length = xs.Length
+
+    let ys = Array.zeroCreate length
+    if length > 0 then
+        ys.[0] <- start xs.[0]
+        if length > 1 then
+            ys.[length - 1] <- fend xs.[length - 1]
+            for i in 1..length - 2 do
+                ys.[i] <- mid xs.[i]
+    ys
