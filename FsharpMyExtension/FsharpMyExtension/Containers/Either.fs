@@ -93,6 +93,13 @@ module Either =
         Some(Right "") = (seqOpt (Right <| Some "") : Either<int,string> option)
     assert
         (None = seqOpt (Right None))
+
+    let toResult = function
+        | Right x -> Ok x
+        | Left x -> Error x
+    let ofResult = function
+        | Ok x -> Right x
+        | Error x -> Left x
 module Operators =
     let (<*>) x f = Either.ap f x
     let (>>=) x f = Either.bind f x
@@ -176,3 +183,12 @@ module Option =
             | Left x -> Left x
         | None -> Right None
     let seqEither x = travEither id x
+
+[<RequireQualifiedAccess>]
+module Result =
+    let ofEither = function
+        | Right x -> Ok x
+        | Left x -> Error x
+    let toEither = function
+        | Ok x -> Right x
+        | Error x -> Left x
