@@ -47,6 +47,21 @@ let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
+Target.create "BuildMainProj" (fun _ ->
+    mainProjPath
+    |> Fake.IO.Path.getDirectory
+    |> DotNet.build (fun x ->
+        // Чтобы в Linux'е не компилировался net461, дан этот костыль:
+        { x with
+                Configuration = buildConf
+                Framework =
+                    if not Environment.isWindows then
+                        Some "netcoreapp3.1"
+                    else
+                        None
+                }
+        |> dtntSmpl)
+)
 Target.create "BuildTest" (fun _ ->
     testProjPath
     |> Fake.IO.Path.getDirectory
@@ -111,4 +126,4 @@ open Fake.Core.TargetOperators
 
 "BuildTest"
   ==> "Test"
-Target.runOrDefault "Test"
+Target.runOrDefault "BuildMainProj"
