@@ -62,6 +62,8 @@ type ExnType =
     | AnotherException of exn
     | NotFound
     | Forbidden
+    | BadRequest
+    | NameResolutionFailure
     | PostException of exn
     | ContentTypeParserError of string
 [<Literal>]
@@ -122,6 +124,8 @@ let getResp reqf url =
                                     return! getResp (attemptsNum + 1)
                                 else
                                     return Left(WebException e)
+                            | System.Net.HttpStatusCode.BadRequest ->
+                                return Left(BadRequest)
                             | _ ->
                                 printfn "%s" e.Message
                                 if attemptsNum < countAttempts then
@@ -139,7 +143,7 @@ let getResp reqf url =
                             else
                                 return Left(WebException e)
                         elif e.Status = System.Net.WebExceptionStatus.NameResolutionFailure then // случается, когда нет интернета
-                            return Left(WebException e)
+                            return Left(NameResolutionFailure)
                         else
                             return Left(WebException e)
                     | e -> return Left(AnotherException e)
