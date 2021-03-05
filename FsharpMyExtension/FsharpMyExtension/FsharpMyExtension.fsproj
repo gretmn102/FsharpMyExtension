@@ -25,8 +25,8 @@
     <Compile Include="Containers/Option.fs" />
     <Compile Include="String.fs" />
     <Compile Include="Containers/Array.fs" />
-    <Compile Include="Containers/LazyList.fs" />
     <Compile Include="Containers/LZ.fs" />
+    <Compile Include="Containers/LazyList.fs" />
     <!-- <Compile Include="Containers/LZLazy.fs" /> -->
     <!-- <Compile Include="Containers/LZLazy2.fs" /> -->
     <Compile Include="Containers/ListZipperC.fs" />

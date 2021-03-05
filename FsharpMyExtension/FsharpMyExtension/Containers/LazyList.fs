@@ -1,59 +1,106 @@
-﻿module LazyList
+﻿module FsharpMyExtension.LazyList
 
-type LazyList<'a> = 
-   | Empty 
-   | Cons of 'a * Lazy<LazyList<'a>> 
-let head = function
-    | Cons (h, _) -> h 
-    | Empty -> failwith "empty list" 
-let tail = function
-    | Cons (_, t) -> t.Force() 
-    | Empty -> failwith "empty list"
+type LazyList<'a> =
+   | Empty
+   | Cons of 'a * Lazy<LazyList<'a>>
 
-let single a = Cons (a, lazy ( Empty ))
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module LazyList =
+    let head = function
+        | Cons (h, _) -> h
+        | Empty -> failwith "empty list"
+    let tail = function
+        | Cons (_, t) -> t.Force()
+        | Empty -> failwith "empty list"
 
-let cons (a : 'a) (l : LazyList<'a>) = Cons (a, lazy ( l )) 
+    let empty = Empty
+    let singleton a = Cons (a, lazy ( Empty ))
 
-let rec map f = function
-    | Empty -> Empty
-    | Cons (a, t) -> Cons (f a, lazy (map f (t.Force())))
+    /// ## Note
+    /// ```
+    /// let rec f i =
+    ///     LazyList.cons i (f (i + 1))
+    /// f 0 // StackOverflow
+    /// ```
+    /// but:
+    /// ```
+    /// let rec f i =
+    ///     Cons (i, lazy ( f (i + 1) ))
+    /// f 0 -> // Ok
+    /// ```
+    let cons (a : 'a) (l : LazyList<'a>) = Cons (a, lazy ( l ))
 
-let rec iter f = function
-    | Empty -> () 
-    | Cons (a, t) -> f a; iter f (t.Force())
+    let rec map f = function
+        | Cons (a, t) -> Cons (f a, lazy (map f (t.Force())))
+        | Empty -> Empty
 
-let rec take nr = function
-    | Empty -> Empty 
-    | Cons (a, t) -> 
-        if nr = 0 then Empty 
-        else Cons (a, lazy (take (nr-1) (t.Force())))
+    let rec iter f = function
+        | Cons (a, t) -> f a; iter f (t.Force())
+        | Empty -> ()
 
-let rec unfold (f : 's -> ('a*'s) option) (init : 's) : LazyList<'a> = 
-    match f init with 
-    | None -> Empty 
-    | Some (a, s) -> Cons (a, lazy ( unfold f s))
+    let rec take nr = function
+        | Cons (a, t) ->
+            if nr = 0 then Empty
+            else Cons (a, lazy (take (nr-1) (t.Force())))
+        | Empty -> Empty
 
-let rec foldr (f : 'a -> Lazy<'s> -> 's) (init : 's) = function
-   | Cons (a, t) -> f a (lazy (foldr f init (t.Force())))
-   | Empty -> init
-//
-//type 'a T =
-//    | T of (unit -> 'a T)
-//    | Elem of 'a
-//
-//let rec next = function
-//    | T f -> f() |> next
-//    | Elem x -> x
-//
-//let fold fn =
-//    let rec f acc = function
-//        | h::t -> fn acc h |> fun acc -> T(fun () -> f acc t)
-//        | [] -> Elem acc
-//    f
-//fold (fun st x -> x::st) [] [1..10] |> next
+    let rec unfold (f : 's -> ('a*'s) option) (init : 's) : LazyList<'a> =
+        match f init with
+        | Some (a, s) -> Cons (a, lazy (unfold f s))
+        | None -> Empty
 
-//assert
-//    List.fold (fun st x -> x::st) [] [1..10] = fold (fun st x -> x::st) [] [1..10]
-(*let ff fn ini ini' xs = Seq.fold fn ini xs ini'
-let fn = fun f x st -> if st = 0 then [] else x :: f (st - 1)
-ff (fun f -> printfn "eval"; fn f ) (fun _ -> []) 3 ['a'..'z'] *)
+    let rec foldr (f : 'a -> Lazy<'s> -> 's) (init : 's) = function
+       | Cons (a, t) -> f a (lazy (foldr f init (t.Force())))
+       | Empty -> init
+
+    let isEmpty = function
+        | Cons _ -> false
+        | Empty -> true
+
+    let initInfinite initializer =
+        let rec f i =
+            Cons (initializer i, lazy ( f (i + 1) ))
+        f 0
+
+
+open FsharpMyExtension.ListZipper
+type LazyListZipper<'a> =
+    {
+        SrcList: LazyList<'a>
+        State: ListZipper.ListZ<'a>
+    }
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module LazyListZipper =
+    let create x src =
+        {
+            SrcList = src
+            State = ListZ.singleton x
+        }
+    let hole (llz:_ LazyListZipper) =
+        ListZ.hole llz.State
+
+    let next (llz:_ LazyListZipper) =
+        match ListZ.next llz.State with
+        | Some lz ->
+            { llz with
+                State = lz }
+            |> Some
+        | None ->
+            match llz.SrcList with
+            | Cons(x, xs) ->
+                { llz with
+                    SrcList = xs.Value
+                    State =
+                        ListZ.insertAfter x llz.State }
+                |> Some
+            | Empty -> None
+    let prev (llz:_ LazyListZipper) =
+        match ListZ.prev llz.State with
+        | Some lz ->
+            { llz with
+                State = lz }
+            |> Some
+        | None -> None
