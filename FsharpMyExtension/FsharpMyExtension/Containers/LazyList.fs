@@ -65,39 +65,47 @@ module LazyList =
 
 
 open FsharpMyExtension.ListZipper
-type LazyListZipper<'a> =
+open FsharpMyExtension.Either
+type LazyListZipper<'Error, 'a> =
     {
-        SrcList: LazyList<'a>
+        SrcList: Lazy<LazyList<Either<'Error, 'a>>>
         State: ListZipper.ListZ<'a>
     }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LazyListZipper =
+    type NextResult<'Error, 'a> =
+        | EndOfList
+        | Error of 'Error
+
     let create x src =
         {
             SrcList = src
             State = ListZ.singleton x
         }
-    let hole (llz:_ LazyListZipper) =
+    let hole (llz:LazyListZipper<'Error,_>) =
         ListZ.hole llz.State
 
-    let next (llz:_ LazyListZipper) =
+    let next (llz:LazyListZipper<'Error,_>) =
         match ListZ.next llz.State with
         | Some lz ->
             { llz with
                 State = lz }
-            |> Some
+            |> Right
         | None ->
-            match llz.SrcList with
+            match llz.SrcList.Value with
             | Cons(x, xs) ->
-                { llz with
-                    SrcList = xs.Value
-                    State =
-                        ListZ.insertAfter x llz.State }
-                |> Some
-            | Empty -> None
-    let prev (llz:_ LazyListZipper) =
+                match x with
+                | Right x ->
+                    { llz with
+                        SrcList = lazy xs.Value
+                        State =
+                            ListZ.insertAfter x llz.State }
+                    |> Right
+                | Left x -> Left (Error x)
+            | Empty -> Left EndOfList
+    let prev (llz:LazyListZipper<'Error,_>) =
         match ListZ.prev llz.State with
         | Some lz ->
             { llz with
