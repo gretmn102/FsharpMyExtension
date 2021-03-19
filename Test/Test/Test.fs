@@ -1105,6 +1105,21 @@ module ArrayTests =
                 let exp = [|0; 3; 4; 5; 6; 7; 8; 9; 10; 8|]
                 Assert.Equal("", exp, act)
         ]
+module Array2DTests =
+    open FsharpMyExtension
+
+    [<Tests>]
+    let mapStartMidEndTests =
+        testList "forallTest" [
+            testCase "one" <| fun () ->
+                let xs = Array.zeroCreate 6
+                let res =
+                    Array2D.ofListListD [[1..3]; [4..6]]
+                    |> Array2D.forall (fun x -> xs.[x - 1] <- x; true)
+
+                Assert.Equal("", [|1..6|], xs)
+                Assert.Equal("", true, res)
+        ]
 [<EntryPoint>]
 let main arg =
     defaultMainThisAssembly arg

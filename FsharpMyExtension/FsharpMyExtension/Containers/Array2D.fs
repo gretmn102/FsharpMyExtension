@@ -96,7 +96,7 @@ let ofBitmapFast (bmp:Bitmap) =
 //         bmp.UnlockBits(bmpData)
 
 //         let colors = Array2D.zeroCreate bmp.Height bmp.Width
-        
+
 //         let xss = rgbValues |> Array.chunkBySize 3
 //         printf "%f\n%d;%d" (float xss.Length / 3.) len (bmp.Height * bmp.Width)
 //         // xss |> Array.Parallel.iteri (fun i x ->
@@ -150,8 +150,8 @@ let toBitmapFast (xss:Color [,]) =
             | 0 -> x.B
             | _ -> failwith ""
         )
-    
-    
+
+
     // System.Threading.Tasks.Task.Factory.
 
     // System.Threading.Tasks.TaskFactory()
@@ -178,7 +178,7 @@ let toBitmap =
     toBitmapFast
 
 
-let toArrayArray xss = 
+let toArrayArray xss =
     let h = Array2D.length1 xss
     let w = Array2D.length2 xss
     Array.init h (fun i -> Array.init w (fun j -> xss.[i,j] ))
@@ -194,10 +194,10 @@ module Parallel =
     let iteri f = toT >> TwoDOp.Parallel.iter f
     let map f = toT >> TwoDOp.Parallel.map f
     let mapi f = toT >> TwoDOp.Parallel.mapi f
-    let toArrayArray xss = 
+    let toArrayArray xss =
         let h = Array2D.length1 xss
         let w = Array2D.length2 xss
-        
+
         let yss = Array.init h (fun _ -> Array.zeroCreate w)
         // for i = 0 to Array2D.length1 xss - 1 do
         //     for j = 0 to Array2D.length2 xss - 1 do
@@ -210,7 +210,7 @@ module Parallel =
         |> ofArAr
         |> toArrayArray
         |> (=) xss
-    let toArrayArray' xss = 
+    let toArrayArray' xss =
         let h = Array2D.length1 xss
         let w = Array2D.length2 xss
         Array.Parallel.init h (fun i ->
@@ -224,7 +224,7 @@ module Parallel =
         |> ofArAr
         |> toArrayArray'
         |> (=) xss
-    
+
 /// n*i + j
 /// Отображение двухмерного массива на одномерный.
 /// при `w = 3`:
@@ -275,3 +275,47 @@ let testTo2DArray () =
         to2DArray n i |> fun (i,j) ->
             Array2D.set act i j x) //printfn "%d%A" x i)
     exp = act
+
+let ofArray width xs =
+    let height = int (ceil (float32 (Array.length xs) / float32 width))
+    let xss = Array2D.zeroCreate height width
+
+    xs
+    |> Array.iteri (fun i x ->
+        xss.[i / width, i % width] <- x
+    )
+    xss
+
+let forall predicate xss =
+    let w, h = Array2D.length2 xss, Array2D.length1 xss
+    let rec f y =
+        if 0 <= y && y < h then
+            let rec g x =
+                if 0 <= x && x < w then
+                    if predicate xss.[y, x] then
+                        g (x + 1)
+                    else
+                        false
+                else
+                    f (y + 1)
+            g 0
+        else
+            true
+    f 0
+
+let foralli predicate xss =
+    let w, h = Array2D.length2 xss, Array2D.length1 xss
+    let rec f y =
+        if 0 <= y && y < h then
+            let rec g x =
+                if 0 <= x && x < w then
+                    if predicate y x xss.[y, x] then
+                        g (x + 1)
+                    else
+                        false
+                else
+                    f (y + 1)
+            g 0
+        else
+            true
+    f 0
