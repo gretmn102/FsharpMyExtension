@@ -75,7 +75,7 @@ type LazyListZipper<'Error, 'a> =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LazyListZipper =
-    type NextResult<'Error, 'a> =
+    type 'Error NextResult =
         | EndOfList
         | Error of 'Error
 
