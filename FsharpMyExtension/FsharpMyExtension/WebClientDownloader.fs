@@ -42,6 +42,17 @@ let post (headers:(string * string) list) (url:string) data =
     with
         | x -> Left x.Message
 
+let postData (headers:(string * string) list) contentType (url:string) data =
+    let hd = webClient.Headers
+    headers |> List.iter hd.Set
+    hd.Set(System.Net.HttpRequestHeader.ContentType, contentType)
+
+    try
+        webClient.UploadData(url, data)
+        |> Right
+    with
+        | x -> Left x.Message
+
 let get (headers:(string * string) list) (url:string) =
     let hd = webClient.Headers
 
