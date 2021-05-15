@@ -567,6 +567,31 @@ module LZCTests =
                 let e = LZC.ofList [x;y] |> LZC.next |> LZC.next
                 Assert.Equal("", e, act)
        ]
+    let removeLTest =
+        let rem = LZC.removeL >> Option.get
+        testList "LZC.RemoveL" [
+            testCase "base case" <| fun () ->
+                Assert.Equal("", None, LZC.ofList [1] |> LZC.removeL)
+            testCase "remove first elem of two" <| fun () ->
+                let x, y = 1, 2
+                let act = LZC.ofList [x;y] |> rem
+                Assert.Equal("", LZC.ofList [y] |> LZC.prev, act)
+            testCase "remove 2/2" <| fun () ->
+                let x, y = 1, 2
+                let act = LZC.ofList [x;y] |> LZC.prev |> rem
+                let e = LZC.ofList [x] |> LZC.prev
+                Assert.Equal("", e, act)
+            testCase "remove 2/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act = LZC.ofList [x;y;z] |> LZC.prev |> rem
+                let e = LZC.ofList [x;z] |> LZC.prev
+                Assert.Equal("", e, act)
+            testCase "remove 3/3" <| fun () ->
+                let x, y, z = 1, 2, 3
+                let act = LZC.ofList [x;y;z] |> LZC.prev |> LZC.prev |> rem
+                let e = LZC.ofList [x;y] |> LZC.prev |> LZC.prev
+                Assert.Equal("", e, act)
+        ]
 
 module Path =
     open FsharpMyExtension.Path
