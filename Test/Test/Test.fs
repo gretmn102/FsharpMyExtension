@@ -275,6 +275,60 @@ module ListTests =
             Assert.Equal("", (xsExp, stExp), act)
 module EitherTests =
     open FsharpMyExtension.Either
+    [<Tests>]
+    let seqEitherPseudoTest =
+        let seqEitherPseudo = Either.seqEitherPseudo
+        testList "seqEitherPseudoTest" [
+            testCase "BaseCase" <| fun () ->
+                let act =
+                    Right Seq.empty |> seqEitherPseudo |> List.ofSeq
+                Assert.Equal("", [], act)
+            testCase "Case2" <| fun () ->
+                let act =
+                    Left "0" |> seqEitherPseudo |> List.ofSeq
+                Assert.Equal("", [Left "0"], act)
+            testCase "Case3" <| fun () ->
+                let act =
+                    Right (seq[ Left "0"; Right 1 ]) |> seqEitherPseudo |> List.ofSeq
+                Assert.Equal("", [Left "0"; Right 1], act)
+        ]
+
+    [<Tests>]
+    let collectTest =
+        let collect = Either.collect
+        testList "collectTest" [
+            testCase "BaseCase" <| fun () ->
+                let act =
+                    Right 0 |> collect (Seq.singleton << Right) |> List.ofSeq
+                Assert.Equal("", [Right 0], act)
+            testCase "Case2" <| fun () ->
+                let act =
+                    Left "error" |> collect (Seq.singleton << Right) |> List.ofSeq
+                Assert.Equal("", [Left "error"], act)
+            testCase "Case3" <| fun () ->
+                let act =
+                    Right ()
+                    |> collect (fun _ -> seq [ Right 0; Left "left"; Right 1 ])
+                    |> List.ofSeq
+                Assert.Equal("", [Right 0; Left "left"; Right 1], act)
+        ]
+    [<Tests>]
+    let seqOptTest =
+        let seqOpt = Either.seqOpt
+        testList "seqOptTest" [
+            testCase "BaseCase1" <| fun () ->
+                let act =
+                    seqOpt (Left "")
+                Assert.Equal("", Some(Left ""), act)
+            testCase "BaseCase2" <| fun () ->
+                let act =
+                    seqOpt (Right (Some ""))
+                Assert.Equal("", Some(Right ""), act)
+            testCase "BaseCase3" <| fun () ->
+                let act =
+                    seqOpt (Right None)
+                Assert.Equal("", None, act)
+        ]
 
     let travBaseTests testListName fn =
         testList testListName [

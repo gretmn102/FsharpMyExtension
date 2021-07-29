@@ -1,5 +1,5 @@
 ﻿namespace FsharpMyExtension.Either
-open FsharpMyExtension
+
 [<Struct>]
 type Either<'a,'b> =
     | Left of Left : 'a
@@ -12,7 +12,7 @@ module Either =
     let map fn = function
         | Right x -> Right(fn x)
         | Left x -> Left x
-    /// either (f >> Left) (g >> Right)
+    /// `either (f >> Left) (g >> Right)`
     let mapBoth f g = function
         | Right x -> Right(g x)
         | Left x -> Left(f x)
@@ -40,28 +40,15 @@ module Either =
     let either f g = function
         | Right x -> g x
         | Left x -> f x
-    [<System.ObsoleteAttribute("use `mapBoth`", true)>]
-    let eitherE f g = either (f >> Left) (g >> Right)
 
     let ofOption s = function None -> Left s | Some x -> Right x
     let ofOptionWith s = function None -> Left(s()) | Some x -> Right x
 
-    //let travEitherPseudo f xs = either (Left >> Seq.singleton) (Seq.map <| bind f) xs
-    /// не похоже на sequenceA, ибо `f<t, f<x>> -> t<f<x>>` и результат не равен `fmap concat . sequenceA`
+    /// непохоже на sequenceA, ибо `f<t, f<x>> -> t<f<x>>` и результат не равен `fmap concat . sequenceA`
     let seqEitherPseudo xs = either (Left >> Seq.singleton) id xs
-    assert
-        [
-        Left "0" |> seqEitherPseudo |> List.ofSeq = [Left "0"]
-        Right (seq[ Left "0"; Right 1 ]) |> seqEitherPseudo |> List.ofSeq = [Left "0"; Right 1]
-        Right (seq[ ]) |> seqEitherPseudo |> List.ofSeq |> List.isEmpty ] |> List.forall id
+
     let listEitherPseudo xs = either (Left >> List.singleton) id xs
     let collect f = map f >> seqEitherPseudo
-    assert
-        [
-            Right 0 |> collect (Seq.singleton << Right) |> List.ofSeq = [Right 0]
-            Left "error" |> collect (Seq.singleton << Right) |> List.ofSeq = [Left "error"]
-            Right () |> collect (fun _ -> seq [ Right 0; Left "left"; Right 1 ]) |> List.ofSeq = [Right 0; Left "left"; Right 1]
-        ] |> List.forall id
 
     let getOrDef x = function Right x -> x | _ -> x
     let getOrElse f = function
@@ -86,13 +73,6 @@ module Either =
         | Left x -> Some (Left x)
         | Right x ->  (rf >> Option.map Right) x
     let seqOpt x = travOpt id x
-    assert
-        (Some(Left "") = (seqOpt (Left "") : Either<_,int> option))
-
-    assert
-        Some(Right "") = (seqOpt (Right <| Some "") : Either<int,string> option)
-    assert
-        (None = seqOpt (Right None))
 
     let toResult = function
         | Right x -> Ok x
@@ -100,20 +80,19 @@ module Either =
     let ofResult = function
         | Ok x -> Right x
         | Error x -> Left x
+
 module Operators =
     let (<*>) x f = Either.ap f x
     let (>>=) x f = Either.bind f x
     let (>=>) f g x = Either.bind g (f x)
     let preturn x = Right x
-    let (>>.) p1 p2 = p1 >>= k p2
-    let (>>%) p x = p >>= k (preturn x)
+    let (>>.) p1 p2 = p1 >>= fun _ -> p2
+    let (>>%) p x = p >>= fun _ -> (preturn x)
     let (.>>) p1 p2 = p1 >>= (>>%) p2
     let (|>>) p f = p >>= (f >> preturn)
     let (.>>.) p1 p2 =
-        // p >>= fun x -> p' |>> comma x
-        p1 >>= ((|>>) p2 << comma)
+        p1 >>= fun x -> p2 |>> fun y -> x, y
     let (<|>) p1 p2 = Either.orElse p1 p2
-
 
 [<RequireQualifiedAccess>]
 module List =
@@ -123,30 +102,16 @@ module List =
                 match fn x with
                 | Right x -> f (x::acc) xs
                 | Left x -> Left x
-            | [] -> Right acc
+            | [] -> Right (List.rev acc)
         f [] xs
 
     let seqEither xs =
-        // travEither id xs // дольше?
-        xs |> List.takeWhileRest Either.isRight
-        |> function
-            | xs, [] -> List.map Either.get xs |> Right
-            | _, Left x::_ -> Left x
-            | _ -> failwith ""
-    open FsharpMyExtension
+        travEither id xs
+
     let partitionEithers xs =
-        xs |> List.partition (Either.isLeft)
-        |> mapPair (List.map Either.getLeft) (List.map Either.get)
-
-    // assert
-    //     let xs : list<Either<unit, _>> = List.init 500000 Right
-    //     travEither id xs |> ignore
-    //     seqEither xs |> ignore
-    //     true
-    // let seqEither f = List.map f >> seqEither
-    // let ss xs = s id xs
-
-
+        xs
+        |> List.partition (Either.isLeft)
+        |> fun (xs, ys) -> List.map Either.getLeft xs, List.map Either.get ys
 
 [<RequireQualifiedAccess>]
 module Seq =
