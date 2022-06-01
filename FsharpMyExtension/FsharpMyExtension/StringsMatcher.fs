@@ -43,31 +43,54 @@ let toDic xs =
     |> slow
     |> fun (Dic(_, m)) -> m
 
+let lookup(from, max, deep, xs: (string * 'Value) []) =
+    let current = fst xs.[from]
+    if deep < current.Length then
+        let firstChar = current.[deep]
+        let rec loop from =
+            if from < max then
+                let currentChar = (fst xs.[from]).[deep]
+                if currentChar = firstChar then
+                    loop (from + 1)
+                else
+                    from
+            else
+                from
+
+        Some (firstChar, loop (from + 1))
+    else
+        None
+
 /// Значительно быстрее обобщенной реализации, да и память меньше ест
-let toDicStrings xs =
-    let dicEmpty = Dic(None, Map.empty)
-    let rec slow i (xs:list<string * _ list>) =
-        if Seq.isEmpty xs then dicEmpty
+let toDicStrings(xs: (string * 'Value) []): Container<char, 'Value> =
+    let rec f(from, max, deep, acc): Container<char, 'Value> =
+        if from < max then
+            let firstWord, firstValue = xs.[from]
+
+            let from, acc =
+                match lookup(from, max, deep, xs) with
+                | Some(firstChar, max) ->
+                    let v =
+                        let from, v =
+                            if deep + 1 < firstWord.Length then
+                                from, None
+                            else
+                                from + 1, Some firstValue
+
+                        let res = f(from, max, deep + 1, Map.empty)
+
+                        Dic(v, res)
+
+                    max, Map.add firstChar v acc
+
+                | None ->
+                    failwithf "the list contains the same words: %A" xs.[from]
+
+            f(from, max, deep, acc)
         else
-            let emptys, others =
-                xs
-                |> List.partition (
-                    fst >> (fun (x:string) -> not (i < x.Length) ) )
-            let emptys =
-                List.collect snd emptys
-                |> function
-                    | [x] -> Some x
-                    | [] -> None
-                    | xs -> failwithf "в списке есть одинаковые ключи:\n%A" xs
-            others
-            |> List.groupBy (fst >> (fun x -> x.[i]))
-            |> List.fold (fun m (k, v) ->
-                Map.add k (slow (i + 1) v) m) Map.empty
-            |> fun m -> Dic(emptys, m)
-    xs
-    |> List.map (fun (x, y) -> x, [y])
-    |> slow 0
-    |> fun (Dic(_, m)) -> m
+            acc
+
+    f(0, xs.Length, 0, Map.empty)
 
 module Serializator =
     let leftChar = '←'
