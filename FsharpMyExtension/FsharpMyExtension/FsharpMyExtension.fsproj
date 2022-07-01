@@ -19,6 +19,7 @@
     <None Include="App.config" />
     <Compile Include="Some/FsharpMyExtension.fs" />
     <Compile Include="Library1.fs" />
+    <Compile Include="Show.fs" />
     <Compile Include="Containers/List.fs" />
     <Compile Include="Containers/List1.fs" />
     <Compile Include="Containers/Either.fs" />
