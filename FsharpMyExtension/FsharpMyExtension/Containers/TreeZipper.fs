@@ -43,7 +43,8 @@ module TreeZipper =
                 |> Option.defaultWith (fun () -> ListZ.singleton (Node(x, lz)))
 
             (y, Some lz)::xs
-        | [] -> failwith "now is already now"
+        | xs ->
+            failwithf "expected _::_::xs but %A" xs
 
     let next (tz: 'a TreeZipper): 'a TreeZipper option =
         match tz with
@@ -66,6 +67,8 @@ module TreeZipper =
                 |> Option.defaultWith (fun () -> ListZ.singleton y)
 
             (x, Some lz)::xs
+        | [] ->
+            failwith "treezipper is empty"
 
     let update f (bs: 'a TreeZipper): 'a TreeZipper =
         match bs with
