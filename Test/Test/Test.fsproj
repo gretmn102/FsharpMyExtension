@@ -15,6 +15,7 @@
     <Compile Include="Array2D.fs" />
     <Compile Include="Bitmap.fs" />
     <Compile Include="StringMatcherTests.fs" />
+    <Compile Include="TreeZipperTest.fs" />
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
