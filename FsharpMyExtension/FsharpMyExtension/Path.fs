@@ -1,4 +1,6 @@
 module FsharpMyExtension.Path
+open System.IO
+
 let changeFileNameWithoutExt fname path =
     [|
         match System.IO.Path.GetDirectoryName path with
@@ -53,3 +55,12 @@ let getExtension (str:string) =
     if i < 0 then ""
     else
         str.[i..]
+
+let changeExt ext path =
+    [|
+        Path.GetDirectoryName path
+        string Path.DirectorySeparatorChar
+        Path.GetFileNameWithoutExtension path
+        ext
+    |]
+    |> System.String.Concat

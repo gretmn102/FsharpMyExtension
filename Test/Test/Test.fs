@@ -712,6 +712,17 @@ module Path =
                 Assert.Raise("", typeof<System.NullReferenceException>, (fun () -> getExtension null |> ignore))
         ]
 
+    [<Tests>]
+    let changeExtTests =
+        testList "changeExtTests" [
+            testCase "base" <| fun () ->
+                let input = @"E:\Project\SmallTask\sandbox3.fsx"
+                let exp = @"E:\Project\SmallTask\sandbox3.txt"
+                let act = changeExt ".txt" input
+
+                Assert.Equal("", exp, act)
+        ]
+
 module DateTimeTest =
     open FsharpMyExtension
     [<Tests>]
