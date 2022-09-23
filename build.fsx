@@ -93,7 +93,7 @@ Target.create "PushNuGetToGithub" (fun _ ->
     |> Option.defaultWith (fun () -> failwith "'**/*.nupkg' not found")
     |> DotNet.nugetPush (fun x ->
         { x with
-            PushParams = { x.PushParams with Source = Some "github" }}
+            PushParams = { x.PushParams with Source = Some "gitlab" }}
     )
 )
 
