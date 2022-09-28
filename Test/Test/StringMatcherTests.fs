@@ -235,12 +235,9 @@ let runOnListGreedyTest2 =
     )
 
 open FParsec
-open FsharpMyExtension.StringsMatcher.FParsec
 
-let runEither p str =
-    match FParsec.CharParsers.run p str with
-    | Success(x, _, _) -> Right x
-    | Failure(x, _, _) -> Left x
+open FsharpMyExtension.FParsecExt
+open FsharpMyExtension.StringsMatcher.FParsec
 
 [<Tests>]
 let keywordsLTest =

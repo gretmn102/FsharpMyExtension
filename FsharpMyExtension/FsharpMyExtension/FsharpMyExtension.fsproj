@@ -41,6 +41,7 @@
     <Compile Include="Map.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="HtmlAgilityPackExt.fs" />
+    <Compile Include="FParsecExt.fs" />
     <Compile Include="XPathLimited.fs" />
     <Compile Include="XmlBuilder.fs" />
     <Compile Include="Parser/ParserPrimitives2.fs" />

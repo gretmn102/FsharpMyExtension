@@ -32,6 +32,9 @@ type ContentType =
 
 module Parser =
     open FParsec
+
+    open FsharpMyExtension.FParsecExt
+
     /// https://www.w3.org/Protocols/rfc1341/4_Content-Type.html
     /// ```ebnf
     /// type :=     "application" / "audio"
@@ -128,8 +131,5 @@ module Parser =
                 }
             )
 
-    open FsharpMyExtension.Either
     let start rawContentType =
-        match run contentType rawContentType with
-        | Success(x, _, _) -> Right x
-        | Failure(x, _, _) -> Left x
+        runEither contentType rawContentType

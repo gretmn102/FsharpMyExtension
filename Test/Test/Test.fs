@@ -1,7 +1,6 @@
 open Fuchu
 open FsharpMyExtension.FSharpExt
 
-let ran = System.Random() |> fun x k n -> x.Next(k, n)
 module FsharpExt =
     [<Tests>]
     let For'Test =
@@ -12,11 +11,16 @@ module FsharpExt =
             testCase "fact" <| fun () ->
                 Assert.Equal("", List.reduce (*) [1..12], for' 1 12 (*) 1)
        ]
+
 module ParserXpath =
+    open FParsec
+
+    open FsharpMyExtension
     open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
-    open FParsec
     open FsharpMyExtension.XPathLimited
+    open FsharpMyExtension.FParsecExt
+
     [<Tests>]
     let ExecTest =
         testList "HtmlNode.isMatch" [
@@ -42,51 +46,48 @@ module ParserXpath =
                         |> HtmlNode.isMatch "a[@atr='attrVal'][text()='a2']"
                 Assert.Equal("", true, act)
        ]
-    let run str p =
-        match run p str with
-        | Success(x, _, _) -> Right x
-        | Failure(x, _, _) -> Left x
+
     [<Tests>]
     let parserTest =
         testList "xpath parse" [
             testCase "empty req" <| fun () ->
-                let k = run "" Parser.pname |> Either.isRight
+                let k = runEither Parser.pname "" |> Either.isRight
                 Assert.Equal("some", false, not k)
             testCase "only name tag without attributes" <| fun () ->
-                let k = run "a" Parser.pname |> Either.isRight
+                let k = runEither Parser.pname "a" |> Either.isRight
                 Assert.Equal("some", true, k)
             testCase "a[@href]" <| fun () ->
                 let xpath = "a[@href]"
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal(sprintf "%A" act, true, Either.isRight act)
             testCase "*[@att='value'][@*='value'][@*]" <| fun () ->
                 let xpath = "*[@att='value'][@*='value'][@*]"
                 let exp = Right { Name = None; Att = [(Some "att", Some "value"); (None, Some "value"); (None,None)]; Text = None}
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal("some", exp, act)
 
             testCase "any tag with some text: *[text()='some text in node']" <| fun () ->
                 let xpath = "*[text()='some text in node']"
                 let exp = Right { Name = None; Att = []; Text = Some "some text in node"}
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal("", exp, act)
             testCase "*[@att='value'][text()='some text in node']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node']"
                 let exp = Right { Name = None; Att = [(Some "att", Some "value");]; Text = Some "some text in node"}
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal("", exp, act)
             testCase "text between attributes: *[@att='value'][text()='some text in node'][@att2='val']" <| fun () ->
                 let xpath = "*[@att='value'][text()='some text in node'][@att2='val']"
                 let exp = Right { Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal("", exp, act)
             testCase "two text: *[text()='some text in node'][text()='txt2']" <| fun () ->
                 let xpath = "*[text()='some text in node'][text()='txt2']"
                 //let exp = Right({ Name = None; Att = [(Some "att", Some "value"); Some "att2", Some "val" ]; Text = Some "some text in node"}, [])
-                let act = run xpath Parser.res
+                let act = runEither Parser.res xpath
                 Assert.Equal("", true, Either.isLeft act)
         ]
-    open FsharpMyExtension
+
     [<Tests>]
     let showsTest =
         testList "xpath parse" [

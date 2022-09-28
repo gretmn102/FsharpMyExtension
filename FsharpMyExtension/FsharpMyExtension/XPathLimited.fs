@@ -10,7 +10,9 @@ type Req = {
 // https://www.w3schools.com/xml/xpath_syntax.asp
 module Parser =
     open FParsec
+
     open FsharpMyExtension
+    open FsharpMyExtension.FParsecExt
 
     let pname = (pchar '*' >>% None) <|> (manySatisfy (isNoneOf " []=") |>> Some)
     let pval = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''
@@ -33,11 +35,8 @@ module Parser =
                         | y -> xs @ y
                     { Name = name; Att = atts; Text = txt })
             .>> eof
-    open FsharpMyExtension.Either
-    let run str =
-        match run res str with
-        | Success(x, _, _) -> Right x
-        | Failure(x, _, _) -> Left x
+
+    let run str = runEither res str
 
 module ShowReq =
     open FsharpMyExtension.ShowList
