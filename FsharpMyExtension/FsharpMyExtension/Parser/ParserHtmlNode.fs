@@ -2,67 +2,6 @@
 open FsharpMyExtension
 open FsharpMyExtension.FSharpExt
 
-
-module ParHtmlNode =
-    open Primitives
-    open FsharpMyExtension
-    open FsharpMyExtension.HtmlAgilityPackExt
-    open FsharpMyExtension.Either
-    open HtmlAgilityPack
-
-    let private satisfy f note noteExpected =
-        satisfy f note noteExpected : Pars<HtmlNode,_>
-
-    let nodePrint (node:HtmlNode) =
-        match node.NodeType with
-        | HtmlNodeType.Text ->
-            sprintf "htmlText, contain:\n'%s'" (HtmlNode.innerText node)
-        | _ ->
-            sprintf "<%s %s>\n%s\n</%s>"
-                (HtmlNode.name node)
-                (node.Attributes
-                    |> Seq.map (fun x -> sprintf "%s='%s'" x.Name x.Value)
-                    |> String.concat " ")
-                node.InnerHtml
-                node.Name
-    let textEmpty =
-        satisfy (fun node ->
-                match HtmlNode.nodeType node with
-                | HtmlNodeType.Text -> HtmlNode.IsNullOrWhiteSpace node
-                | _ -> false)
-            (fun x -> sprintf "type: %A\ncontent: %s" x.NodeType x.InnerText)
-            "text node or empty"
-    let br = satisfy (HtmlNode.name >> (=) "br") nodePrint "node with name \"br\""
-    let ptext =
-        satisfy
-            (cond (HtmlNode.nodeType >> (=) HtmlNodeType.Text)
-                (not << HtmlNode.IsNullOrWhiteSpace)
-                (k false))
-            nodePrint "text node"
-
-    let pcomm =
-        satisfy (HtmlNode.nodeType >> (=) HtmlNodeType.Comment)
-            nodePrint
-            "comment node"
-
-    let takeNC name content =
-        satisfy (fun x -> HtmlNode.name x = name && HtmlNode.innerText x = content)
-            (sprintf "expected node with name: '%s' and content:\n'%s', but take %A"
-                name content)
-    let takeN name =
-        satisfy (fun x -> x.Name = name)
-            (sprintf "expected node with name: '%s', but take %A" name)
-    let takeC content =
-        satisfy (fun x -> HtmlNode.innerText x = content)
-            (sprintf "expected node with content:\n'%s', but take %A" content)
-
-    let ws = many textEmpty
-    let takr (xpath:string) =
-        satisfy (XPathLimited.HtmlNode.isMatch xpath) nodePrint xpath
-        .>> ws
-    let sub (p:Pars<_,_>) (x:HtmlNode) =
-        preturn (run x.ChildNodes (ws >>. p)) |> trav : Pars<_,_>
-    let (>>@) p x = p >>= sub x
 module ParHtmlNode2 =
     open Primitives2
     open FsharpMyExtension
