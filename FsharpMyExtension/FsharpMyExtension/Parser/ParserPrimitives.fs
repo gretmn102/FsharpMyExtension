@@ -1,4 +1,4 @@
-module Parser.Primitives2
+module Parser.Primitives
 open FsharpMyExtension
 open FsharpMyExtension.Either
 open FsharpMyExtension.Tree

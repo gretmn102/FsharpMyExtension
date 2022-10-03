@@ -12,13 +12,13 @@ open Fuchu
 // #endif
 
 open FsharpMyExtension.Tree
-open Parser.Primitives2
+open Parser.Primitives
 
 let change s = Left (true, Node(NotBack s, []))
 
 let xs = [1..5]
 [<Tests>]
-let runTest = 
+let runTest =
     testCase "run; praw" <| fun () ->
         Assert.Equal("", ((List.tail xs, ()), List.head xs |> Right), run xs praw)
 
@@ -70,7 +70,7 @@ let orTest =
             let expected = (xs,()), Left (false, Node(Or, [Tree.singleton <| NotBack ""; Tree.singleton <| NotBack ""]))
             Assert.Equal("", expected, (run xs (pzero <|> pzero) : Result<int,int,_>))
         testCase "sdf" <| fun () ->
-            
+
             Assert.Equal("", (([],()), Left (true, Tree.singleton <| NotBack "1")), (run [1] (((praw .>> (pzero <?> "1")) <|> praw)) : Result<int, int,_>))
         testCase "right" <| fun () ->
             Assert.Equal("",  ((List.tail xs,()), List.head xs |> Right), run xs (pzero <|> praw))
@@ -105,7 +105,7 @@ let attemptTest =
         testCase "very big stmt (state test)" <| fun () ->
             let choice xs = Seq.reduce (<|>) xs
             let p : Pars<_,unit,_> = attempt (choice [pzero; praw >>? pzero; pzero; praw >>? pzero] ) <|> pzero
-            
+
 //            |> mapSnd (Either.either (fun x -> Tree.visualize (sprintf "%A") (snd x) ) (sprintf "Right - %A"))
             Assert.Equal("", (xs,()), fst <| run xs (attempt p <|> pzero))
         // testCase "attempt in attempt" <| fun () ->
@@ -154,14 +154,14 @@ let sepByTest =
         //     ([1..5], 0) |> fun (xs, sep) ->
         //     List.map List.singleton xs
         //     |> List.reduce (fun x y -> x @ [sep] @ y) |> flip List.append [0]
-        //     |> fun ys -> 
+        //     |> fun ys ->
         //     Assert.Equal("", ([sep], Right xs), run ys (sepBy praw (satisfy ((=) 0) null)))
         // testCase "attempt in attempt" <| fun () ->
         //     ([1..5], 0) |> fun (xs, sep) ->
         //     List.map List.singleton xs
         //     |> List.reduce (fun x y -> x @ [sep] @ y) |> List.append [0]
         //     |> fun xs -> (* ([sep], Right [1; 2; 3; 4; 5]) = *) run xs (sepBy praw (satisfy ((=) 0) null))
-            
+
         //     Assert.Equal("", (List.tail ys, List.head xs |> Right), run xs (praw .>> praw))
     ]
 

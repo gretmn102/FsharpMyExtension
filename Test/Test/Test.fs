@@ -137,7 +137,7 @@ module ParserXpath =
 
 module ParserStringTest =
     open Parser
-    open Parser.Primitives2
+    open Parser.Primitives
     open Parser.ParserString
     open FsharpMyExtension.Either
 

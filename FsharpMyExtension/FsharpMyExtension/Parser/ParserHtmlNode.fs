@@ -3,7 +3,7 @@ open FsharpMyExtension
 open FsharpMyExtension.FSharpExt
 
 module ParHtmlNode2 =
-    open Primitives2
+    open Primitives
     open FsharpMyExtension
     open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
@@ -71,7 +71,7 @@ module ParHtmlNode2 =
     open FsharpMyExtension.XmlBuilder
     let run p nodes =
         let (xs, _), res =
-            Parser.Primitives2.run nodes p
+            run nodes p
         match res with
         | Right x -> Right x
         | Left x ->
@@ -172,7 +172,7 @@ module ParHtmlNode2 =
         |> ShowList.show
 
 module NodeParser =
-    open Primitives2
+    open Primitives
     open FsharpMyExtension
     open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Either
@@ -205,4 +205,4 @@ module NodeParser =
     let pbody p =
         ofLinearParser
             (fun (node:HtmlNode) -> node.ChildNodes)
-            (Primitives2.(>>.) ParHtmlNode2.ws p)
+            (Primitives.(>>.) ParHtmlNode2.ws p)

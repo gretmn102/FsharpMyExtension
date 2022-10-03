@@ -153,7 +153,7 @@ let runs node (st:'u) (p:FixedParser<'Node, _,_>) = (node, st) |> p
 let ofLinearParser get p =
     satisfyRaw (fun (node, u) ->
         let (_, (u:'u)), res =
-            Primitives2.runs (get node) u p
+            Primitives.runs (get node) u p
 
         match res with
         | Right x ->
@@ -162,9 +162,9 @@ let ofLinearParser get p =
             let res =
                 tree
                 |> Tree.Tree.map (function
-                    | Primitives2.NotBack x -> NotBack x
-                    | Primitives2.Or -> Or
-                    | Primitives2.Back(xs, x) -> // TODO: что делать с `xs`?
+                    | Primitives.NotBack x -> NotBack x
+                    | Primitives.Or -> Or
+                    | Primitives.Back(xs, x) -> // TODO: что делать с `xs`?
                         Back x
                 )
             Left(isChanged, res)
@@ -172,7 +172,7 @@ let ofLinearParser get p =
     )
 
 let toLinearParser p =
-    Primitives2.satisfyRaw (fun (node, u) ->
+    Primitives.satisfyRaw (fun (node, u) ->
         let (_, (u:'u)), res =
             runs node u p
 
@@ -182,10 +182,10 @@ let toLinearParser p =
             let res =
                 tree
                 |> Tree.map (function
-                    | NotBack x -> Primitives2.NotBack x
-                    | Or -> Primitives2.Or
+                    | NotBack x -> Primitives.NotBack x
+                    | Or -> Primitives.Or
                     | Back x ->
-                        Primitives2.Back (Seq.empty, x)
+                        Primitives.Back (Seq.empty, x)
                 )
             Left(isChanged, res)
         |> fun x -> u, x

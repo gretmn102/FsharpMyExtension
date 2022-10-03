@@ -3,7 +3,7 @@
 module ParserString =
     open FsharpMyExtension
     open FsharpMyExtension.Either
-    open Parser.Primitives2
+    open Parser.Primitives
 
     type Parser<'T, 'UserState> = Pars<char, 'T, 'UserState>
 
