@@ -1,24 +1,13 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
-#r "paket:
-  nuget Fake.Core.Target
-  nuget Fake.Core.Process
-  nuget Fake.DotNet.Cli
-  nuget Fake.Core.ReleaseNotes
-  nuget Fake.DotNet.AssemblyInfoFile
-  nuget Fake.DotNet.Paket
-  nuget Fake.Tools.Git
-  nuget Fake.Core.Environment
-  nuget Fake.Core.UserInput
-  nuget Fake.IO.FileSystem
-  nuget Fake.IO.Zip
-  nuget Fake.DotNet.MsBuild
-  nuget Fake.Api.GitHub
-  nuget Microsoft.Build"
-#load ".fake/build.fsx/intellisense.fsx"
-open Fake.IO.Globbing.Operators
+#r "paket: groupref build //"
+#load "./.fake/build.fsx/intellisense.fsx"
+#r "netstandard"
+
 open Fake.Core
+open Fake.IO
+open Fake.IO.Globbing.Operators
 // --------------------------------------------------------------------------------------
 // Build variables
 // --------------------------------------------------------------------------------------
@@ -32,98 +21,80 @@ let f projName =
         |> List.ofSeq
         |> failwithf "'%s' expected exactly one but:\n%A" pattern
     )
+
 let testProjName = "Test"
 let testProjPath = f testProjName
+let testsProjDir = Path.getDirectory testProjPath
 let mainProjName = "FsharpMyExtension"
 let mainProjPath = f mainProjName
+let mainProjDir = Path.getDirectory mainProjPath
+
+let deployDir = Path.getFullName "./deploy"
 // --------------------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------------------
 open Fake.DotNet
-let buildConf = DotNet.BuildConfiguration.Release
-let dotnetSdk = lazy DotNet.install DotNet.Versions.FromGlobalJson
-let inline dtntSmpl arg = DotNet.Options.lift dotnetSdk.Value arg
 
+let dotnet cmd workingDir =
+    let result = DotNet.exec (DotNet.Options.withWorkingDirectory workingDir) cmd ""
+    if result.ExitCode <> 0 then failwithf "'dotnet %s' failed in %s" cmd workingDir
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
-Target.create "BuildMainProj" (fun _ ->
-    mainProjPath
-    |> Fake.IO.Path.getDirectory
-    |> DotNet.build (fun x ->
-        // Чтобы в Linux'е не компилировался net461, дан этот костыль:
-        { x with
-                Configuration = buildConf
-                Framework =
-                    if not Environment.isWindows then
-                        Some "netcoreapp3.1"
-                    else
-                        None
-                }
-        |> dtntSmpl)
-)
-Target.create "BuildTest" (fun _ ->
-    testProjPath
-    |> Fake.IO.Path.getDirectory
-    |> DotNet.build (fun x ->
-        // Чтобы в Linux'е не компилировался net461, дан этот костыль:
-        { x with
-                Configuration = buildConf
-                Framework =
-                    if not Environment.isWindows then
-                        Some "netcoreapp3.1"
-                    else
-                        None
-                }
-        |> dtntSmpl)
+Target.create "Clean" (fun _ -> Shell.cleanDir deployDir)
+
+Target.create "Build" (fun _ ->
+    mainProjDir
+    |> dotnet "build -c Release"
 )
 
-Target.create "NuGet" (fun _ ->
-    mainProjPath
-    |> System.IO.Path.GetDirectoryName
-    |> DotNet.pack (fun x ->
-        { x with Configuration = DotNet.BuildConfiguration.Release }
-        |> dtntSmpl
-    )
+Target.create "Deploy" (fun _ ->
+    let target = "-f net461"
+    mainProjDir
+    |> dotnet (sprintf "build -c Release -o \"%s\" %s" deployDir target)
 )
 
-Target.create "PushNuGetToGithub" (fun _ ->
-    let packPath = !! "**/*.nupkg" |> Seq.tryHead
-    packPath
-    |> Option.defaultWith (fun () -> failwith "'**/*.nupkg' not found")
-    |> DotNet.nugetPush (fun x ->
-        { x with
-            PushParams = { x.PushParams with Source = Some "gitlab" }}
-    )
+Target.create "Pack" (fun _ ->
+    mainProjDir
+    |> dotnet (sprintf "pack -c Release -o \"%s\"" deployDir)
 )
 
-let run projName projPath =
-    let dir = Fake.IO.Path.getDirectory projPath
-    let localpath = sprintf "bin/%A/net461/%s.exe" buildConf projName
-    let path = Fake.IO.Path.combine dir localpath
-    if not <| Fake.IO.File.exists path then
-        failwithf "not found %s" path
+Target.create "PushToGitlab" (fun _ ->
+    let packPathPattern = sprintf "%s/*.nupkg" deployDir
+    let packPath =
+        !! packPathPattern |> Seq.tryExactlyOne
+        |> Option.defaultWith (fun () -> failwithf "'%s' not found" packPathPattern)
 
-    Command.RawCommand(path, Arguments.Empty)
-    |> CreateProcess.fromCommand
-    |> CreateProcess.withWorkingDirectory (Fake.IO.Path.getDirectory path)
-    |> Proc.run
-
-Target.create "Test" (fun _ ->
-    let x = run testProjName testProjPath
-    if x.ExitCode <> 0 then
-        failwith "test error"
+    deployDir
+    |> dotnet (sprintf "nuget push -s %s %s" "gitlab" packPath)
 )
 
-// Target "Release" DoNothing
+Target.create "BuildTests" (fun _ ->
+    testsProjDir
+    |> dotnet "build -c Release"
+)
+
+Target.create "RunTestsNet461" (fun _ ->
+    testsProjDir
+    |> dotnet "run -c Release -f net461"
+)
+
 // --------------------------------------------------------------------------------------
 // Build order
 // --------------------------------------------------------------------------------------
 open Fake.Core.TargetOperators
 
-"NuGet"
-  ==> "PushNuGetToGithub"
+"Build"
 
-"BuildTest"
-  ==> "Test"
-Target.runOrDefault "BuildMainProj"
+"Clean"
+  ==> "Deploy"
+
+// "Clean"
+//   ==> "Pack"
+//   ==> "PushToGitlab"
+
+"BuildTests"
+
+"RunTestsNet461"
+
+Target.runOrDefault "Deploy"
