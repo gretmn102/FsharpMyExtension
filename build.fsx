@@ -89,9 +89,9 @@ open Fake.Core.TargetOperators
 "Clean"
   ==> "Deploy"
 
-// "Clean"
-//   ==> "Pack"
-//   ==> "PushToGitlab"
+"Clean"
+  ==> "Pack"
+  ==> "PushToGitlab"
 
 "BuildTests"
 

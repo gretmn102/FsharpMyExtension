@@ -4,17 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "run",
+            "label": "RunTestsNet461",
             "type": "shell",
-            "command": "build.cmd",
+            "command": "build",
             "args": [
                 "-t",
-                "Test"
+                "RunTestsNet461"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "problemMatcher": []
         }
     ]
