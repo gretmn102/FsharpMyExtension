@@ -12,3 +12,13 @@ let runResult p str =
     match run p str with
     | Success(res, _, _) -> Result.Ok res
     | Failure(errMsg, _, _) -> Result.Error errMsg
+
+let pbigint<'UserState> : Primitives.Parser<_, 'UserState> =
+    let digitsToNum xs =
+        xs
+        |> List.rev
+        |> List.fold (fun (acc, i) x ->
+            (acc + x * pown 10I i, i + 1)
+             ) (0I, 0)
+        |> fst
+    many1 digit |>> (List.map (fun d -> bigint (int d - 48)) >> digitsToNum)
