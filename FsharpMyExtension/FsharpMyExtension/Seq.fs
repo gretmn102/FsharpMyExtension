@@ -92,3 +92,22 @@ let concatSep sep (xs:_ seq) =
                 x <- xs.Current
                 yield x
     }
+
+let r = System.Random()
+
+/// Generate sequence with random number from 0 to length. For example:
+/// ```fsharp
+/// generateRandomSequence 4
+/// ```
+/// return `seq [1; 3; 0; 2]` or `seq [1; 2; 0; 3]`, etc.
+let generateRandomSequence length =
+    let rec f length (xs: int []) =
+        seq {
+            if length > 0 then
+                let n = r.Next(0, length)
+
+                yield xs.[n]
+                yield! f (length - 1) (Array.removeAt n xs)
+        }
+
+    f length [|0..length - 1|]

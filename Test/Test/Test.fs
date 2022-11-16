@@ -877,6 +877,28 @@ module SeqTests =
             )
         ]
 
+    [<Tests>]
+    let generateRandomSequenceTests =
+        testList "generateRandomSequenceTests" [
+            testCase "length = 0" <| fun () ->
+                let act = Seq.generateRandomSequence 0 |> List.ofSeq
+                let exp = []
+
+                Assert.Equal("", exp, act)
+
+            testCase "length = 1" <| fun () ->
+                let act = Seq.generateRandomSequence 1 |> List.ofSeq
+                let exp = [0]
+
+                Assert.Equal("", exp, act)
+
+            testCase "length = 10" <| fun () ->
+                let act = Seq.generateRandomSequence 10 |> List.ofSeq |> List.sort
+                let exp = [0..9]
+
+                Assert.Equal("", exp, act)
+        ]
+
 module WebDownloader =
     open FsharpMyExtension
     open FsharpMyExtension.WebDownloader
