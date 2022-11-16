@@ -1015,6 +1015,21 @@ module ArrayTests =
                 let exp = [|0; 3; 4; 5; 6; 7; 8; 9; 10; 8|]
                 Assert.Equal("", exp, act)
         ]
+
+    [<Tests>]
+    let removeAtTests =
+        testList "removeAtTests" [
+            yield! [
+                    [|2; 3|], (0, [|1..3|])
+                    [|1; 3|], (1, [|1..3|])
+                    [|1; 2|], (2, [|1..3|])
+                ]
+                |> List.map (fun (exp, (i, xs)) ->
+                    testCase (sprintf "(%d, %A)" i xs) <| fun () ->
+                        Assert.Equal("", exp, Array.removeAt i xs)
+                )
+        ]
+
 module Array2DTests =
     open FsharpMyExtension
 

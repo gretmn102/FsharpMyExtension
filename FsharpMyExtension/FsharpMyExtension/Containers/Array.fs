@@ -85,3 +85,10 @@ let mapStartMidEnd start mid fend (xs: _ []) =
             for i in 1..length - 2 do
                 ys.[i] <- mid xs.[i]
     ys
+
+/// Create new array without element by target index.
+let removeAt i (xs: _ []) =
+    Array.init (xs.Length - 1) (fun i' ->
+        if i' < i then xs.[i']
+        else  xs.[i' + 1]
+    )
