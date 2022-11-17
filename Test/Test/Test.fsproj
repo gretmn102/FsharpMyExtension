@@ -17,6 +17,7 @@
     <Compile Include="StringMatcherTests.fs" />
     <Compile Include="TreeZipperTest.fs" />
     <Compile Include="FParsecExtTests.fs" />
+    <Compile Include="ColorExtTests.fs" />
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
