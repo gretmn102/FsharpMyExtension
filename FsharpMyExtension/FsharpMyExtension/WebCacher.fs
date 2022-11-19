@@ -1,4 +1,4 @@
-module FsharpMyExtension.WebCache
+namespace FsharpMyExtension
 open FsharpMyExtension
 open FsharpMyExtension.Either
 
