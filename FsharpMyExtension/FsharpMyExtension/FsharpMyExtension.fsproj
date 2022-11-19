@@ -68,6 +68,7 @@
     <Compile Include="WebDownloader.fs" />
     <Compile Include="WebDownloaderParallel.fs" />
     <Compile Include="WebClientDownloader.fs" />
+    <Compile Include="WebCacher.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
