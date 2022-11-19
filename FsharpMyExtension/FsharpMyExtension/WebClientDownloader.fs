@@ -84,3 +84,13 @@ let patch (headers:(string * string) list) (url:string) (data:string) =
         |> Right
     with
         | x -> Left x.Message
+
+let getData (headers: (string * string) list) (url: string) =
+    let hd = webClient.Headers
+
+    headers |> List.iter hd.Set
+    try
+        webClient.DownloadData url
+        |> Right
+    with
+        | x -> Left x.Message
