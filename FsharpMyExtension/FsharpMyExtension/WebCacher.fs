@@ -18,11 +18,15 @@ module WebCacher =
     let get headers dataMapper url (webCacher: WebCacher<'Data>) =
         match Map.tryFind url webCacher.Cache with
         | Some data ->
-            Ok data
+            Ok(data, None)
         | None ->
             match WebClientDownloader.getData headers url with
             | Right data ->
-                dataMapper data
-                |> Ok
+                let data = dataMapper data
+                let webCacher =
+                    { webCacher with
+                        Cache = Map.add url data webCacher.Cache
+                    }
+                Ok(data, Some webCacher)
             | Left errMsg ->
                 Error errMsg
