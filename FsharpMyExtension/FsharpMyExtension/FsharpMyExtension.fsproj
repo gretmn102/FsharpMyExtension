@@ -71,6 +71,7 @@
     <Compile Include="WebCacher.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Scheduler.fs" />
+    <Compile Include="StringCompression.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
