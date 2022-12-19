@@ -10,16 +10,30 @@ module Json =
     let des x = JsonConvert.DeserializeObject<_> x
     let desf path = System.IO.File.ReadAllText path |> des
 
-    let bsonDesb (bytes:byte []) =
+[<RequireQualifiedAccess>]
+module Bson =
+    open Newtonsoft.Json
+
+    let serialize v =
+        use m = new System.IO.MemoryStream()
+        use bwr = new Bson.BsonDataWriter(m)
+        let ser = JsonSerializer()
+        ser.Formatting <- Formatting.None
+        ser.Serialize(bwr, v)
+        m.ToArray()
+
+    let deserializeBytes (bytes: byte []) =
         use m = new System.IO.MemoryStream(bytes)
         use x = new Bson.BsonDataReader(m)
         let json = JsonSerializer()
         json.Deserialize<_> x
-    let bsonDesf path =
+
+    let deserializeFile path =
         let txt = System.IO.File.OpenRead path
         use x = new Bson.BsonDataReader(txt)
         let json = JsonSerializer()
         json.Deserialize<_> x
+
 module JToken =
     let ofFile (path:string) =
         use st = System.IO.File.OpenText path
