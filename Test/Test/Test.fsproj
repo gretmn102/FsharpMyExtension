@@ -20,6 +20,7 @@
     <Compile Include="ColorExtTests.fs" />
     <Compile Include="WebCacherTests.fs" />
     <Compile Include="StringCompressionTests.fs" />
+    <Compile Include="JsonTests.fs" />
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
