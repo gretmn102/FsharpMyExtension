@@ -2,9 +2,9 @@ storage: none
 source https://api.nuget.org/v3/index.json
 
 framework: net461, netstandard2.0, netcoreapp3.1
-nuget FParsec
-nuget FSharp.Core
-nuget FuChu
+nuget FParsec = 1.1.1
+nuget FSharp.Core = 4.7.2
+nuget FuChu = 1.1
 nuget HtmlAgilityPack
 nuget Newtonsoft.Json
 nuget Newtonsoft.Json.Bson

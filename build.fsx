@@ -74,20 +74,22 @@ Target.create "Meta" (fun _ ->
     |> File.write false "Directory.Build.props"
 )
 
+let commonBuildArgs = "-c Release -p:DefineConstants="
+
 Target.create "Build" (fun _ ->
     mainProjDir
-    |> dotnet "build -c Release"
+    |> dotnet (sprintf "build %s" commonBuildArgs)
 )
 
 Target.create "Deploy" (fun _ ->
     let target = "-f net461"
     mainProjDir
-    |> dotnet (sprintf "build -c Release -o \"%s\" %s" deployDir target)
+    |> dotnet (sprintf "build %s %s -o \"%s\"" commonBuildArgs target deployDir)
 )
 
 Target.create "Pack" (fun _ ->
     mainProjDir
-    |> dotnet (sprintf "pack -c Release -o \"%s\"" deployDir)
+    |> dotnet (sprintf "pack %s -o \"%s\"" commonBuildArgs deployDir)
 )
 
 Target.create "PushToGitlab" (fun _ ->
@@ -102,12 +104,12 @@ Target.create "PushToGitlab" (fun _ ->
 
 Target.create "BuildTests" (fun _ ->
     testsProjDir
-    |> dotnet "build -c Release"
+    |> dotnet (sprintf "build %s" commonBuildArgs)
 )
 
 Target.create "RunTestsNet461" (fun _ ->
     testsProjDir
-    |> dotnet "run -c Release -f net461"
+    |> dotnet (sprintf "run %s -f net461" commonBuildArgs)
 )
 
 // --------------------------------------------------------------------------------------

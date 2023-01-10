@@ -12,6 +12,36 @@
                 "RunTestsNet461"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "DeployNet461",
+            "type": "shell",
+            "command": "build",
+            "args": [
+                "-t",
+                "Deploy"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Pack",
+            "type": "shell",
+            "command": "build",
+            "args": [
+                "-t",
+                "Pack"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "PushToGitlab",
+            "type": "shell",
+            "command": "build",
+            "args": [
+                "-t",
+                "PushToGitlab"
+            ],
+            "problemMatcher": []
         }
     ]
 }
