@@ -60,9 +60,9 @@ Target.create "Meta" (fun _ ->
         "</ItemGroup>"
         "<PropertyGroup>"
         "    <EmbedUntrackedSources>true</EmbedUntrackedSources>"
-        "    <PackageProjectUrl>https://github.com/gretmn102/IfEngine</PackageProjectUrl>"
+        "    <PackageProjectUrl>https://github.com/gretmn102/FsharpMyExtension</PackageProjectUrl>"
         "    <PackageLicenseExpression>MIT</PackageLicenseExpression>"
-        "    <RepositoryUrl>https://github.com/gretmn102/IfEngine.git</RepositoryUrl>"
+        "    <RepositoryUrl>https://github.com/gretmn102/FsharpMyExtension.git</RepositoryUrl>"
         sprintf "    <PackageReleaseNotes>%s</PackageReleaseNotes>"
             (String.concat "\n" release.Notes |> XmlText.escape)
         "    <PackageTags>interactive-fiction;fsharp</PackageTags>"
