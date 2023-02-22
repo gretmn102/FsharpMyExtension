@@ -31,8 +31,6 @@
         <Compile Include="Containers/Array.fs" />
         <Compile Include="Containers/LZ.fs" />
         <Compile Include="Containers/LazyList.fs" />
-        <!-- <Compile Include="Containers/LZLazy.fs" /> -->
-        <!-- <Compile Include="Containers/LZLazy2.fs" /> -->
         <Compile Include="Containers/ListZipperC.fs" />
         <Compile Include="Containers/ListZipperC2.fs" />
         <Compile Include="Queue.fs" />
