@@ -116,3 +116,34 @@ module FSharpExt =
         ) fmt
     // System.Console.BackgroundColor <- System.ConsoleColor.Black
     // System.Console.ForegroundColor <- System.ConsoleColor.Gray
+
+    type PipeBackwardBuilder() =
+        member __.Bind (f, next) =
+            f next
+
+        member __.Return x =
+            x
+
+    /// ```fsharp
+    /// let print str next =
+    ///     printf "%s" str
+    ///     next ()
+    ///
+    /// let readLine () next =
+    ///     System.Console.ReadLine ()
+    ///     |> next
+    ///
+    /// let withoutBuilder () =
+    ///     print "Input your name: " <| fun () ->
+    ///     readLine () <| fun name ->
+    ///     print (sprintf "Your name is %s" name) <| fun () ->
+    ///     ()
+    ///
+    /// let withBuilder () =
+    ///     pipeBackwardBuilder {
+    ///         do! print "Input your name: "
+    ///         let! name = readLine ()
+    ///         do! print (sprintf "Your name is %s" name)
+    ///     }
+    /// ```
+    let pipeBackwardBuilder = PipeBackwardBuilder()
