@@ -4,7 +4,7 @@
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\FsharpMyExtension\FsharpMyExtension\FsharpMyExtension.fsproj" AdditionalProperties="DefineConstants=">
+    <ProjectReference Include="..\..\src\FsharpMyExtension.fsproj" AdditionalProperties="DefineConstants=">
       <Name>FsharpMyExtension.fsproj</Name>
     </ProjectReference>
   </ItemGroup>
