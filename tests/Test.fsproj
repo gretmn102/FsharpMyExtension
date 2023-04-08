@@ -4,7 +4,7 @@
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FsharpMyExtension.fsproj" AdditionalProperties="DefineConstants=">
+    <ProjectReference Include="..\src\FsharpMyExtension.fsproj" AdditionalProperties="DefineConstants=">
       <Name>FsharpMyExtension.fsproj</Name>
     </ProjectReference>
   </ItemGroup>
@@ -22,5 +22,5 @@
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

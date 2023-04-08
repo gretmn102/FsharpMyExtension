@@ -5,9 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsharpMyExtension", "src\FsharpMyExtension.fsproj", "{44347609-BE43-4724-95BA-AFF4636E1C39}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{9E074A17-59AB-4007-996F-231B703E87BD}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test", "Test\Test\Test.fsproj", "{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Test", "tests\Test.fsproj", "{2DB38BBD-B091-421C-8BAA-97FD017B1066}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,16 +16,13 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031}.Release|Any CPU.Build.0 = Release|Any CPU
 		{44347609-BE43-4724-95BA-AFF4636E1C39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{44347609-BE43-4724-95BA-AFF4636E1C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44347609-BE43-4724-95BA-AFF4636E1C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44347609-BE43-4724-95BA-AFF4636E1C39}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{E6F90ADB-6AE3-49CC-AA35-E835B4F6A031} = {9E074A17-59AB-4007-996F-231B703E87BD}
+		{2DB38BBD-B091-421C-8BAA-97FD017B1066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DB38BBD-B091-421C-8BAA-97FD017B1066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DB38BBD-B091-421C-8BAA-97FD017B1066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DB38BBD-B091-421C-8BAA-97FD017B1066}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
