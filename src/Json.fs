@@ -10,6 +10,12 @@ module Json =
     let des x = JsonConvert.DeserializeObject<_> x
     let desf path = System.IO.File.ReadAllText path |> des
 
+    let tryDes x =
+        try
+            des x |> Ok
+        with e ->
+            Error e.Message
+
 [<RequireQualifiedAccess>]
 module Bson =
     open Newtonsoft.Json
