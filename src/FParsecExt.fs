@@ -22,3 +22,12 @@ let pbigint<'UserState> : Primitives.Parser<_, 'UserState> =
              ) (0I, 0)
         |> fst
     many1 digit |>> (List.map (fun d -> bigint (int d - 48)) >> digitsToNum)
+
+module ParserResult =
+    let toResult (parserResult: ParserResult<_,_>) =
+        match parserResult with
+        | Success(res, userState, pos) -> Result.Ok (res, userState, pos)
+        | Failure(errMsg, parserError, userState) -> Result.Error (errMsg, parserError, userState)
+
+let runParserOnSubstringStart p startIndex str =
+    runParserOnSubstring p () "" str startIndex (str.Length - startIndex)
