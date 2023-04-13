@@ -1,3 +1,8 @@
+## 1.12.0
+* feat: add `Result.toOption`
+* feat: add `Json.tryDes`
+* feat: add `FParsecExt.runParserOnSubstringStart` and `FParsecExt.ParserResult`
+
 ## 1.11.0
 * feat: add `pipeBackwardBuilder`
 
