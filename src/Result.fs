@@ -23,6 +23,10 @@ module Result =
         | Ok x ->
             failwithf "Expected Error but get Ok %A" x
 
+    let toOption = function
+        | Ok x -> Some x
+        | Error _ -> None
+
 [<RequireQualifiedAccess>]
 module List =
     let travResult (fn: 'a -> Result<'b, 'Error>) (xs:'a list): Result<'b list, 'Error> =
