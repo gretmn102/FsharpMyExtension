@@ -19,6 +19,7 @@
     <Compile Include="WebCacherTests.fs" />
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="JsonTests.fs" />
+    <Compile Include="StringExtTests.fs" />
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>

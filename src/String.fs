@@ -96,3 +96,25 @@ let createTableTest() =
         ] |> String.concat "\n"
     let act = xs |> createTable 4
     exp = act
+
+let chunkBySize (chunkSize: int) (str: string) =
+    let elementsCount = str.Length
+    let chunksCount = elementsCount / chunkSize
+
+    if elementsCount % chunkSize = 0 then
+        let arr = Array.zeroCreate chunksCount
+        for i = 0 to chunksCount - 1 do
+            arr.[i] <- str.Substring(chunkSize * i, chunkSize)
+        arr
+    else
+        let chunksCount = chunksCount + 1
+
+        let arr = Array.zeroCreate chunksCount
+        for i = 0 to (chunksCount - 1) - 1 do
+            arr.[i] <- str.Substring(chunkSize * i, chunkSize)
+
+        let lastIndex = chunksCount - 1
+        let restCount = elementsCount - (chunkSize * lastIndex)
+        arr.[lastIndex] <- str.Substring(chunkSize * lastIndex, restCount)
+
+        arr
