@@ -20,6 +20,7 @@
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="JsonTests.fs" />
     <Compile Include="StringExtTests.fs" />
+    <Compile Include="Int32ExtTests.fs" />
     <Compile Include="Test.fs" />
     <None Include="App.config" />
   </ItemGroup>
