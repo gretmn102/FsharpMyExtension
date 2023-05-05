@@ -73,6 +73,7 @@
         <Compile Include="Result.fs" />
         <Compile Include="Scheduler.fs" />
         <Compile Include="StringCompression.fs" />
+        <Compile Include="Bencode.fs" />
       </ItemGroup>
     </Otherwise>
   </Choose>
