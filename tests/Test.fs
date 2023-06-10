@@ -1056,6 +1056,33 @@ module ArrayTests =
                 )
         ]
 
+    [<Tests>]
+    let generateRandomNumbersBySumTest =
+        let f length dice sum =
+            List.init 20 (fun _ -> Array.generateRandomNumbersBySum length dice sum)
+            |> List.forall (fun xs -> xs |> Array.sum = sum)
+
+        Fuchu.Tests.testList "generateRandomNumbersBySumTest" [
+            testCase "A simple test" (fun _ ->
+                Assert.Equal("", true, f 6 (3, 6) 20)
+            )
+            testCase "A simple test2" (fun _ ->
+                Assert.Equal("", true, f 3 (1, 4) 10)
+            )
+            testCase "m1 > m2" (fun _ ->
+                Assert.Raise("", typeof<exn>,
+                    fun _ -> Array.generateRandomNumbersBySum 4 (3, 2) 10 |> ignore)
+            )
+            testCase "sum < m1 * n" (fun _ ->
+                Assert.Raise("", typeof<exn>,
+                    fun _ -> Array.generateRandomNumbersBySum 4 (1, 2) 3 |> ignore)
+            )
+            testCase "sum > m2 * n" (fun _ ->
+                Assert.Raise("", typeof<exn>,
+                    fun _ -> Array.generateRandomNumbersBySum 4 (1, 2) 10 |> ignore)
+            )
+        ]
+
 module Array2DTests =
     open FsharpMyExtension
 

@@ -92,3 +92,29 @@ let removeAt i (xs: _ []) =
         if i' < i then xs.[i']
         else  xs.[i' + 1]
     )
+
+/// Generates the array of `length` random integers from `m1` to `m2` (inclusive), giving a sum of `sum`.
+///
+/// Examples:
+/// ```fsharp
+/// generateRandomNumbersBySum (1, 4) 10 3 // -> [| 3; 3; 4 |]
+/// generateRandomNumbersBySum (1, 4) 10 5 // -> [| 2; 2; 1; 4; 1 |]
+/// generateRandomNumbersBySum (1, 6) 16 5 // -> [| 4; 3; 2; 1; 6 |]
+/// generateRandomNumbersBySum (3, 6) 20 6 // -> [| 3; 4; 3; 3; 3; 4 |]
+/// ```
+let generateRandomNumbersBySum length (m1, m2) sum =
+    if m1 > m2 then failwith "m1 > m2"
+    if sum < m1 * length then failwith "sum < m1 * length"
+    if sum > m2 * length then failwith "sum > m2 * length"
+    let r = System.Random()
+    let xs = Array.replicate length m1
+    for __ = (length * m1) to sum - 1 do
+        let rec f () =
+            let i = r.Next(0, length)
+            let x = xs.[i]
+            if x < m2 then
+                xs.[i] <- x + 1
+            else
+                f()
+        f()
+    xs
