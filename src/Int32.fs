@@ -20,3 +20,23 @@ let getLength n =
         else
             acc
     loop 0 n
+
+/// Splits a number into a list of digits.
+let toDigits n =
+    (n, pown 10 (getLength n - 1))
+    |> List.unfold (fun (n, i) ->
+        if i > 0 then
+            Some(n / i, (n % i, i / 10))
+        else
+            None
+    )
+
+/// Combines a list of digits into a number.
+let ofDigits =
+    List.rev
+    >> List.fold
+        (fun (acc, i) x ->
+            (acc + x * pown 10 i, i + 1)
+        )
+        (0, 0)
+    >> fst

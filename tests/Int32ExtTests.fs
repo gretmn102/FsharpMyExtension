@@ -33,3 +33,27 @@ let getLengthTests =
         createTest 98765432
         createTest 987654321
     ]
+
+[<Tests>]
+let digitsSplitAndJoinTests =
+    let genRandomList () =
+        let r = System.Random()
+        let length = r.Next(1, Int32.getLength System.Int32.MaxValue)
+        List.init length (fun i ->
+            if i > 0 then r.Next(0, 10)
+            else r.Next(1, 10)
+        )
+
+    let test input =
+        testCase (sprintf "%A" input) <| fun () ->
+            let exp = input
+            let act =
+                Int32.toDigits (Int32.ofDigits input)
+
+            Assert.Equal("", exp, act)
+
+    testList "digitsSplitAndJoinTests" [
+        test [3; 1; 4; 5; 6; 1]
+        test [1; 6; 4; 6; 2; 4; 4; 9]
+        test [8; 9; 4; 0; 9; 9; 6]
+    ]
