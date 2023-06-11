@@ -12,11 +12,11 @@ let parseCharAsDigit (c:char) =
 assert
     List.map parseCharAsDigit ['0'..'9'] = [0..9]
 
-let getLength (n: int32) =
-    let rec f acc n =
-        let n = n / 10
-        if n > 0 then
-            f (acc + 1) n
+/// Determines the number of digits in the target number.
+let getLength n =
+    let rec loop acc i =
+        if i > 0 then
+            loop (acc + 1) (i / 10)
         else
             acc
-    f 1 n
+    loop 0 n
