@@ -16,10 +16,10 @@ let mapPTest =
 
             Assert.Equal("", exp, act)
     ]
-let sampleBmpArr = 
+let sampleBmpArr =
     [|[|Color.Red; Color.Gold; Color.Gray|]
       [|Color.Black; Color.Blue; Color.Brown|]|] |> Array2D.ofArAr
-    
+
 [<Tests>]
 let ofBitmapFast =
     let pfs =
@@ -48,7 +48,7 @@ let ofBitmapFast =
         testCase (sprintf "%A" x) <| fun () ->
             Assert.Equal("", exp, act) )
     testList "ofBitmapFastTest'" ys
-   
+
 [<Tests>]
 let toBitmapFastTest =
     testList "toBitmapFastTest" [
@@ -60,3 +60,71 @@ let toBitmapFastTest =
             let act = sampleBmpArr |> Array2D.toBitmapFast |> Array2D.ofBitmapSlow
             Assert.Equal("", exp, act)
    ]
+
+[<Tests>]
+let leftTrimTests =
+    testList "leftTrimTests" [
+        testCase "empty" <| fun () ->
+            let input =
+                [|
+                    [| |]
+                    [| |]
+                |]
+            let exp =
+                [|
+                    [||]
+                    [||]
+                |]
+            let act =
+                Array2D.trimLeft ((=) 0) input
+
+            Assert.Equal("", exp, act)
+
+        testCase "one empty" <| fun () ->
+            let input =
+                [|
+                    [| 0 |]
+                    [| 0 |]
+                |]
+            let exp =
+                [|
+                    [||]
+                    [||]
+                |]
+            let act =
+                Array2D.trimLeft ((=) 0) input
+
+            Assert.Equal("", exp, act)
+
+        testCase "not empty" <| fun () ->
+            let input =
+                [|
+                    [| 0 |]
+                    [| 1 |]
+                |]
+            let exp =
+                [|
+                    [| 0 |]
+                    [| 1 |]
+                |]
+            let act =
+                Array2D.trimLeft ((=) 0) input
+
+            Assert.Equal("", exp, act)
+
+        testCase "left and right empty" <| fun () ->
+            let input =
+                [|
+                    [| 0; 1; 0 |]
+                    [| 0; 2; 0 |]
+                |]
+            let exp =
+                [|
+                    [| 1; 0 |]
+                    [| 2; 0 |]
+                |]
+            let act =
+                Array2D.trimLeft ((=) 0) input
+
+            Assert.Equal("", exp, act)
+    ]
