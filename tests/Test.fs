@@ -1083,6 +1083,30 @@ module ArrayTests =
             )
         ]
 
+    [<Tests>]
+    let swapTests =
+        testList "swapTests" [
+            testCase "Array.swap_1" <| fun () ->
+                let xs = [|'a'..'e'|]
+                let sourceId, targetId = 1, 4
+                let act = Array.swap sourceId targetId xs
+                let exp = [|'a'; 'c'; 'd'; 'e'; 'b'|]
+                Assert.Equal("", exp, act)
+            testCase "Array.swap_2" <| fun () ->
+                let xs = [|'a'..'e'|]
+                let sourceId, targetId = 4, 1
+                let act = Array.swap sourceId targetId xs
+                let exp = [|'a'; 'e'; 'b'; 'c'; 'd'|]
+                Assert.Equal("", exp, act)
+            testCase "Array.swap_3" <| fun () ->
+                let xs = [|'a'..'e'|]
+                let sourceId, targetId = 1, 1
+                let act = Array.swap sourceId targetId xs
+                let exp = xs
+                Assert.Equal("", exp, act)
+        ]
+
+
 module Array2DTests =
     open FsharpMyExtension
 

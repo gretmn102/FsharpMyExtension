@@ -118,3 +118,19 @@ let generateRandomNumbersBySum length (m1, m2) sum =
                 f()
         f()
     xs
+
+let swap sourceId targetId xs =
+    let ys = Array.copy xs
+
+    if sourceId < targetId then
+        let startId = sourceId + 1
+        let length = targetId - sourceId
+        for i = startId to startId + length - 1 do
+            ys.[i - 1] <- xs.[i]
+    else
+        let startId = targetId
+        let length = sourceId - targetId
+        for i = startId to startId + length - 1 do
+            ys.[i + 1] <- xs.[i]
+    ys.[targetId] <- xs.[sourceId]
+    ys
