@@ -1,3 +1,6 @@
+## 1.13.0
+* fable: add `Result`
+
 ## 1.12.0
 * feat: add `Result.toOption`
 * feat: add `Json.tryDes`
