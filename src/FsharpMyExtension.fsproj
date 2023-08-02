@@ -15,6 +15,7 @@
   <!-- compatible with Fable: -->
   <ItemGroup>
     <Compile Include="Containers/Either.fs" />
+    <Compile Include="Result.fs" />
   </ItemGroup>
   <Choose>
     <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*FABLE_COMPILER(;.*)*$'))">
@@ -70,7 +71,6 @@
         <Compile Include="WebDownloaderParallel.fs" />
         <Compile Include="WebClientDownloader.fs" />
         <Compile Include="WebCacher.fs" />
-        <Compile Include="Result.fs" />
         <Compile Include="Scheduler.fs" />
         <Compile Include="StringCompression.fs" />
         <Compile Include="Bencode.fs" />
