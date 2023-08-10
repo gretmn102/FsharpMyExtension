@@ -1,3 +1,6 @@
+## 1.13.1
+* fix: `List.sepBy`
+
 ## 1.13.0
 * fable: add `Result`
 
