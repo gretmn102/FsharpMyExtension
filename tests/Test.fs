@@ -341,6 +341,24 @@ module ListTests =
                 ) 0
         testCase "chooseFoldTest base" <| fun _ ->
             Assert.Equal("", (xsExp, stExp), act)
+
+    [<Tests>]
+    let sepByTests =
+        testList "sepByTests" [
+            testCase "empty" <| fun _ ->
+                Assert.Equal("", [], List.sepBy "+" [])
+            testCase "1" <| fun _ ->
+                Assert.Equal("", ["1"], List.sepBy "+" ["1"])
+            testCase "2" <| fun _ ->
+                Assert.Equal("", ["1"; "+"; "2"], List.sepBy "+" ["1"; "2"])
+            testCase "many" <| fun _ ->
+                let values =
+                    List.init 5 (id >> string)
+                let exp =
+                    ["0"; "+"; "1"; "+"; "2"; "+"; "3"; "+"; "4"]
+                Assert.Equal("", exp, List.sepBy "+" values)
+        ]
+
 module EitherTests =
     open FsharpMyExtension.Either
     [<Tests>]

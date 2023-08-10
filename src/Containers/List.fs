@@ -483,13 +483,16 @@ let chooseFold fn st =
             loop (acc, st) xs
         | [] -> List.rev acc, st
     loop ([], st)
-let sepBy sep =
-    let rec loop acc = function
-        | x::y::xs ->
-            loop (y::sep::x::acc) xs
-        | x::xs -> loop (x::acc) xs
-        | [] -> List.rev acc
-    loop []
+
+let sepBy sep = function
+    | x::y::xs ->
+        // alternative:
+        // let xs = List.fold (fun acc x -> x::sep::acc) [] (y::xs)
+        // x :: List.rev xs
+
+        x :: List.foldBack (fun x acc -> sep::x::acc) (y::xs) []
+    | xs -> xs
+
 let mapStartMidEnd start mid fend = function
     | x::xs ->
         let rec loop acc = function
