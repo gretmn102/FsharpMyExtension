@@ -50,7 +50,10 @@ module XmlText =
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
-Target.create "Clean" (fun _ -> Shell.cleanDir deployDir)
+Target.create "Clean" (fun _ ->
+    Shell.cleanDir deployDir
+    dotnet "clean" "."
+)
 
 Target.create "Meta" (fun _ ->
     [
