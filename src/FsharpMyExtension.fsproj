@@ -6,7 +6,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FSharpMyExt</PackageId>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <DefineConstants>$(DefineConstants);FABLE_COMPILER</DefineConstants>
+    <!-- don't work in Fable: -->
+    <!-- <FABLE_COMPILER>false</FABLE_COMPILER> -->
   </PropertyGroup>
   <Target Name="SpicNSpan" AfterTargets="Clean">
     <RemoveDir Directories="$(BaseOutputPath)" />
@@ -16,71 +17,67 @@
     <Content Include="Containers/*.fsproj; Containers/*.fs; Containers/*.js;" Exclude="**\*.fs.js" PackagePath="fable\Containers" />
     <Content Include="*.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />
   </ItemGroup>
-  <!-- compatible with Fable: -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(FABLE_COMPILER)' == 'true'">
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
   </ItemGroup>
-  <Choose>
-    <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(DefineConstants), '^(.*;)*FABLE_COMPILER(;.*)*$'))">
-      <!-- A comment that prevents the `dotnet clean` command from removing this node -->
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <Compile Include="Some/FsharpMyExtension.fs" />
-        <Compile Include="Library1.fs" />
-        <Compile Include="Show.fs" />
-        <Compile Include="Containers/List.fs" />
-        <Compile Include="Containers/List1.fs" />
-        <Compile Include="Containers/Option.fs" />
-        <Compile Include="String.fs" />
-        <Compile Include="Containers/Array.fs" />
-        <Compile Include="Containers/LZ.fs" />
-        <Compile Include="Containers/LazyList.fs" />
-        <Compile Include="Containers/ListZipperC.fs" />
-        <Compile Include="Containers/ListZipperC2.fs" />
-        <Compile Include="Queue.fs" />
-        <Compile Include="Seq.fs" />
-        <Compile Include="LazyTree.fs" />
-        <Compile Include="Combinatorics.fs" />
-        <Compile Include="Tree.fs" />
-        <Compile Include="Containers/TreeZipper.fs" />
-        <Compile Include="Map.fs" />
-        <Compile Include="Graph.fs" />
-        <Compile Include="HtmlAgilityPackExt.fs" />
-        <Compile Include="FParsecExt.fs" />
-        <Compile Include="XPathLimited.fs" />
-        <Compile Include="XmlBuilder.fs" />
-        <Compile Include="Parser/ParserPrimitives.fs" />
-        <Compile Include="Parser/FixedParser.fs" />
-        <Compile Include="Parser/ParserString.fs" />
-        <Compile Include="Parser/ParserHtmlNode.fs" />
-        <Compile Include="Reflection.fs" />
-        <Compile Include="Print.fs" />
-        <Compile Include="DateTime.fs" />
-        <Compile Include="Numeric.fs" />
-        <Compile Include="Json.fs" />
-        <Compile Include="Containers/TwoDSeq.fs" />
-        <Compile Include="Containers/Array2D.fs" />
-        <Compile Include="Bitmap.fs" />
-        <Compile Include="ColorExt.fs" />
-        <Compile Include="Path.fs" />
-        <Compile Include="File.fs" />
-        <Compile Include="Clipboard.fs" />
-        <Compile Include="Int32.fs" />
-        <Compile Include="Regex.fs" />
-        <Compile Include="Proc.fs" />
-        <Compile Include="StringsMatcher.fs" />
-        <Compile Include="Net/ContentType.fs" />
-        <Compile Include="WebDownloader.fs" />
-        <Compile Include="WebDownloaderParallel.fs" />
-        <Compile Include="WebClientDownloader.fs" />
-        <Compile Include="WebCacher.fs" />
-        <Compile Include="Scheduler.fs" />
-        <Compile Include="StringCompression.fs" />
-        <Compile Include="Bencode.fs" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
+  <!-- Fable not to recognize Choose so the code has to be repeated in both cases -->
+  <ItemGroup Condition="'$(FABLE_COMPILER)' != 'true'">
+    <Compile Include="Containers/Either.fs" />
+    <Compile Include="Result.fs" />
+
+    <Compile Include="Some/FsharpMyExtension.fs" />
+    <Compile Include="Library1.fs" />
+    <Compile Include="Show.fs" />
+    <Compile Include="Containers/List.fs" />
+    <Compile Include="Containers/List1.fs" />
+    <Compile Include="Containers/Option.fs" />
+    <Compile Include="String.fs" />
+    <Compile Include="Containers/Array.fs" />
+    <Compile Include="Containers/LZ.fs" />
+    <Compile Include="Containers/LazyList.fs" />
+    <Compile Include="Containers/ListZipperC.fs" />
+    <Compile Include="Containers/ListZipperC2.fs" />
+    <Compile Include="Queue.fs" />
+    <Compile Include="Seq.fs" />
+    <Compile Include="LazyTree.fs" />
+    <Compile Include="Combinatorics.fs" />
+    <Compile Include="Tree.fs" />
+    <Compile Include="Containers/TreeZipper.fs" />
+    <Compile Include="Map.fs" />
+    <Compile Include="Graph.fs" />
+    <Compile Include="HtmlAgilityPackExt.fs" />
+    <Compile Include="FParsecExt.fs" />
+    <Compile Include="XPathLimited.fs" />
+    <Compile Include="XmlBuilder.fs" />
+    <Compile Include="Parser/ParserPrimitives.fs" />
+    <Compile Include="Parser/FixedParser.fs" />
+    <Compile Include="Parser/ParserString.fs" />
+    <Compile Include="Parser/ParserHtmlNode.fs" />
+    <Compile Include="Reflection.fs" />
+    <Compile Include="Print.fs" />
+    <Compile Include="DateTime.fs" />
+    <Compile Include="Numeric.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Containers/TwoDSeq.fs" />
+    <Compile Include="Containers/Array2D.fs" />
+    <Compile Include="Bitmap.fs" />
+    <Compile Include="ColorExt.fs" />
+    <Compile Include="Path.fs" />
+    <Compile Include="File.fs" />
+    <Compile Include="Clipboard.fs" />
+    <Compile Include="Int32.fs" />
+    <Compile Include="Regex.fs" />
+    <Compile Include="Proc.fs" />
+    <Compile Include="StringsMatcher.fs" />
+    <Compile Include="Net/ContentType.fs" />
+    <Compile Include="WebDownloader.fs" />
+    <Compile Include="WebDownloaderParallel.fs" />
+    <Compile Include="WebClientDownloader.fs" />
+    <Compile Include="WebCacher.fs" />
+    <Compile Include="Scheduler.fs" />
+    <Compile Include="StringCompression.fs" />
+    <Compile Include="Bencode.fs" />
+  </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

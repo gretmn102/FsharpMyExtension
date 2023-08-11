@@ -77,7 +77,7 @@ Target.create "Meta" (fun _ ->
     |> File.write false "Directory.Build.props"
 )
 
-let commonBuildArgs = "-c Release -p:DefineConstants="
+let commonBuildArgs = "-c Release -p:FABLE_COMPILER=false"
 
 Target.create "Build" (fun _ ->
     mainProjDir
@@ -113,6 +113,11 @@ Target.create "BuildTests" (fun _ ->
 Target.create "RunTestsNet461" (fun _ ->
     testsProjDir
     |> dotnet (sprintf "run %s -f net461" commonBuildArgs)
+)
+
+Target.create "FableBuild" (fun _ ->
+    mainProjDir
+    |> dotnet "fable -o bin/fable"
 )
 
 // --------------------------------------------------------------------------------------
