@@ -105,6 +105,7 @@ module FSharpExt =
 
     let (^|) = (<|)
 
+    #if !FABLE_COMPILER
     let cprintfn background foreground fmt =
         Printf.kprintf (fun x ->
             let f', b' = System.Console.ForegroundColor, System.Console.BackgroundColor
@@ -114,8 +115,7 @@ module FSharpExt =
             System.Console.ForegroundColor <- f'
             System.Console.BackgroundColor <- b'
         ) fmt
-    // System.Console.BackgroundColor <- System.ConsoleColor.Black
-    // System.Console.ForegroundColor <- System.ConsoleColor.Gray
+    #endif
 
     type PipeBackwardBuilder() =
         member __.Bind (f, next) =
