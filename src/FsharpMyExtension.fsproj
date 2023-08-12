@@ -50,10 +50,6 @@
     <Compile Include="FParsecExt.fs" />
     <Compile Include="XPathLimited.fs" />
     <Compile Include="XmlBuilder.fs" />
-    <Compile Include="Parser/ParserPrimitives.fs" />
-    <Compile Include="Parser/FixedParser.fs" />
-    <Compile Include="Parser/ParserString.fs" />
-    <Compile Include="Parser/ParserHtmlNode.fs" />
     <Compile Include="Reflection.fs" />
     <Compile Include="Print.fs" />
     <Compile Include="DateTime.fs" />
