@@ -117,9 +117,12 @@ module Tree =
     assert
         let xs = [[1..3]; [2..5]; [4..10]]
         pack xs |> unpack = xs
+
+    #if !FABLE_COMPILER
     let rec ofLazyTree (LT(x,xs)) =
         Node(x, xs |> Seq.map ofLazyTree |> List.ofSeq)
-    
+    #endif
+
     let toList xs =
         let rec f st xs =
             xs
