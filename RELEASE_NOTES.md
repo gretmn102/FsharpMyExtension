@@ -1,3 +1,7 @@
+## 2.0.0-prerelease.1.0
+* breaking: Fable version 4 or higher is now required to compile the project in JS
+* breaking: remove `Parser` from project. Please use `FuniversalParser`
+
 ## 1.13.1
 * fix: `List.sepBy`
 
