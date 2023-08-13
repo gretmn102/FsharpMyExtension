@@ -34,7 +34,6 @@ let truncWhile p xs =
 // assert
 //     truncWhile (fun x -> x % 2 = 0) [2; 4; 6; 7; 8; 9] = ([2;4;6], [7; 8; 9])
 [<System.ObsoleteAttribute("use 'takeWhileRest'")>]
-/// takeWhile = truncWhile ?
 let takeWhile p =
     failwith "use 'takeWhileRest'"
 //     let rec f acc = function
@@ -305,6 +304,7 @@ module Alt =
     // let xs = [1,1; 2,1; 3,1]
 
     // groupBy (fun x y -> snd x = snd y) xs = [xs]
+    #if !FABLE_COMPILER
     let timer f =
         let s = System.Diagnostics.Stopwatch()
         s.Start()
@@ -314,6 +314,7 @@ module Alt =
     let f() =
         let xs = List.init 10000 (List.replicate 5000)
         timer (fun () -> xs |> groupBySeq2 (=)), timer (fun () -> xs |> groupBySeq (=))
+    #endif
 /// Группирует подряд повторяющиеся элементы с их количеством.
 ///
 /// `f [2;3;3;6;4;5;6]` -> `[(2, 1); (3, 2); (6, 1); (4, 1); (5, 1); (6, 1)]`

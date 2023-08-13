@@ -23,6 +23,7 @@
     <Compile Include="Library1.fs" />
     <Compile Include="Tree.fs" />
     <Compile Include="Show.fs" />
+    <Compile Include="Containers/List.fs" />
   </ItemGroup>
   <!-- Fable not to recognize Choose so the code has to be repeated in both cases -->
   <ItemGroup Condition="'$(FABLE_COMPILER)' != 'true'">
@@ -31,7 +32,7 @@
     <Compile Include="Some/FsharpMyExtension.fs" />
     <Compile Include="Library1.fs" />  <!-- added to Fable -->
     <Compile Include="Show.fs" /> <!-- added to Fable -->
-    <Compile Include="Containers/List.fs" />
+    <Compile Include="Containers/List.fs" /> <!-- added to Fable -->
     <Compile Include="Containers/List1.fs" />
     <Compile Include="Containers/Option.fs" />
     <Compile Include="String.fs" />
