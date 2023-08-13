@@ -1,3 +1,6 @@
+## 2.0.0-prerelease.3.0
+* fable: add `List`
+
 ## 2.0.0-prerelease.2.0
 * fable: add `FSharpExt` and `Pair`
 * fable: add `Tree`
