@@ -31,3 +31,27 @@ module ParserResult =
 
 let runParserOnSubstringStart p startIndex str =
     runParserOnSubstring p () "" str startIndex (str.Length - startIndex)
+
+/// ## Example
+/// ```fsharp
+/// type Item =
+///     {
+///         Name: string
+///         Cost: int
+///     }
+///
+///     static member GetParser<'UserState> () : Parser<Item, 'UserState> =
+///         pipe2
+///             (manySatisfy ((<>) '\n') .>> newline)
+///             pint32
+///             (fun name cost ->
+///                 {
+///                     Name = name
+///                     Cost = cost
+///                 }
+///             )
+///
+/// run parser<Item, unit> "Sword\n300"
+/// ```
+let inline parser<'T, 'UserState when 'T : (static member GetParser: unit -> Parser<'T, 'UserState>)> =
+    (^T : (static member GetParser: unit -> Parser<'T, 'UserState>) ())
