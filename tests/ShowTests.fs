@@ -6,24 +6,45 @@ open FsharpMyExtension.ShowList
 let joinTest =
     testList "joinTest" [
         testCase "base case" <| fun () ->
-            let exp = "Abram, Lyouis, Loid"
-            let xs = [empty;empty;showString "Abram";showString "Lyouis";empty;empty;showString "Loid";empty;empty]
+            let exp = "a, b, c"
             let act =
-                joins (showString ", ") xs
+                [
+                    empty
+                    empty
+                    showString "a"
+                    showString "b"
+                    empty
+                    empty
+                    showString "c"
+                    empty
+                    empty
+                ]
+                |> joins (showString ", ")
                 |> show
-                |> System.String.Concat
+
             Assert.Equal("", exp, act)
     ]
 
 [<Tests>]
 let joinEmptyTest =
-    testList "joinTest" [
+    testList "joinEmptyTest" [
         testCase "base case" <| fun () ->
-            let exp = ", , Abram, Lyouis, , , Loid, , "
-            let xs = [empty;empty;showString "Abram";showString "Lyouis";empty;empty;showString "Loid";empty;empty]
+            let exp = ", , a, b, , , c, , "
+
             let act =
-                joinEmpty ", " xs
+                [
+                    empty
+                    empty
+                    showString "a"
+                    showString "b"
+                    empty
+                    empty
+                    showString "c"
+                    empty
+                    empty
+                ]
+                |> joinEmpty ", "
                 |> show
-                |> System.String.Concat
+
             Assert.Equal("", exp, act)
     ]
