@@ -1,3 +1,11 @@
+## 2.0.0-prerelease.4.0
+* fix: `Array.split`
+* feat: add `FParsecExt.parser`
+* breaking: rename `ShowList.shows` to `ShowList.showByToString`
+* feat: add `ShowList.shows`
+* feat: add `deserialize`
+* feat: add `empty`
+
 ## 2.0.0-prerelease.3.0
 * fable: add `List`
 
