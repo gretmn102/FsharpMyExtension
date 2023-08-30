@@ -63,6 +63,9 @@ module ShowList =
     type String = char list
     type ShowS = String -> String
 
+    type IShow =
+        abstract Shows : unit -> ShowS
+
     let showChar c = let f xs = c :: xs in f : ShowS
 
     let showSpace = showChar ' '
@@ -118,6 +121,25 @@ module ShowList =
 
     /// show by `obj.ToString()`
     let showByToString x = showString (x.ToString()) : ShowS
+
+    /// ## Example
+    /// ```fsharp
+    /// type Item =
+    ///     {
+    ///         Name: string
+    ///         Cost: int
+    ///     }
+    ///
+    ///     interface IShow with
+    ///         member this.Shows () =
+    ///             showString this.Name << nl
+    ///             << showByToString this.Cost
+    ///
+    /// { Name = "Sword"; Cost = 100 }
+    /// |> shows
+    /// |> show // "Sword\n100"
+    /// ```
+    let shows (x: #IShow) = x.Shows()
 
     let showAutoParen parOpen: (_ -> ShowS) =
         let parClose = function
