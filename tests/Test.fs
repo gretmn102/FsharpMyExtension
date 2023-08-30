@@ -35,6 +35,12 @@ module FsharpExt =
             | Success(res, _, _) -> Result.Ok res
             | Failure(errMsg, _, _) -> Result.Error errMsg
 
+        static member Empty : Item =
+            {
+                Name = ""
+                Cost = 0
+            }
+
     [<Tests>]
     let deserializeTests =
         testList "deserializeTests" [
@@ -46,6 +52,21 @@ module FsharpExt =
                     }
                 let act =
                     ((deserialize "Sword\n300") : Result<Item, string>)
+
+                Assert.Equal("", exp, act)
+        ]
+
+    [<Tests>]
+    let emptyTests =
+        testList "emptyTests" [
+            testCase "base" <| fun () ->
+                let exp =
+                    {
+                        Name = ""
+                        Cost = 0
+                    }
+                let act =
+                    empty
 
                 Assert.Equal("", exp, act)
         ]

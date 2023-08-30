@@ -176,3 +176,21 @@ module FSharpExt =
     /// ```
     let inline deserialize<'T when 'T : (static member Deserialize: string -> Result<'T,string>)> str =
         (^T : (static member Deserialize: string -> Result<'T,string>) str)
+
+    /// ## Example
+    /// ```fsharp
+    /// type Item =
+    ///     {
+    ///         Name: string
+    ///         Cost: int
+    ///     }
+    ///
+    ///     static member Empty : Item =
+    ///         {
+    ///             Name = ""
+    ///             Cost = 0
+    ///         }
+    /// (empty : Item) // { Name = ""; Cost = 0 }
+    /// ```
+    let inline empty<'T when 'T : (static member Empty: 'T)> =
+        (^T : (static member Empty: 'T) ())
