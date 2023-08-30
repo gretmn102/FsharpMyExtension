@@ -47,32 +47,24 @@ let indexOf patt startIndex xs =
 // 1 = indexOf [| 1; 2 |] 0 [| 0..10 |]
 // 1 = indexOf [|2;3|] 0 [|1..6|]
 
-/// Ведет себя почти так же, как и `System.String.Split`, за исключением:
-/// ```fsharp
-/// let sep = "<>"
-/// let str = "<>"
-/// str.Split([|str|], System.StringSplitOptions.None) // -> [|""; ""|]
-/// split (sep.ToCharArray()) (str.ToCharArray())
-/// |> Array.map System.String.Concat // -> [|""|]
-/// ```
-/// Еще пример:
-/// ```fsharp
-/// let sep = "<>"
-/// let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
-/// split (sep.ToCharArray()) (str.ToCharArray())
-/// |> Array.map System.String.Concat
-/// // -> [|"asdfg"; " s aff"; "a"; "fa"; "f"; ""; "dsf"|]
-/// ```
-let split (sep:_ []) (xs:_ []) =
-    Array.unfold (fun i ->
-        if i < xs.Length then
-            let i' = indexOf sep i xs
-            if i' = -1 then Some(xs.[i..], xs.Length)
-            else
-                Some(xs.[i..i' - 1], i' + sep.Length)
-        else
-            None
-        ) 0
+/// <summary>Splits a array into subarrays that are based on the separator in an array.</summary>
+/// <param name="separator">A array that delimits the substrings in this array, an empty array that contains no delimiters.</param>
+let split (separator: _ []) (xs: _ []) =
+    if separator = xs then
+        [|[||]; [||]|]
+    else
+        Array.unfold
+            (fun i ->
+                if i < xs.Length then
+                    match indexOf separator i xs with
+                    | -1 ->
+                        Some(xs.[i..], xs.Length)
+                    | i' ->
+                        Some(xs.[i..i' - 1], i' + separator.Length)
+                else
+                    None
+            )
+            0
 
 let mapStartMidEnd start mid fend (xs: _ []) =
     let length = xs.Length

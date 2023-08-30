@@ -800,24 +800,19 @@ module ArrayTests =
 
     [<Tests>]
     let splitTests =
-        testList "splitTests" [
-            testCase "one" <| fun () ->
-                let sep = "<>"
-                let str = "asdfg<> s aff<>a<>fa<>f<><>dsf"
-                let exp = String.split sep str
+        let test sep input =
+            testCase input <| fun () ->
+                let exp = String.split sep input
                 let act =
-                    Array.split (sep.ToCharArray()) (str.ToCharArray())
+                    Array.split (sep.ToCharArray()) (input.ToCharArray())
                     |> Array.map System.String.Concat
                 Assert.Equal("", exp, act)
-            testCase "two" <| fun () ->
-                let sep = "<>"
-                let str = "<>"
 
-                let exp = String.split sep str
-                let act =
-                    Array.split (sep.ToCharArray()) (str.ToCharArray())
-                    |> Array.map System.String.Concat
-                Assert.Equal("", exp, act) // [|""; ""|] <> [|""|]
+        testList "splitTests" [
+            test "++" "item"
+            test "++" "++"
+            test "++" "sword++shield"
+            test "<>" "sword<> arrow<>bow<>knife <>health potion<><>nothing"
         ]
 
     [<Tests>]
