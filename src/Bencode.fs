@@ -30,11 +30,11 @@ module Bencode =
 
         let showInt n : ShowS =
             showChar 'i'
-            << shows n
+            << showByToString n
             << showEnd
 
         let showString (str: string) : ShowS =
-            shows str.Length
+            showByToString str.Length
             << showChar ':'
             << showString str
 

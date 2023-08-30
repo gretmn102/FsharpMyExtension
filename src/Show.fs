@@ -116,7 +116,8 @@ module ShowList =
         between (showString opened) (showString closed)
         : _ -> ShowS
 
-    let shows x = showString (x.ToString()) : ShowS
+    /// show by `obj.ToString()`
+    let showByToString x = showString (x.ToString()) : ShowS
 
     let showAutoParen parOpen: (_ -> ShowS) =
         let parClose = function
