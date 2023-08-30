@@ -147,3 +147,32 @@ module FSharpExt =
     ///     }
     /// ```
     let pipeBackwardBuilder = PipeBackwardBuilder()
+
+    /// ## Example
+    /// ```fsharp
+    /// type Item =
+    ///     {
+    ///         Name: string
+    ///         Cost: int
+    ///     }
+    ///     static member Deserialize str =
+    ///         let p =
+    ///             pipe2
+    ///                 (manySatisfy ((<>) '\n') .>> newline)
+    ///                 pint32
+    ///                 (fun name cost ->
+    ///                     {
+    ///                         Name = name
+    ///                         Cost = cost
+    ///                     }
+    ///                 )
+    ///
+    ///         match run p str with
+    ///         | Success(res, _, _) -> Result.Ok res
+    ///         | Failure(errMsg, _, _) -> Result.Error errMsg
+    ///
+    /// ((deserialize "Sword\n300") : Result<Item, string>)
+    /// // Result.Ok { Name = "Sword"; Cost = 300 }
+    /// ```
+    let inline deserialize<'T when 'T : (static member Deserialize: string -> Result<'T,string>)> str =
+        (^T : (static member Deserialize: string -> Result<'T,string>) str)
