@@ -6,8 +6,11 @@
         {
             "label": "RunTestsNet461",
             "type": "shell",
-            "command": "build",
+            "options": { "env": {"PAKET_SKIP_RESTORE_TARGETS": "true"} },
+            "command": "dotnet",
             "args": [
+                "fake",
+                "build",
                 "-t",
                 "RunTestsNet461"
             ],
