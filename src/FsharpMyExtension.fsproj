@@ -9,10 +9,6 @@
     <!-- don't work in Fable: -->
     <!-- <FABLE_COMPILER>false</FABLE_COMPILER> -->
   </PropertyGroup>
-  <Target Name="SpicNSpan" AfterTargets="Clean">
-    <RemoveDir Directories="$(BaseOutputPath)" />
-    <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
-  </Target>
   <ItemGroup>
     <Content Include="Containers/*.fsproj; Containers/*.fs; Containers/*.js;" Exclude="**\*.fs.js" PackagePath="fable\Containers" />
     <Content Include="*.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />

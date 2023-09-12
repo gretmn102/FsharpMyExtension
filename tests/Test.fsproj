@@ -3,10 +3,6 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
   </PropertyGroup>
-  <Target Name="SpicNSpan" AfterTargets="Clean">
-    <RemoveDir Directories="$(BaseOutputPath)" />
-    <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
-  </Target>
   <ItemGroup>
     <ProjectReference Include="..\src\FsharpMyExtension.fsproj" AdditionalProperties="DefineConstants=">
       <Name>FsharpMyExtension.fsproj</Name>

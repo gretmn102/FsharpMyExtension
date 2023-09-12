@@ -8,6 +8,7 @@
 open Fake.Core
 open Fake.IO
 open Fake.IO.Globbing.Operators
+open Fake.IO.FileSystemOperators
 // --------------------------------------------------------------------------------------
 // Build variables
 // --------------------------------------------------------------------------------------
@@ -50,9 +51,16 @@ module XmlText =
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
+
 Target.create "Clean" (fun _ ->
+    let cleanBinAndObj projectPath =
+        Shell.cleanDirs [
+            projectPath </> "bin"
+            projectPath </> "obj"
+        ]
+    cleanBinAndObj mainProjDir
+    cleanBinAndObj testsProjDir
     Shell.cleanDir deployDir
-    dotnet "clean" "."
 )
 
 Target.create "Meta" (fun _ ->
