@@ -1,16 +1,25 @@
+strategy: min
 storage: none
 source https://api.nuget.org/v3/index.json
+framework: net461, netstandard2.0
 
-framework: net461, netstandard2.0, netcoreapp3.1
 nuget FParsec = 1.1.1
 nuget FSharp.Core = 4.7.2
-nuget FuChu = 1.1
-nuget HtmlAgilityPack
-nuget Newtonsoft.Json
-nuget Newtonsoft.Json.Bson
-nuget TextCopy
-nuget YamlDotNet
-nuget System.Drawing.Common
+nuget HtmlAgilityPack = 1.11.24
+nuget Newtonsoft.Json = 12.0.3
+nuget Newtonsoft.Json.Bson = 1.0.2
+nuget TextCopy = 4.2
+nuget YamlDotNet = 8.1.2
+nuget System.Drawing.Common = 4.7
+
+group Tests
+    strategy: min
+    storage: none
+    source https://api.nuget.org/v3/index.json
+    framework: net461, netcoreapp3.1
+
+    nuget FSharp.Core = 4.7.2
+    nuget Fuchu
 
 group Build
     source https://api.nuget.org/v3/index.json
