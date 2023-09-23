@@ -177,3 +177,11 @@ let genericBinarySearch compare length =
         f 0 (length - 1)
     else
         invalidArg "length" "Length must be greater then 0"
+
+let binarySearch comparer (array: _ []) =
+    let length = array.Length
+    match genericBinarySearch (fun index -> comparer array.[index]) length with
+    | GenericBinarySearchResult.Exactly index ->
+        index
+    | GenericBinarySearchResult.Range(startIndex, endIndex) ->
+        startIndex

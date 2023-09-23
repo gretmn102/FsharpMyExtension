@@ -1003,6 +1003,28 @@ module ArrayTests =
             createTest (9, [|0; 2; 4; 6; 8|]) (range (4, 5))
         ]
 
+    [<Tests>]
+    let binarySearchTests =
+        let binarySearch target xs =
+            let compare (x: int) =
+                x.CompareTo target
+
+            let xs = xs |> Array.sort
+
+            Array.binarySearch compare xs
+
+        let createTest (target, xs) exp =
+            testCase (sprintf "(%d, %A)" target xs) <| fun () ->
+                let act = binarySearch target xs
+
+                Assert.Equal("", exp, act)
+
+        testList "binarySearchTests" [
+            createTest (System.Int32.MinValue, [| 0..5 |]) -1
+            createTest (System.Int32.MaxValue, [| 0..5 |]) 5
+            createTest (3, [| 0..5 |]) 3
+        ]
+
 module Array2DTests =
     open FsharpMyExtension
 
