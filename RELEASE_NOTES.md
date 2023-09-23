@@ -1,3 +1,8 @@
+## 2.0.0-prerelease.5.0
+* move `Fuchu` from main dependencies to `Tests` group
+* feat: add `Array.genericBinarySearch`
+* feat: add `Array.binarySearch`
+
 ## 2.0.0-prerelease.4.0
 * fix: `Array.split`
 * feat: add `FParsecExt.parser`
