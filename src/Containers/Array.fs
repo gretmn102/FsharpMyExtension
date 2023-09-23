@@ -126,3 +126,54 @@ let swap sourceId targetId xs =
             ys.[i + 1] <- xs.[i]
     ys.[targetId] <- xs.[sourceId]
     ys
+
+[<RequireQualifiedAccess>]
+type GenericBinarySearchResult =
+    | Exactly of index: int
+    /// Possible `startIndex = -1` and `endIndex = length + 1`.
+    | Range of startIndex: int * endIndex:int
+
+/// * Returns `Exactly` when the index of the item in the case of an exact hit.
+/// * Returns `Range` when the range between elements as indices. Possible `startIndex = -1` and `endIndex = length + 1`.
+let genericBinarySearch compare length =
+    let rec f from to' =
+        let diff = to' - from
+
+        if diff = 0 then
+            let res = compare from
+            if res = 0 then
+                GenericBinarySearchResult.Exactly from
+            elif res > 0 then
+                GenericBinarySearchResult.Range (from - 1, from)
+            else
+                GenericBinarySearchResult.Range (from, from + 1)
+        elif diff = 1 then
+            let res = compare from
+            if res = 0 then
+                GenericBinarySearchResult.Exactly from
+            elif res < 0 then
+                let from = from + 1
+                let res = compare from
+                if res = 0 then
+                    GenericBinarySearchResult.Exactly from
+                elif res > 0 then
+                    GenericBinarySearchResult.Range (from - 1, from)
+                else
+                    GenericBinarySearchResult.Range (from, from + 1)
+            else
+                GenericBinarySearchResult.Range (from - 1, from)
+        else
+            let average = diff / 2
+            let idx = from + average
+            let res = compare idx
+            if res = 0 then
+                GenericBinarySearchResult.Exactly idx
+            elif res > 0 then
+                f from (idx - 1)
+            else
+                f (idx + 1) to'
+
+    if length > 0 then
+        f 0 (length - 1)
+    else
+        invalidArg "length" "Length must be greater then 0"

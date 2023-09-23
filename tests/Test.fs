@@ -956,6 +956,52 @@ module ArrayTests =
                 Assert.Equal("", exp, act)
         ]
 
+    [<Tests>]
+    let genericBinarySearchTests =
+        let binarySearch target xs =
+            let compare (xs: int []) (target: int) (idx: int) =
+                xs.[idx].CompareTo target
+            let xs = xs |> Array.sort
+            Array.genericBinarySearch (compare xs target) xs.Length
+
+        let createTest (target, xs) exp =
+            testCase (sprintf "(%d, %A)" target xs) <| fun () ->
+                let act = binarySearch target xs
+
+                Assert.Equal("", exp, act)
+
+        let range x =
+            Array.GenericBinarySearchResult.Range x
+
+        let exactly x =
+            Array.GenericBinarySearchResult.Exactly x
+
+        testList "genericBinarySearchTests" [
+            createTest (-1, [|0|]) (range (-1, 0))
+            createTest (0, [|0|]) (exactly 0)
+            createTest (1, [|0|]) (range (0, 1))
+
+            createTest (-1, [|0; 1|]) (range (-1, 0))
+            createTest (0, [|0; 1|]) (exactly 0)
+            createTest (1, [|0; 1|]) (exactly 1)
+            createTest (2, [|0; 1|]) (range (1, 2))
+
+            createTest (1, [|0; 2|]) (range (0, 1))
+
+            createTest (-1, [|0; 2; 4|]) (range (-1, 0))
+            createTest (0, [|0; 2; 4|]) (exactly 0)
+            createTest (1, [|0; 2; 4|]) (range (0, 1))
+            createTest (2, [|0; 2; 4|]) (exactly 1)
+            createTest (3, [|0; 2; 4|]) (range (1, 2))
+            createTest (4, [|0; 2; 4|]) (exactly 2)
+            createTest (5, [|0; 2; 4|]) (range (2, 3))
+
+            createTest (-1, [|0; 2; 4; 6|]) (range (-1, 0))
+            createTest (7, [|0; 2; 4; 6|]) (range (3, 4))
+
+            createTest (-1, [|0; 2; 4; 6; 8|]) (range (-1, 0))
+            createTest (9, [|0; 2; 4; 6; 8|]) (range (4, 5))
+        ]
 
 module Array2DTests =
     open FsharpMyExtension
