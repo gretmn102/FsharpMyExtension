@@ -27,6 +27,14 @@ module Result =
         | Ok x -> Some x
         | Error _ -> None
 
+    type Builder() =
+        member __.Bind(x, f) =
+            Result.bind f x
+        member __.Return x = Ok x
+        member __.ReturnFrom x = x
+
+    let builder = Builder()
+
 [<RequireQualifiedAccess>]
 module List =
     let travResult (fn: 'a -> Result<'b, 'Error>) (xs:'a list): Result<'b list, 'Error> =
