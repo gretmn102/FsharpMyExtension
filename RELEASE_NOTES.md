@@ -1,3 +1,11 @@
+## 2.0.0-prerelease.6.0
+* feat: add `Dictionary.tryGetValue`
+* feat: add `EnvironmentExt` with local environment
+* remove YamlDotNet
+* feat: add `UInt64Ext`
+* feat: add `Result.builder`
+* feat: add `TaskExt` with `continueWith`, `await`, `awaiti`, `runSync` functions
+
 ## 2.0.0-prerelease.5.0
 * move `Fuchu` from main dependencies to `Tests` group
 * feat: add `Array.genericBinarySearch`
