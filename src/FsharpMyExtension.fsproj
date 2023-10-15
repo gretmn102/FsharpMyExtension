@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -26,7 +26,7 @@
     <Compile Include="Containers/Either.fs" /> <!-- added to Fable -->
     <Compile Include="Result.fs" /> <!-- added to Fable -->
     <Compile Include="Some/FsharpMyExtension.fs" />
-    <Compile Include="Library1.fs" />  <!-- added to Fable -->
+    <Compile Include="Library1.fs" /> <!-- added to Fable -->
     <Compile Include="Show.fs" /> <!-- added to Fable -->
     <Compile Include="Containers/List.fs" /> <!-- added to Fable -->
     <Compile Include="Containers/List1.fs" />
@@ -73,6 +73,7 @@
     <Compile Include="Scheduler.fs" />
     <Compile Include="StringCompression.fs" />
     <Compile Include="Bencode.fs" />
+    <Compile Include="TaskExt.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

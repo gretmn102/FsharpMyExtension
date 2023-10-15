@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
@@ -22,6 +22,7 @@
     <Compile Include="StringExtTests.fs" />
     <Compile Include="Int32ExtTests.fs" />
     <Compile Include="BencodeTests.fs" />
+    <Compile Include="TaskExtTests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
