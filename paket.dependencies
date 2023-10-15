@@ -10,6 +10,7 @@ nuget Newtonsoft.Json = 12.0.3
 nuget Newtonsoft.Json.Bson = 1.0.2
 nuget TextCopy = 4.2
 nuget System.Drawing.Common = 4.7
+nuget dotenv.net
 
 group Tests
     strategy: min

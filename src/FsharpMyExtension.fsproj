@@ -81,6 +81,7 @@
     <Compile Include="StringCompression.fs" />
     <Compile Include="Bencode.fs" />
     <Compile Include="TaskExt.fs" />
+    <Compile Include="EnvironmentExt.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
