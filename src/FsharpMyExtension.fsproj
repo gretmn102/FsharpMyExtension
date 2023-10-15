@@ -23,12 +23,17 @@
   </ItemGroup>
   <!-- Fable not to recognize Choose so the code has to be repeated in both cases -->
   <ItemGroup Condition="'$(FABLE_COMPILER)' != 'true'">
-    <Compile Include="Containers/Either.fs" /> <!-- added to Fable -->
-    <Compile Include="Result.fs" /> <!-- added to Fable -->
+    <!-- added to Fable -->
+    <Compile Include="Containers/Either.fs" />
+    <!-- added to Fable -->
+    <Compile Include="Result.fs" />
     <Compile Include="Some/FsharpMyExtension.fs" />
-    <Compile Include="Library1.fs" /> <!-- added to Fable -->
-    <Compile Include="Show.fs" /> <!-- added to Fable -->
-    <Compile Include="Containers/List.fs" /> <!-- added to Fable -->
+    <!-- added to Fable -->
+    <Compile Include="Library1.fs" />
+    <!-- added to Fable -->
+    <Compile Include="Show.fs" />
+    <!-- added to Fable -->
+    <Compile Include="Containers/List.fs" />
     <Compile Include="Containers/List1.fs" />
     <Compile Include="Containers/Option.fs" />
     <Compile Include="String.fs" />
@@ -41,7 +46,8 @@
     <Compile Include="Seq.fs" />
     <Compile Include="LazyTree.fs" />
     <Compile Include="Combinatorics.fs" />
-    <Compile Include="Tree.fs" /> <!-- added to Fable -->
+    <!-- added to Fable -->
+    <Compile Include="Tree.fs" />
     <Compile Include="Containers/TreeZipper.fs" />
     <Compile Include="Map.fs" />
     <Compile Include="Graph.fs" />
@@ -62,6 +68,7 @@
     <Compile Include="File.fs" />
     <Compile Include="Clipboard.fs" />
     <Compile Include="Int32.fs" />
+    <Compile Include="UInt64Ext.fs" />
     <Compile Include="Regex.fs" />
     <Compile Include="Proc.fs" />
     <Compile Include="StringsMatcher.fs" />
