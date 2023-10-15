@@ -9,7 +9,6 @@ nuget HtmlAgilityPack = 1.11.24
 nuget Newtonsoft.Json = 12.0.3
 nuget Newtonsoft.Json.Bson = 1.0.2
 nuget TextCopy = 4.2
-nuget YamlDotNet = 8.1.2
 nuget System.Drawing.Common = 4.7
 
 group Tests
