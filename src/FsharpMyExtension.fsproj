@@ -50,6 +50,7 @@
     <Compile Include="Tree.fs" />
     <Compile Include="Containers/TreeZipper.fs" />
     <Compile Include="Map.fs" />
+    <Compile Include="Dictionary.fs" />
     <Compile Include="Graph.fs" />
     <Compile Include="HtmlAgilityPackExt.fs" />
     <Compile Include="FParsecExt.fs" />

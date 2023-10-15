@@ -2,14 +2,7 @@
 module FsharpMyExtension.EnvironmentExt.Environment
 open System.Collections.Generic
 open dotenv.net
-
-// todo: move to DictionaryExt
-[<RequireQualifiedAccess>]
-module Dictionary =
-    let tryGetValue key (dic: #IDictionary<_, _>) =
-        match dic.TryGetValue key with
-        | true, value -> Some value
-        | false, _ -> None
+open FsharpMyExtension.DictionaryExt
 
 [<RequireQualifiedAccess>]
 type LocalEnvironmentsError =
