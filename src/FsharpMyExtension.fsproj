@@ -14,6 +14,7 @@
     <Content Include="*.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />
   </ItemGroup>
   <ItemGroup Condition="'$(FABLE_COMPILER)' == 'true'">
+    <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Library1.fs" />
@@ -23,6 +24,8 @@
   </ItemGroup>
   <!-- Fable not to recognize Choose so the code has to be repeated in both cases -->
   <ItemGroup Condition="'$(FABLE_COMPILER)' != 'true'">
+    <!-- added to Fable -->
+    <Compile Include="Enum.fs" />
     <!-- added to Fable -->
     <Compile Include="Containers/Either.fs" />
     <!-- added to Fable -->
