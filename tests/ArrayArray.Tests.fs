@@ -185,6 +185,56 @@ let ``ArrayArray.verticalForall`` =
     ]
 
 [<Tests>]
+let ``ArrayArray.crop`` =
+    testList "ArrayArray.crop" [
+        testCase "(0, getWidth xss) (1, 3)" <| fun () ->
+            let xss : _ ArrayArray =
+                [|
+                    [| 0; 1 |]
+                    [| 2; 3 |]
+                    [| 4; 5 |]
+                    [| 6; 7 |]
+                |]
+            let act =
+                crop (0, getWidth xss) (1, 3) xss
+            let exp =
+                xss[1..2]
+            Assert.Equal("", exp, act)
+
+        testCase "(1, 3) (0, getHeight xss)" <| fun () ->
+            let xss : _ ArrayArray =
+                [|
+                    [| 0; 2; 4; 6 |]
+                    [| 1; 3; 5; 7 |]
+                |]
+            let act =
+                crop (1, 3) (0, getHeight xss) xss
+            let exp =
+                xss
+                |> Array.map (fun xs ->
+                    xs[1..2]
+                )
+            Assert.Equal("", exp, act)
+
+        testCase "(1, 4) (1, 3)" <| fun () ->
+            let xss : _ ArrayArray =
+                [|
+                    [|  0;  1;  2;  3 |]
+                    [|  4;  5;  6;  7 |]
+                    [|  8;  9; 10; 11 |]
+                    [| 12; 13; 14; 15 |]
+                |]
+            let act =
+                crop (1, 4) (1, 3) xss
+            let exp =
+                [|
+                    [| 5;  6;  7 |]
+                    [| 9; 10; 11 |]
+                |]
+            Assert.Equal("", exp, act)
+    ]
+
+[<Tests>]
 let leftTrimTests =
     testList "leftTrimTests" [
         testCase "empty" <| fun () ->

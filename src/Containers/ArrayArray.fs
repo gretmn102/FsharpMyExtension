@@ -43,6 +43,12 @@ module ArrayArray =
     let verticalForall columnIndex rowRange predicate (xss: _ ArrayArray) =
         not <| verticalExists columnIndex rowRange (not << predicate) xss
 
+    let crop (rowFrom, rowTo) (columnFrom, columnTo) (xss: _ ArrayArray) : _ ArrayArray =
+        let height = columnTo - columnFrom
+        Array.init height (fun i ->
+            xss[columnFrom + i][rowFrom..rowTo - 1]
+        )
+
     let trimLeft isEmpty (xss: 'a ArrayArray) =
         let width = getWidth xss
         let height = getHeight xss
