@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />
+    <Compile Include="ArrayArray.Tests.fs" />
     <Compile Include="Bitmap.fs" />
     <Compile Include="StringMatcherTests.fs" />
     <Compile Include="TreeZipperTest.fs" />
