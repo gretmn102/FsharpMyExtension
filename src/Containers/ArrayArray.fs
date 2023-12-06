@@ -43,17 +43,12 @@ module ArrayArray =
     let verticalForall columnIndex rowRange predicate (xss: _ ArrayArray) =
         not <| verticalExists columnIndex rowRange (not << predicate) xss
 
-    let columnIsEmpty columnIndex isEmpty (xss: 'a ArrayArray) =
-        xss
-        |> Array.forall (fun xs ->
-            isEmpty xs.[columnIndex]
-        )
-
     let trimLeft isEmpty (xss: 'a ArrayArray) =
-        let columnIsEmpty columnIndex =
-            columnIsEmpty columnIndex isEmpty xss
+        let width = getWidth xss
+        let height = getHeight xss
 
-        let width = xss.[0].Length
+        let columnIsEmpty columnIndex =
+            verticalForall columnIndex (0, height) isEmpty xss
 
         let leftMost =
             let rec apply x =
@@ -62,7 +57,6 @@ module ArrayArray =
                 else
                     x
             apply 0
-
 
         let diff = width - leftMost
 
