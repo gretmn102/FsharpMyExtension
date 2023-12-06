@@ -5,6 +5,38 @@ type 'a ArrayArray = 'a [] []
 [<RequireQualifiedAccess>]
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module ArrayArray =
+    let getWidth (xss: _ ArrayArray) =
+        match Array.tryHead xss with
+        | Some xs -> Array.length xs
+        | None -> 0
+
+    let getHeight (xss: _ ArrayArray) =
+        Array.length xss
+
+    let horizontalExists rowIndex (columnFrom, columnTo) predicate (xss: _ ArrayArray) =
+        let row = xss[rowIndex]
+        let rec loop columnFrom =
+            if columnFrom < columnTo then
+                if predicate row[columnFrom] then
+                    true
+                else
+                    loop (columnFrom + 1)
+            else
+                false
+        loop columnFrom
+
+    let verticalExists columnIndex (rowFrom, rowTo) predicate (xss: _ ArrayArray) =
+        let rec loop rowFrom =
+            if rowFrom < rowTo then
+                let row = xss[rowFrom]
+                if predicate row[columnIndex] then
+                    true
+                else
+                    loop (rowFrom + 1)
+            else
+                false
+        loop rowFrom
+
     let columnIsEmpty columnIndex isEmpty (xss: 'a ArrayArray) =
         xss
         |> Array.forall (fun xs ->
