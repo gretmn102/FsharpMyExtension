@@ -58,6 +58,41 @@ let ``ArrayArray.horizontalExists`` =
             Assert.Equal("tested values", [ 3 ], actTestedValues)
     ]
 
+
+[<Tests>]
+let ``ArrayArray.horizontalForall`` =
+    let xss : _ ArrayArray =
+        [|
+            [| 0; 2; 4 |]
+            [| 1; 3; 5 |]
+        |]
+
+    let horizontalForall rowIndex columnRange predicate xss =
+        let testedValues = ref []
+        let exists =
+            xss
+            |> horizontalForall rowIndex columnRange (fun x ->
+                testedValues.Value <- x :: testedValues.contents
+                predicate x
+            )
+        List.rev testedValues.contents, exists
+
+    testList "ArrayArray.horizontalForall" [
+        testCase "0 (0, getWidth xss) (fun _ -> true)" <| fun () ->
+            let actTestedValues, actExists =
+                xss
+                |> horizontalForall 0 (0, getWidth xss) (fun _ -> true)
+            Assert.Equal("for all", true, actExists)
+            Assert.Equal("tested values", [ 0; 2; 4 ], actTestedValues)
+
+        testCase "0 (0, getWidth xss) (fun x -> x < 3)" <| fun () ->
+            let actTestedValues, actExists =
+                xss
+                |> horizontalForall 0 (0, getWidth xss) (fun x -> x < 2)
+            Assert.Equal("for all", false, actExists)
+            Assert.Equal("tested values", [ 0; 2 ], actTestedValues)
+    ]
+
 [<Tests>]
 let ``ArrayArray.verticalExists`` =
     let xss : _ ArrayArray =
@@ -112,6 +147,41 @@ let ``ArrayArray.verticalExists`` =
                 |> verticalExists 1 (1, getHeight xss) ((=) 3)
             Assert.Equal("exists", true, actExists)
             Assert.Equal("tested values", [ 3 ], actTestedValues)
+    ]
+
+[<Tests>]
+let ``ArrayArray.verticalForall`` =
+    let xss : _ ArrayArray =
+        [|
+            [| 0; 1 |]
+            [| 2; 3 |]
+            [| 4; 5 |]
+        |]
+
+    let verticalForall columnIndex rowRange predicate xss =
+        let testedValues = ref []
+        let exists =
+            xss
+            |> verticalForall columnIndex rowRange (fun x ->
+                testedValues.Value <- x :: testedValues.contents
+                predicate x
+            )
+        List.rev testedValues.contents, exists
+
+    testList "ArrayArray.verticalForall" [
+        testCase "0 (0, getHeight xss) (fun _ -> true)" <| fun () ->
+            let actTestedValues, actExists =
+                xss
+                |> verticalForall 0 (0, getHeight xss) (fun _ -> true)
+            Assert.Equal("for all", true, actExists)
+            Assert.Equal("tested values", [ 0; 2; 4 ], actTestedValues)
+
+        testCase "0 (0, getHeight xss) (fun x -> x < 3)" <| fun () ->
+            let actTestedValues, actExists =
+                xss
+                |> verticalForall 0 (0, getHeight xss) (fun x -> x < 2)
+            Assert.Equal("for all", false, actExists)
+            Assert.Equal("tested values", [ 0; 2 ], actTestedValues)
     ]
 
 [<Tests>]

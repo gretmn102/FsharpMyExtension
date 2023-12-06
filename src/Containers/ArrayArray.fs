@@ -25,6 +25,9 @@ module ArrayArray =
                 false
         loop columnFrom
 
+    let horizontalForall rowIndex columnRange predicate xss =
+        not <| horizontalExists rowIndex columnRange (not << predicate) xss
+
     let verticalExists columnIndex (rowFrom, rowTo) predicate (xss: _ ArrayArray) =
         let rec loop rowFrom =
             if rowFrom < rowTo then
@@ -36,6 +39,9 @@ module ArrayArray =
             else
                 false
         loop rowFrom
+
+    let verticalForall columnIndex rowRange predicate (xss: _ ArrayArray) =
+        not <| verticalExists columnIndex rowRange (not << predicate) xss
 
     let columnIsEmpty columnIndex isEmpty (xss: 'a ArrayArray) =
         xss
