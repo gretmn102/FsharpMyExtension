@@ -235,69 +235,262 @@ let ``ArrayArray.crop`` =
     ]
 
 [<Tests>]
-let leftTrimTests =
-    testList "leftTrimTests" [
+let ``ArrayArray.trim`` =
+    testList "ArrayArray.trim" [
         testCase "empty" <| fun () ->
             let input =
-                [|
-                    [| |]
-                    [| |]
-                |]
+                [||]
             let exp =
-                [|
-                    [||]
-                    [||]
-                |]
+                None
             let act =
-                trimLeft ((=) 0) input
-
+                trim TrimOption.all ((=) 0) input
             Assert.Equal("", exp, act)
 
-        testCase "one empty" <| fun () ->
+        testCase "0x0 empty" <| fun () ->
+            let input =
+                [|
+                    [||]
+                    [||]
+                |]
+            let exp =
+                None
+            let act =
+                trim TrimOption.all ((=) 0) input
+            Assert.Equal("", exp, act)
+
+        testCase "0x0 empty2" <| fun () ->
             let input =
                 [|
                     [| 0 |]
                     [| 0 |]
                 |]
-            let exp =
-                [|
-                    [||]
-                    [||]
-                |]
             let act =
-                trimLeft ((=) 0) input
-
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                None
             Assert.Equal("", exp, act)
 
-        testCase "not empty" <| fun () ->
+        testCase "1x1 top empty" <| fun () ->
             let input =
                 [|
                     [| 0 |]
                     [| 1 |]
                 |]
+            let act =
+                trim TrimOption.all ((=) 0) input
             let exp =
-                [|
-                    [| 0 |]
+                Some [|
                     [| 1 |]
                 |]
-            let act =
-                trimLeft ((=) 0) input
-
             Assert.Equal("", exp, act)
 
-        testCase "left and right empty" <| fun () ->
+        testCase "1x1 right empty" <| fun () ->
+            let input =
+                [|
+                    [| 1; 0 |]
+                |]
+            let act =
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                Some [|
+                    [| 1 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "1x2" <| fun () ->
             let input =
                 [|
                     [| 0; 1; 0 |]
                     [| 0; 2; 0 |]
                 |]
+            let act =
+                trim TrimOption.all ((=) 0) input
             let exp =
+                Some [|
+                    [| 1 |]
+                    [| 2 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x1" <| fun () ->
+            let input =
                 [|
-                    [| 1; 0 |]
-                    [| 2; 0 |]
+                    [| 0; 0 |]
+                    [| 1; 2 |]
+                    [| 0; 0 |]
                 |]
             let act =
-                trimLeft ((=) 0) input
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                Some [|
+                    [| 1; 2 |]
+                |]
+            Assert.Equal("", exp, act)
 
+        testCase "2x3" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 2; 0 |]
+                    [| 0; 3; 4; 0 |]
+                    [| 0; 5; 6; 0 |]
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                Some [|
+                    [| 1; 2 |]
+                    [| 3; 4 |]
+                    [| 5; 6 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "3x2" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 2; 3 |]
+                    [| 0; 4; 5; 6 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                Some [|
+                    [| 1; 2; 3 |]
+                    [| 4; 5; 6 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "3x3" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0; 0 |]
+                    [| 0; 0; 1; 0; 0 |]
+                    [| 0; 2; 3; 4; 0 |]
+                    [| 0; 0; 5; 0; 0 |]
+                    [| 0; 0; 0; 0; 0 |]
+                    [| 0; 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.all ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 1; 0 |]
+                    [| 2; 3; 4 |]
+                    [| 0; 5; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 left trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.Left ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 0; 0 |]
+                    [| 1; 0; 0 |]
+                    [| 0; 2; 0 |]
+                    [| 0; 0; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 top trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.Top ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 right trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.Right ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 0; 0 |]
+                    [| 0; 1; 0 |]
+                    [| 0; 0; 2 |]
+                    [| 0; 0; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 bottom trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim TrimOption.Bottom ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 left and top trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim (TrimOption.Left ||| TrimOption.Top) ((=) 0) input
+            let exp =
+                Some [|
+                    [| 1; 0; 0 |]
+                    [| 0; 2; 0 |]
+                    [| 0; 0; 0 |]
+                |]
+            Assert.Equal("", exp, act)
+
+        testCase "2x2 right and bottom trim" <| fun () ->
+            let input =
+                [|
+                    [| 0; 0; 0; 0 |]
+                    [| 0; 1; 0; 0 |]
+                    [| 0; 0; 2; 0 |]
+                    [| 0; 0; 0; 0 |]
+                |]
+            let act =
+                trim (TrimOption.Right ||| TrimOption.Bottom) ((=) 0) input
+            let exp =
+                Some [|
+                    [| 0; 0; 0 |]
+                    [| 0; 1; 0 |]
+                    [| 0; 0; 2 |]
+                |]
             Assert.Equal("", exp, act)
     ]
