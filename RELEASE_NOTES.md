@@ -36,6 +36,14 @@
 
 ## 1.13.0
 * fable: add `Result`
+* feat: add `Array.swap`
+* feat: add `Array2D.trimLeft`
+* feat: add `Int32.toDigits`, `Int32.ofDigits`
+* feat: add `Array.generateRandomNumbersBySum`
+* feat: add `Bencode`
+* feat: add `Int32.getLength`
+* feat: `String.chunkBySize`
+* feat: add `Regex.create` , `Regex.getMatches`
 
 ## 1.12.0
 * feat: add `Result.toOption`
