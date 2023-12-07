@@ -5,11 +5,12 @@ open FsharpMyExtension
 type UserRole =
     | Admin = 0b01
     | Member = 0b10
+    | AdminAndMember = 0b11
 
 [<Tests>]
 let ``Enum.is`` =
-    let createTest (value, current, exp) =
-        testCase (sprintf "is %A %A = %b" value current exp) <| fun () ->
+    let createTest (current, value, exp) =
+        testCase (sprintf "%A is %A = %b" current value exp) <| fun () ->
             Assert.Equal("", exp, is value current)
 
     testList "Enum.is" [
@@ -27,8 +28,8 @@ let ``Enum.is`` =
 
 [<Tests>]
 let ``Enum.contains`` =
-    let createTest (value, current, exp) =
-        testCase (sprintf "contains %A %A = %b" value current exp) <| fun () ->
+    let createTest (current, value, exp) =
+        testCase (sprintf "%A contains %A = %b" current value exp) <| fun () ->
             Assert.Equal("", exp, contains value current)
 
     testList "Enum.contains" [
