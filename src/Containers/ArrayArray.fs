@@ -13,7 +13,7 @@ module ArrayArray =
     let getHeight (xss: _ ArrayArray) =
         Array.length xss
 
-    let horizontalExists rowIndex (columnFrom, columnTo) predicate (xss: _ ArrayArray) =
+    let rowExists rowIndex (columnFrom, columnTo) predicate (xss: _ ArrayArray) =
         let row = xss[rowIndex]
         let rec loop columnFrom =
             if columnFrom < columnTo then
@@ -25,10 +25,10 @@ module ArrayArray =
                 false
         loop columnFrom
 
-    let horizontalForall rowIndex columnRange predicate xss =
-        not <| horizontalExists rowIndex columnRange (not << predicate) xss
+    let rowForall rowIndex columnRange predicate xss =
+        not <| rowExists rowIndex columnRange (not << predicate) xss
 
-    let verticalExists columnIndex (rowFrom, rowTo) predicate (xss: _ ArrayArray) =
+    let columnExists columnIndex (rowFrom, rowTo) predicate (xss: _ ArrayArray) =
         let rec loop rowFrom =
             if rowFrom < rowTo then
                 let row = xss[rowFrom]
@@ -40,8 +40,8 @@ module ArrayArray =
                 false
         loop rowFrom
 
-    let verticalForall columnIndex rowRange predicate (xss: _ ArrayArray) =
-        not <| verticalExists columnIndex rowRange (not << predicate) xss
+    let columnForall columnIndex rowRange predicate (xss: _ ArrayArray) =
+        not <| columnExists columnIndex rowRange (not << predicate) xss
 
     let crop (rowFrom, rowTo) (columnFrom, columnTo) (xss: _ ArrayArray) : _ ArrayArray =
         let height = columnTo - columnFrom
@@ -54,7 +54,7 @@ module ArrayArray =
         let height = getHeight xss
 
         let columnIsEmpty columnIndex =
-            verticalForall columnIndex (0, height) isEmpty xss
+            columnForall columnIndex (0, height) isEmpty xss
 
         let leftMost =
             let rec apply x =
