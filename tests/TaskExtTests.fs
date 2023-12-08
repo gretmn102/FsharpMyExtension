@@ -3,9 +3,7 @@ open FsharpMyExtension
 open Fuchu
 open System.Threading.Tasks
 
-module Expect =
-    let equal act exp msg =
-        Assert.Equal(msg, exp, act)
+open Helpers
 
 [<Tests>]
 let ``TaskExt.runSync`` =

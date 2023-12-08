@@ -4,9 +4,7 @@ open System.Drawing
 open FsharpMyExtension
 open FsharpMyExtension.Either
 
-module Expect =
-    let equal act exp msg =
-        Assert.Equal(msg, exp, act)
+open Helpers
 
 [<Tests>]
 let mapPTest =

@@ -9,6 +9,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers.fs" />
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />
     <Compile Include="ArrayArray.Tests.fs" />
