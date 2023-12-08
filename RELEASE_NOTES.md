@@ -1,3 +1,11 @@
+## 2.0.0-prerelease.7.0
+* feat: add `getWidth`, `getHeight`, `toArray` to `Array2D`
+* feat: add `Enum.is`, `Enum.contains`
+* feat: add `ArrayArray` module with `getWidth`, `getHeight`, `rowExists`, `rowForall`, `columnExists`, `columnForall`, `cropBounds`, `crop`
+* breaking: remove `Array2D.trimLeft`, use instead `ArrayArray.trim`
+* feat: add `ArrayArray.trim`
+* breaking: move `Array2D.trimLeft` to `ArrayArray` module
+
 ## 2.0.0-prerelease.6.0
 * feat: add `Dictionary.tryGetValue`
 * feat: add `EnvironmentExt` with local environment
