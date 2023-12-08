@@ -4,6 +4,10 @@ open System.Drawing
 open FsharpMyExtension
 open FsharpMyExtension.Either
 
+module Expect =
+    let equal act exp msg =
+        Assert.Equal(msg, exp, act)
+
 [<Tests>]
 let mapPTest =
     testList "mapPTest" [
@@ -60,3 +64,47 @@ let toBitmapFastTest =
             let act = sampleBmpArr |> Array2D.toBitmapFast |> Array2D.ofBitmapSlow
             Assert.Equal("", exp, act)
    ]
+
+[<Tests>]
+let ``Array2D.toArray`` =
+    testList "Array2D.toArray" [
+        testCase "empty" <| fun () ->
+            Expect.equal
+                (Array2D.toArray (Array2D.create 0 0 0))
+                [||]
+                ""
+
+        testCase "2x2" <| fun () ->
+            Expect.equal
+                ([|
+                    [| 0; 1 |]
+                    [| 2; 3 |]
+                |]
+                |> Array2D.ofArAr
+                |> Array2D.toArray)
+                [| 0; 1; 2; 3 |]
+                ""
+
+        testCase "2x3" <| fun () ->
+            Expect.equal
+                ([|
+                    [| 0; 1 |]
+                    [| 2; 3 |]
+                    [| 4; 5 |]
+                |]
+                |> Array2D.ofArAr
+                |> Array2D.toArray)
+                [| 0; 1; 2; 3; 4; 5 |]
+                ""
+
+        testCase "3x2" <| fun () ->
+            Expect.equal
+                ([|
+                    [| 0; 1; 2 |]
+                    [| 3; 4; 5 |]
+                |]
+                |> Array2D.ofArAr
+                |> Array2D.toArray)
+                [| 0; 1; 2; 3; 4; 5 |]
+                ""
+    ]

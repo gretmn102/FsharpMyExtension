@@ -258,6 +258,20 @@ let testTo1DArray () =
         to1DArray n i j |> fun i -> Array.set act i x )
     input |> Array.ofList = act
 
+let getWidth = Array2D.length2
+
+let getHeight = Array2D.length1
+
+let toArray (xss: _ [,]) : _ [] =
+    let width, height =  getWidth xss, getHeight xss
+    let toArrayIndex = to1DArray width
+    let ys = Array.zeroCreate (width * height)
+    xss
+    |> Array2D.iteri (fun i j x ->
+        ys[toArrayIndex i j] <- x
+    )
+    ys
+
 /// i / n, i % n
 /// при `w = 3`:
 /// `|0|1|2|3|4|5|`
