@@ -30,7 +30,6 @@
     <Compile Include="Containers/Either.fs" />
     <!-- added to Fable -->
     <Compile Include="Result.fs" />
-    <Compile Include="Some/FsharpMyExtension.fs" />
     <!-- added to Fable -->
     <Compile Include="Library1.fs" />
     <!-- added to Fable -->
