@@ -77,11 +77,6 @@
     <Compile Include="Regex.fs" />
     <Compile Include="Proc.fs" />
     <Compile Include="StringsMatcher.fs" />
-    <Compile Include="Net/ContentType.fs" />
-    <Compile Include="WebDownloader.fs" />
-    <Compile Include="WebDownloaderParallel.fs" />
-    <Compile Include="WebClientDownloader.fs" />
-    <Compile Include="WebCacher.fs" />
     <Compile Include="Scheduler.fs" />
     <Compile Include="StringCompression.fs" />
     <Compile Include="Bencode.fs" />
