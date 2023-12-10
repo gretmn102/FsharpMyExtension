@@ -1,3 +1,6 @@
+## 2.0.0-prerelease.8
+* remove `Net.ContentType`, `WebCacher`, `WebClientDownloader`, `WebDownloader`, `WebDownloaderParallel`
+
 ## 2.0.0-prerelease.7.0
 * feat: add `getWidth`, `getHeight`, `toArray` to `Array2D`
 * feat: add `Enum.is`, `Enum.contains`
