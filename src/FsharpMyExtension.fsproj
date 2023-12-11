@@ -6,81 +6,62 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FSharpMyExt</PackageId>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <!-- don't work in Fable: -->
-    <!-- <FABLE_COMPILER>false</FABLE_COMPILER> -->
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Containers/*.fsproj; Containers/*.fs; Containers/*.js;" Exclude="**\*.fs.js" PackagePath="fable\Containers" />
     <Content Include="*.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />
   </ItemGroup>
-  <ItemGroup Condition="'$(FABLE_COMPILER)' == 'true'">
+  <ItemGroup>
     <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Library1.fs" />
-    <Compile Include="Tree.fs" />
     <Compile Include="Show.fs" />
     <Compile Include="Containers/List.fs" />
-  </ItemGroup>
-  <!-- Fable not to recognize Choose so the code has to be repeated in both cases -->
-  <ItemGroup Condition="'$(FABLE_COMPILER)' != 'true'">
-    <!-- added to Fable -->
-    <Compile Include="Enum.fs" />
-    <!-- added to Fable -->
-    <Compile Include="Containers/Either.fs" />
-    <!-- added to Fable -->
-    <Compile Include="Result.fs" />
-    <!-- added to Fable -->
-    <Compile Include="Library1.fs" />
-    <!-- added to Fable -->
-    <Compile Include="Show.fs" />
-    <!-- added to Fable -->
-    <Compile Include="Containers/List.fs" />
-    <Compile Include="Containers/List1.fs" />
-    <Compile Include="Containers/Option.fs" />
-    <Compile Include="String.fs" />
-    <Compile Include="Containers/Array.fs" />
-    <Compile Include="Containers/LZ.fs" />
-    <Compile Include="Containers/LazyList.fs" />
-    <Compile Include="Containers/ListZipperC.fs" />
-    <Compile Include="Containers/ListZipperC2.fs" />
-    <Compile Include="Queue.fs" />
-    <Compile Include="Seq.fs" />
-    <Compile Include="LazyTree.fs" />
-    <Compile Include="Combinatorics.fs" />
-    <!-- added to Fable -->
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/List1.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Option.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="String.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LZ.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LazyList.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC2.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Queue.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Seq.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="LazyTree.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
     <Compile Include="Tree.fs" />
-    <Compile Include="Containers/TreeZipper.fs" />
-    <Compile Include="Map.fs" />
-    <Compile Include="Dictionary.fs" />
-    <Compile Include="Graph.fs" />
-    <Compile Include="HtmlAgilityPackExt.fs" />
-    <Compile Include="FParsecExt.fs" />
-    <Compile Include="XPathLimited.fs" />
-    <Compile Include="XmlBuilder.fs" />
-    <Compile Include="Reflection.fs" />
-    <Compile Include="Print.fs" />
-    <Compile Include="DateTime.fs" />
-    <Compile Include="Numeric.fs" />
-    <Compile Include="Json.fs" />
-    <Compile Include="Containers/TwoDSeq.fs" />
-    <Compile Include="Containers/Array2D.fs" />
-    <Compile Include="Containers/ArrayArray.fs" />
-    <Compile Include="Bitmap.fs" />
-    <Compile Include="ColorExt.fs" />
-    <Compile Include="Path.fs" />
-    <Compile Include="File.fs" />
-    <Compile Include="Clipboard.fs" />
-    <Compile Include="Int32.fs" />
-    <Compile Include="UInt64Ext.fs" />
-    <Compile Include="Regex.fs" />
-    <Compile Include="Proc.fs" />
-    <Compile Include="StringsMatcher.fs" />
-    <Compile Include="Scheduler.fs" />
-    <Compile Include="StringCompression.fs" />
-    <Compile Include="Bencode.fs" />
-    <Compile Include="TaskExt.fs" />
-    <Compile Include="EnvironmentExt.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/TreeZipper.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Map.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Dictionary.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Graph.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="XPathLimited.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="XmlBuilder.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Reflection.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Print.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="DateTime.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Numeric.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Json.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/TwoDSeq.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array2D.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ArrayArray.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bitmap.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="ColorExt.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Path.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="File.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Clipboard.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Int32.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="UInt64Ext.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Regex.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Proc.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringsMatcher.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Scheduler.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringCompression.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bencode.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="TaskExt.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="EnvironmentExt.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

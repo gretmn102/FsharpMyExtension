@@ -85,7 +85,7 @@ Target.create "Meta" (fun _ ->
     |> File.write false "Directory.Build.props"
 )
 
-let commonBuildArgs = "-c Release -p:FABLE_COMPILER=false"
+let commonBuildArgs = "-c Release"
 
 Target.create "Build" (fun _ ->
     mainProjDir
