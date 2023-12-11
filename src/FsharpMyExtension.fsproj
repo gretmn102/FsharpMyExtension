@@ -12,6 +12,7 @@
     <Content Include="*.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers/Pair.fs" />
     <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
