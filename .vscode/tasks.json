@@ -45,6 +45,16 @@
                 "PushToGitlab"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "FableBuild",
+            "type": "shell",
+            "command": "build",
+            "args": [
+                "-t",
+                "FableBuild"
+            ],
+            "problemMatcher": []
         }
     ]
 }
