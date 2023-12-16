@@ -1,4 +1,4 @@
-module FsharpMyExtension.Set
+module FsharpMyExtension.Collections.Set
 
 let tryFirst (s: _ Set) =
     if Set.isEmpty s then
