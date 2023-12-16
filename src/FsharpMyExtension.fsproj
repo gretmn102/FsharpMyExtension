@@ -45,6 +45,7 @@
     <Compile Include="Show.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Option.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Task.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Scheduler.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
@@ -61,7 +62,6 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Regex.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Proc.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringsMatcher.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Scheduler.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringCompression.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bencode.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="EnvironmentExt.fs" />
