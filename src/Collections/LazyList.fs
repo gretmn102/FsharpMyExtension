@@ -1,5 +1,6 @@
 ﻿namespace FsharpMyExtension.Collections
 
+[<RequireQualifiedAccess>]
 type LazyList<'a> =
    | Empty
    | Cons of 'a * Lazy<LazyList<'a>>
@@ -8,14 +9,16 @@ type LazyList<'a> =
 [<RequireQualifiedAccess>]
 module LazyList =
     let head = function
-        | Cons (h, _) -> h
-        | Empty -> failwith "empty list"
-    let tail = function
-        | Cons (_, t) -> t.Force()
-        | Empty -> failwith "empty list"
+        | LazyList.Cons (h, _) -> h
+        | LazyList.Empty -> failwith "empty list"
 
-    let empty = Empty
-    let singleton a = Cons (a, lazy ( Empty ))
+    let tail = function
+        | LazyList.Cons (_, t) -> t.Force()
+        | LazyList.Empty -> failwith "empty list"
+
+    let empty = LazyList.Empty
+
+    let singleton a = LazyList.Cons (a, lazy ( LazyList.Empty ))
 
     /// ## Note
     /// ```
@@ -26,39 +29,45 @@ module LazyList =
     /// but:
     /// ```
     /// let rec f i =
-    ///     Cons (i, lazy ( f (i + 1) ))
+    ///     LazyList.Cons (i, lazy ( f (i + 1) ))
     /// f 0 -> // Ok
     /// ```
-    let cons (a : 'a) (l : LazyList<'a>) = Cons (a, lazy ( l ))
+    let cons (a : 'a) (l : LazyList<'a>) = LazyList.Cons (a, lazy ( l ))
 
     let rec map f = function
-        | Cons (a, t) -> Cons (f a, lazy (map f (t.Force())))
-        | Empty -> Empty
+        | LazyList.Cons (a, t) ->
+            LazyList.Cons (f a, lazy (map f (t.Force())))
+        | LazyList.Empty ->
+            LazyList.Empty
 
     let rec iter f = function
-        | Cons (a, t) -> f a; iter f (t.Force())
-        | Empty -> ()
+        | LazyList.Cons (a, t) ->
+            f a
+            iter f (t.Force())
+        | LazyList.Empty -> ()
 
     let rec take nr = function
-        | Cons (a, t) ->
-            if nr = 0 then Empty
-            else Cons (a, lazy (take (nr-1) (t.Force())))
-        | Empty -> Empty
+        | LazyList.Cons (a, t) ->
+            if nr = 0 then
+                LazyList.Empty
+            else
+                LazyList.Cons (a, lazy (take (nr-1) (t.Force())))
+        | LazyList.Empty -> LazyList.Empty
 
-    let rec unfold (f : 's -> ('a*'s) option) (init : 's) : LazyList<'a> =
+    let rec unfold (f : 's -> ('a * 's) option) (init : 's) : LazyList<'a> =
         match f init with
-        | Some (a, s) -> Cons (a, lazy (unfold f s))
-        | None -> Empty
+        | Some (a, s) -> LazyList.Cons (a, lazy (unfold f s))
+        | None -> LazyList.Empty
 
     let rec foldr (f : 'a -> Lazy<'s> -> 's) (init : 's) = function
-       | Cons (a, t) -> f a (lazy (foldr f init (t.Force())))
-       | Empty -> init
+       | LazyList.Cons (a, t) -> f a (lazy (foldr f init (t.Force())))
+       | LazyList.Empty -> init
 
     let isEmpty = function
-        | Cons _ -> false
-        | Empty -> true
+        | LazyList.Cons _ -> false
+        | LazyList.Empty -> true
 
     let initInfinite initializer =
         let rec f i =
-            Cons (initializer i, lazy ( f (i + 1) ))
+            LazyList.Cons (initializer i, lazy ( f (i + 1) ))
         f 0

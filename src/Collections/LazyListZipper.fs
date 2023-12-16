@@ -31,7 +31,7 @@ module LazyListZipper =
             |> Ok
         | None ->
             match llz.SrcList.Value with
-            | Cons(x, xs) ->
+            | LazyList.Cons(x, xs) ->
                 match x with
                 | Ok x ->
                     { llz with
@@ -40,7 +40,7 @@ module LazyListZipper =
                             ListZ.insertAfter x llz.State }
                     |> Ok
                 | Error x -> Error (NextResult.Error x)
-            | Empty -> Error NextResult.EndOfList
+            | LazyList.Empty -> Error NextResult.EndOfList
 
     let prev (llz: LazyListZipper<'Error,_>) =
         match ListZ.prev llz.State with
