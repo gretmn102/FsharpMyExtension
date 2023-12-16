@@ -1,11 +1,10 @@
 module FsharpMyExtension.Collections.LazyListZipper
 open FsharpMyExtension.ListZipper
-open FsharpMyExtension.Either
 open FsharpMyExtension.LazyList
 
 type LazyListZipper<'Error, 'a> =
     {
-        SrcList: Lazy<LazyList<Either<'Error, 'a>>>
+        SrcList: Lazy<LazyList<Result<'a, 'Error>>>
         State: ListZ<'a>
     }
 
@@ -31,19 +30,19 @@ module LazyListZipper =
         | Some lz ->
             { llz with
                 State = lz }
-            |> Right
+            |> Ok
         | None ->
             match llz.SrcList.Value with
             | Cons(x, xs) ->
                 match x with
-                | Right x ->
+                | Ok x ->
                     { llz with
                         SrcList = lazy xs.Value
                         State =
                             ListZ.insertAfter x llz.State }
-                    |> Right
-                | Left x -> Left (NextResult.Error x)
-            | Empty -> Left NextResult.EndOfList
+                    |> Ok
+                | Error x -> Error (NextResult.Error x)
+            | Empty -> Error NextResult.EndOfList
 
     let prev (llz: LazyListZipper<'Error,_>) =
         match ListZ.prev llz.State with
