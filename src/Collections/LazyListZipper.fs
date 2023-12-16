@@ -12,6 +12,7 @@ type LazyListZipper<'Error, 'a> =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LazyListZipper =
+    [<RequireQualifiedAccess>]
     type 'Error NextResult =
         | EndOfList
         | Error of 'Error
@@ -41,8 +42,8 @@ module LazyListZipper =
                         State =
                             ListZ.insertAfter x llz.State }
                     |> Right
-                | Left x -> Left (Error x)
-            | Empty -> Left EndOfList
+                | Left x -> Left (NextResult.Error x)
+            | Empty -> Left NextResult.EndOfList
 
     let prev (llz: LazyListZipper<'Error,_>) =
         match ListZ.prev llz.State with
