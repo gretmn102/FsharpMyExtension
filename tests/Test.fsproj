@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <Compile Include="Primitives\DateTime.Tests.fs" />
+    <Compile Include="Collections\List.Tests.fs" />
     <Compile Include="Collections\Array.Tests.fs" />
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />

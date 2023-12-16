@@ -1,7 +1,8 @@
 ﻿[<RequireQualifiedAccess>]
-module FsharpMyExtension.List
-
+module FsharpMyExtension.Collections.List
 open FsharpMyExtension
+open FsharpMyExtension.Commons
+
 let cons x xs = x::xs
 let consFlip xs x = x::xs
 
