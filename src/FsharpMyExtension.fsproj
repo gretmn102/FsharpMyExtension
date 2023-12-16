@@ -41,7 +41,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ArrayArray.fs" />
     <Compile Include="Collections/Set.fs" />
     <Compile Include="Containers/Either.fs" />
-    <Compile Include="Result.fs" />
+    <Compile Include="Containers/Result.fs" />
     <Compile Include="Show.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Option.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
