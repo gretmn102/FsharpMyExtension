@@ -1,4 +1,4 @@
-namespace FsharpMyExtension
+namespace FsharpMyExtension.Collections
 
 type List1<'a> = 'a * 'a list
 module List1 =
