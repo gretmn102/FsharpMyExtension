@@ -14,6 +14,9 @@
   <ItemGroup>
     <Compile Include="Containers/Pair.fs" />
     <Compile Include="Commons.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\Int32.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\UInt64Ext.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\Numeric.fs" />
     <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
@@ -43,7 +46,6 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Reflection.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Print.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="DateTime.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Numeric.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Json.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/TwoDSeq.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array2D.fs" />
@@ -53,8 +55,6 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Path.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Clipboard.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Int32.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="UInt64Ext.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Regex.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Proc.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringsMatcher.fs" />
