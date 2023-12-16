@@ -54,7 +54,6 @@ module JToken =
 
 module FSharpJsonType =
     open FsharpMyExtension
-    open FsharpMyExtension.Reflection
     open Newtonsoft.Json.Linq
 
     type JsonFType =
