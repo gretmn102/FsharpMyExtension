@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module FsharpMyExtension.UInt64Ext.UInt64
+module FsharpMyExtension.Primitives.Numeric.UInt64
 
 let tryParse (str: string) =
     match System.UInt64.TryParse str with

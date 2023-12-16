@@ -1,4 +1,4 @@
-module FsharpMyExtension.Numeric
+module FsharpMyExtension.Primitives.Numeric.Numeric
 
 
 //CustomEquality;
@@ -30,13 +30,13 @@ module FsharpMyExtension.Numeric
 //     //     if Rational<'a>.op_LessThan(n,nn) then -1
 //     //     elif n = nn then 0 else 1
 //     // interface System.IComparable with
-//     //     member this.CompareTo(obj:obj) = 
-//     //         match obj with 
+//     //     member this.CompareTo(obj:obj) =
+//     //         match obj with
 //     //         | :? Rational<'a> as that -> Rational<'a>.compare(this,that)
 //     //         | _ -> invalidArg "obj" "the objects are not comparable"
 
-//     // override this.Equals(obj) = 
-//     //     match obj with 
+//     // override this.Equals(obj) =
+//     //     match obj with
 //     //     | :? Rational<'a> as that -> Rational<'a>.op_Equality(this, that)
 //     //     | _ -> false
 //     static member inline Neg (R(x,y)) = R(-x, y) // (~-)
@@ -47,7 +47,7 @@ module FsharpMyExtension.Numeric
 
 
 module Num =
-    let inline gcd x y = 
+    let inline gcd x y =
         let rec gcd' a b =
             if b = LanguagePrimitives.GenericZero then a
             else gcd' b (a % b)
@@ -55,7 +55,7 @@ module Num =
                     // gcd x y         =  gcd' (abs x) (abs y)
                     //        where gcd' a 0  =  a
                     //              gcd' a b  =  gcd' b (a `rem` b)
-    let inline sign' (x: ^a) : ^a = 
+    let inline sign' (x: ^a) : ^a =
         if x > LanguagePrimitives.GenericZero then LanguagePrimitives.GenericOne
         elif x < LanguagePrimitives.GenericZero then -LanguagePrimitives.GenericOne
         else LanguagePrimitives.GenericZero
@@ -90,13 +90,13 @@ type Rational =
         if x * y' <  x' * y then -1
         elif n = nn then 0 else 1
     interface System.IComparable with
-        member this.CompareTo(obj:obj) = 
-            match obj with 
+        member this.CompareTo(obj:obj) =
+            match obj with
             | :? Rational as that -> Rational.compare(this,that)
             | _ -> invalidArg "obj" "the objects are not comparable"
 
-    override this.Equals(obj) = 
-        match obj with 
+    override this.Equals(obj) =
+        match obj with
         | :? Rational as that -> Rational.op_Equality(this, that)
         | _ -> false
     override this.GetHashCode () = this.GetHashCode ()
@@ -130,7 +130,7 @@ type Rational =
 //         else
 //             let d = Num.gcd x y
 //             let (/) a b : ^a = (^a : (static member (/) : ^a -> ^a -> ^a) (a, b))
-            
+
 //             R((x / d), (y / d))
 //     static member inline (+) ((R(x,y)) : RationalG< ^a>, (R(x', y'))) =
 //         let (+) a b : ^a = (^a : (static member (+) : ^a -> ^a -> ^a) (a, b))
@@ -163,14 +163,14 @@ type Rational =
 //         if x * y' <  x' * y then -1
 //         elif (x = y) && (x' = y') then 0 else 1
 //     interface System.IComparable< ^a> with
-//         member this.CompareTo(obj: ^a) = 
+//         member this.CompareTo(obj: ^a) =
 //             RationalG<'a>.compare(this,obj)
-//             // match obj with 
+//             // match obj with
 //             // | :? RationalG<'a> as that -> RationalG<'a>.compare(this,that)
 //             // | _ -> invalidArg "obj" "the objects are not comparable"
 
-//     // override this.Equals(obj) = 
-//     //     match obj with 
+//     // override this.Equals(obj) =
+//     //     match obj with
 //     //     | :? RationalG<'a> as that -> RationalG<'a>.op_Equality(this, that)
 //     //     | _ -> false
 //     // override this.GetHashCode () = this.GetHashCode ()
@@ -213,7 +213,7 @@ type Rational =
 
 //     let inline ofNum x =
 //         let denum x =
-//             let dec = 
+//             let dec =
 //                 let rec f x = function
 //                     | 0 -> x
 //                     | i -> f (x * 10) (i-1)
@@ -229,7 +229,7 @@ type Rational =
 //         int x |> fun y ->
 //         if y < 0 then y %^ 1 - (x |> denum)
 //         else y %^ 1 + (x |> denum)
-        
+
 //     assert
 //         let x = 14.
 //         x |> ofNum |> toDouble = x
@@ -250,8 +250,8 @@ type Rational =
 //     //x - 28.5
 
 [<CustomEquality;CustomComparison>]
-type RatBig = 
-    { 
+type RatBig =
+    {
         numerator: bigint
         denominator: bigint
     }
@@ -262,12 +262,12 @@ type RatBig =
         if x * y' <  x' * y then -1
         elif x = y then 0 else 1
     interface System.IComparable with
-        member this.CompareTo(obj:obj) = 
-            match obj with 
+        member this.CompareTo(obj:obj) =
+            match obj with
             | :? RatBig as that -> RatBig.compare(this,that)
             | _ -> invalidArg "obj" "the objects are not comparable"
-    override this.Equals(obj) = 
-        match obj with 
+    override this.Equals(obj) =
+        match obj with
         | :? RatBig as that -> RatBig.op_Equality(this, that)
         | _ -> false
     override this.GetHashCode () = this.GetHashCode ()
@@ -279,9 +279,9 @@ module RatBig =
     let rec gcd a (b: BigInteger) =
       if b = BigInteger.Zero then a else
         gcd b (a % b)
-    let lcm a b = 
+    let lcm a b =
       (a * b) / (gcd a b)
-    
+
     let mkRational p q =
       let p, q =
         if q = BigInteger.Zero then raise(System.DivideByZeroException())
@@ -290,7 +290,7 @@ module RatBig =
 
       let p, q =
         if q > BigInteger.Zero then p, q else -p, -q
-        
+
       { numerator = p; denominator = q }
 
     let intToRational (p:int) = mkRational (BigInteger(p)) BigInteger.One
@@ -298,12 +298,12 @@ module RatBig =
     let OneRational = mkRational BigInteger.One BigInteger.One
 
     let AddRational m n =
-      let d = gcd m.denominator n.denominator 
+      let d = gcd m.denominator n.denominator
       let m' = m.denominator / d
       let n' = n.denominator / d
       mkRational (m.numerator * n' + n.numerator * m') (m.denominator * n')
-    
-    let NegRational m = 
+
+    let NegRational m =
       mkRational (-m.numerator) m.denominator
 
     let MulRational m n =
@@ -312,7 +312,7 @@ module RatBig =
     let DivRational m n =
       mkRational (m.numerator * n.denominator) (m.denominator * n.numerator)
 
-    let AbsRational m = 
+    let AbsRational m =
       mkRational (abs m.numerator) m.denominator
 
     let RationalToString m =
@@ -327,7 +327,7 @@ module RatBig =
         AddRational (mkRational 40I 1I) (mkRational 1I 2I) |> toDouble = 40.5
     let inline ofNum x =
         let denum x =
-            let dec = 
+            let dec =
                 let rec f x i =
                     if i = LanguagePrimitives.GenericZero then x
                     else
@@ -358,8 +358,8 @@ module RatBig =
             [ test 40.231234
               test 45.
               test 1.5 ]
-        
-    let SignRational p = 
+
+    let SignRational p =
       if p.numerator < BigInteger.Zero then -1 else
       if p.numerator > BigInteger.Zero then 1 else 0
 
@@ -379,10 +379,10 @@ type RatBig with
 
 
 type PercentType = RatBig
-module private Tool = 
+module private Tool =
     let max = RatBig.mkRational 100I 1I
     let min = RatBig.mkRational 0I 1I
-    let plane x = 
+    let plane x =
         if x > max then max
         elif x < min then min
         else x
@@ -392,7 +392,7 @@ module private Tool =
 //     member __.Val = Tool.plane x
 //     // new (x) =
 //     //     let s = 10
-        
+
 //     //     { Val = Tool.plane x }
 //     //     then
 //     //         PercentType <| PercentType.Plane

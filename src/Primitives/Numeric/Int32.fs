@@ -1,4 +1,5 @@
-module FsharpMyExtension.Int32
+module FsharpMyExtension.Primitives.Numeric.Int32
+
 let tryParse x =
     match System.Int32.TryParse x with
     | true, x -> Some x

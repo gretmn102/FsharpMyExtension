@@ -1,6 +1,6 @@
-module Int32ExtTests
-open FsharpMyExtension
+module FsharpMyExtension.Primitives.Numeric.Int32.Tests
 open Fuchu
+open FsharpMyExtension
 
 [<Tests>]
 let getLengthTests =
@@ -9,7 +9,7 @@ let getLengthTests =
             let exp =
                 (n.ToString()).Length
             let act =
-                Int32.getLength n
+                getLength n
 
             Assert.Equal("", exp, act)
 
@@ -38,7 +38,7 @@ let getLengthTests =
 let digitsSplitAndJoinTests =
     let genRandomList () =
         let r = System.Random()
-        let length = r.Next(1, Int32.getLength System.Int32.MaxValue)
+        let length = r.Next(1, getLength System.Int32.MaxValue)
         List.init length (fun i ->
             if i > 0 then r.Next(0, 10)
             else r.Next(1, 10)
@@ -48,7 +48,7 @@ let digitsSplitAndJoinTests =
         testCase (sprintf "%A" input) <| fun () ->
             let exp = input
             let act =
-                Int32.toDigits (Int32.ofDigits input)
+                toDigits (ofDigits input)
 
             Assert.Equal("", exp, act)
 

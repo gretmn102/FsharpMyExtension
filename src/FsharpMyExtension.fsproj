@@ -15,7 +15,7 @@
     <Compile Include="Containers/Pair.fs" />
     <Compile Include="Commons.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\Int32.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\UInt64Ext.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\UInt64.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\Numeric\Numeric.fs" />
     <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
