@@ -1,4 +1,4 @@
-module FsharpMyExtension.Pair
+module FsharpMyExtension.Containers.Pair
 
 let create x y = x, y
 

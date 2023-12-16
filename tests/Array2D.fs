@@ -3,6 +3,7 @@ open Fuchu
 open System.Drawing
 
 open FsharpMyExtension
+open FsharpMyExtension.Containers
 open FsharpMyExtension.Either
 
 open Helpers

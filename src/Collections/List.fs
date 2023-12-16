@@ -461,7 +461,7 @@ let inline chunkBySizeRange size length =
 assert
     let f size len =
         (List.chunkBySize size [0..len - 1] |> List.map (on List.head List.last), chunkBySizeRange size len)
-        |> Pair.reduce (=)
+        |> Containers.Pair.reduce (=)
     [
         f 3 15
         f 3 14

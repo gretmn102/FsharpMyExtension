@@ -2,6 +2,8 @@
 
 [<AutoOpen>]
 module Commons =
+    open FsharpMyExtension.Containers
+
     let rec until cond f init =
         match init with
         | curr when cond curr -> curr
