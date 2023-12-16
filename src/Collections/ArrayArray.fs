@@ -1,4 +1,4 @@
-namespace FsharpMyExtension
+namespace FsharpMyExtension.Collections
 open FsharpMyExtension.Primitives
 
 type 'a ArrayArray = 'a [] []

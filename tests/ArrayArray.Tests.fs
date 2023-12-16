@@ -1,7 +1,8 @@
-module FsharpMyExtension.ArrayArray.Tests
+module FsharpMyExtension.Collections.ArrayArray.Tests
 open Fuchu
 
 open FsharpMyExtension
+open FsharpMyExtension.Collections
 
 [<Tests>]
 let ``ArrayArray.rowExists`` =
