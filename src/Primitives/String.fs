@@ -1,5 +1,5 @@
 ﻿// [<RequireQualifiedAccess>]
-module FsharpMyExtension.String
+module FsharpMyExtension.Primitives.String
 let split (sep:string) (s:string) = s.Split([|sep|], System.StringSplitOptions.None)
 let splitSeq (sep:string) (x:string) =
     let rec f (i:int) =

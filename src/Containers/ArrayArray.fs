@@ -1,4 +1,5 @@
 namespace FsharpMyExtension
+open FsharpMyExtension.Primitives
 
 type 'a ArrayArray = 'a [] []
 

@@ -1,4 +1,5 @@
 module Print
+open FsharpMyExtension.Primitives
 
 let reader () =
     let s = System.Text.StringBuilder()
@@ -56,8 +57,6 @@ let escape2 () =
         | x -> string x
     run reader f
 
-
-open FsharpMyExtension
 let toSnippet s =
     s
     |> String.lines

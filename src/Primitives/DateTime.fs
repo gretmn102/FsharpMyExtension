@@ -1,6 +1,6 @@
-module FsharpMyExtension.DateTime
+module FsharpMyExtension.Primitives.DateTime
 open System
-module Unix = 
+module Unix =
     let unixEpoch = DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
     let ofSec = unixEpoch.AddSeconds
     let ofMSec = unixEpoch.AddMilliseconds

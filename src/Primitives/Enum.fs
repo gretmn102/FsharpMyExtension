@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module FsharpMyExtension.Enum
+module FsharpMyExtension.Primitives.Enum
 
 let inline is<'EnumType, 'Enum when 'Enum: enum<'EnumType> and 'Enum: equality>
     (value: 'Enum)

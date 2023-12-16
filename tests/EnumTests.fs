@@ -1,4 +1,4 @@
-module FsharpMyExtension.Enum.Tests
+module FsharpMyExtension.Primitives.Enum.Tests
 open Fuchu
 open FsharpMyExtension
 

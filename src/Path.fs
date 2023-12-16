@@ -1,6 +1,8 @@
 module FsharpMyExtension.Path
 open System.IO
 
+open FsharpMyExtension.Primitives
+
 let changeFileNameWithoutExt fname path =
     [|
         match System.IO.Path.GetDirectoryName path with
