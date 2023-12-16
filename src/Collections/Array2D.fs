@@ -1,5 +1,5 @@
 [<RequireQualifiedAccessAttribute>]
-module FsharpMyExtension.Array2D
+module FsharpMyExtension.Collections.Array2D
 
 open FsharpMyExtension.TwoDSeq
 let private toT (xss:_ [,]) = {

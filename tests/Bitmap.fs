@@ -2,8 +2,8 @@ module Bitmap
 open Fuchu
 open System.Drawing
 open FsharpMyExtension
+open FsharpMyExtension.Collections
 open FsharpMyExtension.TwoDSeq
-
 
 [<Tests>]
 let MapPTest =
