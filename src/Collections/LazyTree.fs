@@ -7,13 +7,13 @@ type 'a LazyTree = LT of 'a * 'a LazyTree seq
 [<RequireQualifiedAccess>]
 module LazyTree =
     open FsharpMyExtension
-    let visualize print inputTree = 
+    let visualize print inputTree =
         let prefMid = seq { yield "├─"; while true do yield "│ " }
         let prefEnd = seq { yield "└─"; while true do yield "  " }
         let prefNone = seq { while true do yield "" }
         // let c2 x y = Seq.map2 (fun u v -> String.concat "" [u; v]) x y
         let inline c2 x y = Seq.map2 (+) x y
-        
+
         let rec visualize (LT(label, children)) pre =
             seq {
                 yield Seq.head pre + print label
@@ -23,7 +23,7 @@ module LazyTree =
                     // for e in children do
                     //     if e = last then yield! visualize e (c2 preRest prefEnd)
                     //     else yield! visualize e (c2 preRest prefMid)
-                    let xs = 
+                    let xs =
                         children
                         |> Seq.mapMidLast
                             (flip visualize (c2 preRest prefMid))
@@ -40,7 +40,7 @@ module LazyTree =
             | LT(x, xs) -> Seq.map (fun xs -> x::xs) (unpack xs)
         Seq.collect f pairs
     // assert
-    //     let dummy = 
+    //     let dummy =
     //          [Node (0,seq [Node (1,seq []); Node (2,seq []); Node (3,seq [])]);
     //           Node (1,seq [Node (2,seq []); Node (3,seq [])]);
     //           Node (2,seq [Node (3,seq [])])]
@@ -61,7 +61,7 @@ module LazyTree =
         let rec loop xs =
             xs |> Seq.map (fun (LT(x, xs)) -> LT(f x, loop xs))
         LT(f x, loop xs)
-    let rec truncate count (LT(x, xs)) = 
+    let rec truncate count (LT(x, xs)) =
         if count > 1 then
             LT(x, xs |> Seq.map (truncate (count - 1)))
         else

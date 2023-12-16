@@ -20,27 +20,31 @@
     <Compile Include="Primitives\Enum.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\DateTime.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Primitives\String.fs" />
+    <Compile Include="Collections/List.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/List1.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Array.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LZ.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyList.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyListZipper.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ListZipperC.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ListZipperC2.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Queue.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Seq.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyTree.fs" />
+    <Compile Include="Collections/Tree.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/TreeZipper.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Map.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Dictionary.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Graph.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/TwoDSeq.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Array2D.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ArrayArray.fs" />
+    <Compile Include="Collections/Set.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
     <Compile Include="Show.fs" />
-    <Compile Include="Containers/List.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/List1.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Option.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LZ.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LazyList.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyListZipper.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC2.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Queue.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Seq.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="LazyTree.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
-    <Compile Include="Tree.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/TreeZipper.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Map.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Dictionary.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Graph.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="XPathLimited.fs" />
@@ -48,9 +52,6 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Reflection.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Print.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Json.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/TwoDSeq.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array2D.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ArrayArray.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bitmap.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="ColorExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Path.fs" />
