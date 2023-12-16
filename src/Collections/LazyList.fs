@@ -1,4 +1,4 @@
-﻿module FsharpMyExtension.LazyList
+﻿namespace FsharpMyExtension.Collections
 
 type LazyList<'a> =
    | Empty
