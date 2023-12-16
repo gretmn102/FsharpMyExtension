@@ -1,5 +1,7 @@
 ﻿namespace FsharpMyExtension.Combinatorics
 open FsharpMyExtension
+open FsharpMyExtension.Collections
+
 type 'a LazyTreeEmpty = LteNil | Lte of 'a * LazyTreeEmpty<'a> seq
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
@@ -18,7 +20,7 @@ module LazyTreeEmpty =
 module Comb =
     /// Сочетания без повторений:
     /// `f 2 [1..3]` -> `[[1; 2]; [1; 3]; [2; 3]]`
-    let rec comb count = 
+    let rec comb count =
         if count <= 0 then fun _ -> Seq.empty
         else
             let fn = function
@@ -38,14 +40,14 @@ module Comb =
         comb 4 [0..3] |> LazyTree.unpack |> List.ofSeq = [[0..3]]
     assert
         comb 5 [0..3] |> Seq.isEmpty
-    
+
     let rec combAllLazy xs =
         let map fn = Seq.unfold (function [] -> None | h::t -> Some(fn h t, t))
         seq{ yield LteNil
              yield! map (fun x t -> Lte(x, (combAllLazy t))) xs }
     assert
         combAllLazy [1..3]
-        |> LazyTreeEmpty.unpack |> Seq.map List.ofSeq |> List.ofSeq 
+        |> LazyTreeEmpty.unpack |> Seq.map List.ofSeq |> List.ofSeq
         |> (=) [[]; [1]; [1; 2]; [1; 2; 3]; [1; 3]; [2]; [2; 3]; [3]]
     //    let rec permm xs =
     //        let fn = function
@@ -53,17 +55,17 @@ module Comb =
     //            | h::t as xs -> Some(LT(h, seq{ yield Nil; yield! permm t}), t)
     //        Seq.unfold fn xs
     //    assert
-    //        
+    //
     //        permm [0..3] |> LazyTree.unpack
     //    let xs = Seq.init 10 (printfn "%d")
     //    Seq.take 2 xs
     //    Seq.skip 2 xs
     /// Бесконечные сочетания с повторениями:
-    /// 
+    ///
     /// `f [1..3]` -&gt; (если отсеять до 2-ух в ширину) `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
-    /// 
+    ///
     /// Бесконечная как в ширину, так и в длину.
-    let combRepLazy = 
+    let combRepLazy =
         let rec f = function
             | x::xs as ys ->
                 seq {
@@ -74,7 +76,7 @@ module Comb =
         f
     /// Сочетания с повторениями:
     /// `f 2 [1..3]` -&gt; `[[1; 1]; [1; 2]; [1; 3]; [2; 2]; [2; 3]; [3; 3]]`
-    let combRep i xs = 
+    let combRep i xs =
         let rec count i xs =
             if i = 0 then Seq.empty
             else
@@ -91,7 +93,7 @@ module Comb =
         f xss
     /// Перестановка без повторений в алфавитном порядке:
     /// `f [1..3]` -&gt; `[[1; 2; 3]; [1; 3; 2]; [2; 1; 3]; [2; 3; 1]; [3; 1; 2]; [3; 2; 1]]`
-    let rec permutation xs = 
+    let rec permutation xs =
         // более понятный вариант:
         // /// 1234 -> [1, 234; 2, 134; 3, 124; 4, 123]
         // /// [(1, [2; 3; 4]); (2, [1; 3; 4]); (3, [1; 2; 4]); (4, [1; 2; 3])]
@@ -131,7 +133,7 @@ module Comb =
 module CombUnpacked =
     /// `[1..3]` -&gt; `[[]; [1]; [1; 2]; [1; 2; 3]; [1; 3]; [2]; [2; 3]; [3]]`
     let rec combAll xs =
-        let rec map fn xs = 
+        let rec map fn xs =
             let rec f acc = function
                 | [] -> acc
                 | x::xs -> f (fn x xs::acc) xs
@@ -154,7 +156,7 @@ module CombUnpacked =
         let test xs = combAllLazy xs |> Seq.map (List.ofSeq) |> List.ofSeq = combAll xs
         test [1..12]
     /// Перестановки без повторений в странном порядке:
-    /// 
+    ///
     /// `[1..3]` -> `[[1; 2; 3]; [2; 1; 3]; [2; 3; 1]; [1; 3; 2]; [3; 1; 2]; [3; 2; 1]]`
     let permutation xs =
         let rec inserts x = function
@@ -174,7 +176,7 @@ module CombUnpacked =
             | 0 -> List.map (fun x -> [x]) l
             | k -> List.collect (fun x -> add x (f (k-1))) l
         f (k - 1)
-module Formulas = 
+module Formulas =
     let inline fact n =
         List.reduce (*) [ LanguagePrimitives.GenericOne .. n ]
     let inline perm n k =
@@ -188,19 +190,19 @@ module Formulas =
             state * bigint y) LanguagePrimitives.GenericOne
 
 /// https://stackoverflow.com/questions/18613690/calculate-nth-multiset-combination-with-repetition-based-only-on-index
-module UnionManual = 
+module UnionManual =
     (*
     largest[i_, nn_, kk_] := With[
-        {x = g[nn, kk]}, 
+        {x = g[nn, kk]},
         If[x > i, largest[i, nn-1, kk], {nn,x}]
     ]
     *)
-    let union n k i j = 
+    let union n k i j =
         if i > (k - 1) then failwith "j не должно превышать k"
 
-        let fact = function 
+        let fact = function
             | n when n < 0 -> 0
-            | 0 -> 1 | 1 -> 1 
+            | 0 -> 1 | 1 -> 1
             | n -> List.reduce (*) [2..n]
 
         let g n k = fact(n + k - 1) / (fact k * fact (n - 1))

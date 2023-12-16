@@ -1,4 +1,5 @@
 ﻿module FsharpMyExtension.Tree
+open FsharpMyExtension.Collections
 
 type Tree<'a> = Node of 'a * Tree<'a> list
 module Tree =

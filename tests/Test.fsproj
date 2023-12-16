@@ -16,6 +16,7 @@
     <Compile Include="Collections\ListZipper.Tests.fs" />
     <Compile Include="Collections\ListZipperC2.Tests.fs" />
     <Compile Include="Collections\Seq.Tests.fs" />
+    <Compile Include="Collections\LazyTree.Tests.fs" />
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />
     <Compile Include="ArrayArray.Tests.fs" />

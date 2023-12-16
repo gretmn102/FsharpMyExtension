@@ -1,5 +1,4 @@
-namespace FsharpMyExtension
-open FsharpMyExtension.Collections
+namespace FsharpMyExtension.Collections
 
 [<Struct>]
 type 'a LazyTree = LT of 'a * 'a LazyTree seq

@@ -257,31 +257,6 @@ module OptionTests =
                     Assert.Equal("", 1, !counter)
            ]
 
-module TreeTest =
-    open FsharpMyExtension
-    [<Tests>]
-    let VisualizeTest =
-        testList "VisualizeTest" [
-            testCase "base case" <| fun () ->
-                let dummy =
-                  LT
-                    ("1",
-                     seq
-                       {yield LT ("2",seq { yield LT ("3",Seq.empty); yield LT ("4",Seq.empty)});
-                        yield LT ("3",seq { yield LT ("4",Seq.empty)})})
-                let exp =
-                    [
-                        "1"
-                        "├─2"
-                        "│ ├─3"
-                        "│ └─4"
-                        "└─3"
-                        "  └─4"
-                    ] |> String.concat "\n"
-                let act = LazyTree.visualize (sprintf "%s") dummy
-                Assert.Equal("", exp, act)
-       ]
-
 module Path =
     open FsharpMyExtension.Path
     [<Tests>]
@@ -360,7 +335,9 @@ module Path =
 
 module Comb =
     open FsharpMyExtension
+    open FsharpMyExtension.Collections
     open FsharpMyExtension.Combinatorics
+
     [<Tests>]
     let packTest =
         testList "paTest" [
