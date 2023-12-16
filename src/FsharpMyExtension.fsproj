@@ -47,6 +47,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Task.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Scheduler.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Path.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
@@ -57,7 +58,6 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Json.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bitmap.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="ColorExt.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Clipboard.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Regex.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Proc.fs" />
