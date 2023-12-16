@@ -29,6 +29,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Array.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LZ.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/LazyList.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyListZipper.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/ListZipperC2.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Queue.fs" />
