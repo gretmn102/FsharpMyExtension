@@ -227,7 +227,6 @@ let rec runOnSeqNotGreedy m (xs:_ seq) =
             | Some value -> Some value
         | None -> None
 
-open FsharpMyExtension.Tree
 let toTree keyf (xs: Container<_, _>) =
     let rec f (Dic(v, m)) =
         match v with

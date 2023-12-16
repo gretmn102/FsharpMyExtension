@@ -1,5 +1,5 @@
-﻿module FsharpMyExtension.Tree
-open FsharpMyExtension.Collections
+﻿namespace FsharpMyExtension.Collections
+open FsharpMyExtension.Commons
 
 type Tree<'a> = Node of 'a * Tree<'a> list
 module Tree =

@@ -2,7 +2,6 @@ module TreeZipperTest
 open Fuchu
 
 open FsharpMyExtension
-open FsharpMyExtension.Tree
 open FsharpMyExtension.TreeZipper
 open FsharpMyExtension.Collections
 

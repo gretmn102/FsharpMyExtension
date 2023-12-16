@@ -47,7 +47,8 @@ assert
     [set ['a'; 'c'; 'd'; 'e'; 'f']; set ['g'; 'h'; 'x']] = xs
 
 module group =
-    open FsharpMyExtension.Tree
+    open FsharpMyExtension.Collections
+
     type 'a Val = Val of 'a | Ref of int
     let rec find = function
         | Node(_, []) -> None
@@ -62,7 +63,8 @@ module group =
         f 0 [] (Tree.map Val tree)
 
 module group2 =
-    open FsharpMyExtension.Tree
+    open FsharpMyExtension.Collections
+
     /// Найти первый попавшийся узел, который содержит только листья.
     /// `1, [2, [3]; 4, [5; 6]]` -> `2, [3]`
     let rec find = function
@@ -124,7 +126,8 @@ module group2 =
         |> fun (nodes, def) -> sprintf "%s\n#\n%s" (f def) (f nodes)
 module Group3 =
     open FsharpMyExtension
-    open FsharpMyExtension.Tree
+    open FsharpMyExtension.Collections
+
     let ofTree tree =
         let rec f (Node(x, xs)) =
             xs
