@@ -49,9 +49,11 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Clipboard.fs" />
     <Compile Include="Serialization/Serializers/Show.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/Deserializers/Regex.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/Deserializers/FParsec.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/Deserializers/StringsMatcher.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="XPathLimited.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="XmlBuilder.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Reflection.fs" />
@@ -59,9 +61,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Json.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bitmap.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="ColorExt.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Regex.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Proc.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringsMatcher.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="StringCompression.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Bencode.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="EnvironmentExt.fs" />
