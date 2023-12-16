@@ -2,7 +2,8 @@
 module FsharpMyExtension.EnvironmentExt.Environment
 open System.Collections.Generic
 open dotenv.net
-open FsharpMyExtension.DictionaryExt
+
+open FsharpMyExtension.Collections
 
 [<RequireQualifiedAccess>]
 type LocalEnvironmentsError =

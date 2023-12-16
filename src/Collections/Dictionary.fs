@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module FsharpMyExtension.DictionaryExt.Dictionary
+module FsharpMyExtension.Collections.Dictionary
 open System.Collections.Generic
 
 let tryGetValue key (dic: #IDictionary<_, _>) =
