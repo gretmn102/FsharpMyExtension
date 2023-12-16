@@ -42,13 +42,13 @@
     <Compile Include="Collections/Set.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Containers/Result.fs" />
-    <Compile Include="Show.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/Option.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Task.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Control/Scheduler.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Path.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Clipboard.fs" />
+    <Compile Include="Serialization/Serializers/Show.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="HtmlAgilityPackExt.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="FParsecExt.fs" />
