@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module FsharpMyExtension.Array
+module FsharpMyExtension.Collections.Array
 
 let transpose xss =
     let h = Array.length xss

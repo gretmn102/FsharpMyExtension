@@ -1,5 +1,7 @@
 ﻿[<RequireQualifiedAccess>]
 module FsharpMyExtension.Seq
+open FsharpMyExtension.Collections
+
 let rec transpose xss =
     if Seq.isEmpty xss || Seq.isEmpty (Seq.head xss) then
         Seq.empty
