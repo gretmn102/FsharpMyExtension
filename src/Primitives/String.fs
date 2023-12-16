@@ -46,7 +46,7 @@ let last = function
 /// ```
 let createTable width lines =
     let mapping fBoth fxs =
-        let join xs ys = List.fold List.consFlip ys xs
+        let join xs ys = List.fold (fun xs x -> x::xs) ys xs
         let rec red acc = function
             | x::xs, y::ys ->
                 red (fBoth x y :: acc) (xs,ys)
