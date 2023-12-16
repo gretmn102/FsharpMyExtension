@@ -1,4 +1,4 @@
-﻿namespace FsharpMyExtension.Either
+﻿namespace FsharpMyExtension.Containers.Either
 
 [<Struct>]
 type Either<'a,'b> =

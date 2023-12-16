@@ -2,7 +2,7 @@ module StringsMatcherTest
 open Fuchu
 
 open FsharpMyExtension.StringsMatcher
-open FsharpMyExtension.Either
+open FsharpMyExtension.Containers.Either
 
 [<Tests>]
 let toDicTest =

@@ -116,7 +116,8 @@ module HtmlNode =
                     else false
             else false)
 
-    open FsharpMyExtension.Either
+    open FsharpMyExtension.Containers.Either
+
     let tryIsMatch xpath =
         Parser.run xpath |> Either.map isMatchRaw
     let isMatch xpath =

@@ -1,7 +1,7 @@
 module FsharpMyExtension.FParsecExt
 open FParsec
 
-open FsharpMyExtension.Either
+open FsharpMyExtension.Containers.Either
 
 let runEither p str =
     match run p str with

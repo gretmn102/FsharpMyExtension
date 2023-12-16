@@ -1,7 +1,7 @@
 module FParsecExtTests
 open Fuchu
 open FsharpMyExtension
-open FsharpMyExtension.Either
+open FsharpMyExtension.Containers.Either
 open FsharpMyExtension.FParsecExt
 
 open FParsec
