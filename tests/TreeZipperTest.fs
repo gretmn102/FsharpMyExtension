@@ -2,8 +2,8 @@ module TreeZipperTest
 open Fuchu
 
 open FsharpMyExtension
-open FsharpMyExtension.TreeZipper
 open FsharpMyExtension.Collections
+open FsharpMyExtension.Collections.TreeZipper
 
 [<Tests>]
 let treeZipperTests =

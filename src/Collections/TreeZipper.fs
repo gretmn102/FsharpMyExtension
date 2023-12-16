@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.TreeZipper
+namespace FsharpMyExtension.Collections.TreeZipper
 open FsharpMyExtension.Collections
 
 type 'a Crumb = 'a * 'a Tree ListZ option
