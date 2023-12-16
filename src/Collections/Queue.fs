@@ -1,4 +1,5 @@
-﻿namespace FsharpMyExtension
+﻿namespace FsharpMyExtension.Collections
+
 [<Struct>]
 type 'a Queue = Q of 'a list * 'a list
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
