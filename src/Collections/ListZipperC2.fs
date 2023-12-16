@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.ListZipperCircle2
+namespace FsharpMyExtension.Collections.ListZipperCircle2
 open FsharpMyExtension.Collections
 
 type Place = Middle | EndR | EndL
