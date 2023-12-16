@@ -1,4 +1,4 @@
-module FsharpMyExtension.Graph
+module FsharpMyExtension.Collections.Graph
 open FsharpMyExtension
 
 type 'a Leaf = 'a * 'a
