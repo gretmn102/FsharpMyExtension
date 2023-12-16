@@ -1,4 +1,4 @@
-﻿namespace FsharpMyExtension.ListZipper
+﻿namespace FsharpMyExtension.Collections
 
 type ListZ<'a> = { Index:int; Left:'a list; Current:'a; Right:'a list }
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]

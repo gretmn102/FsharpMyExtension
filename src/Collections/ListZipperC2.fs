@@ -1,14 +1,16 @@
 namespace FsharpMyExtension.ListZipperCircle2
+open FsharpMyExtension.Collections
 
 type Place = Middle | EndR | EndL
+
 type 'a LZC = {
-    State:Place * FsharpMyExtension.ListZipper.ListZ<'a>
+    State: Place * ListZ<'a>
 }
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LZC =
     open FsharpMyExtension
-    open FsharpMyExtension.ListZipper
+
     let toList (lz:_ LZC) = lz.State |> snd |> ListZ.toList
     let isEndR' lz =
         List.isEmpty lz.Left

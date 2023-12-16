@@ -4,6 +4,7 @@ open Fuchu
 open FsharpMyExtension
 open FsharpMyExtension.Tree
 open FsharpMyExtension.TreeZipper
+open FsharpMyExtension.Collections
 
 [<Tests>]
 let treeZipperTests =
@@ -27,11 +28,11 @@ let treeZipperTests =
                 Some
                   [("a",
                     Some
-                      { ListZipper.Index = 2
-                        ListZipper.Left = []
-                        ListZipper.Current =
-                         Node ("c1", [Node ("f", []); Node ("d2", [Node ("e", [])])])
-                        ListZipper.Right = [Node ("g", []); Node ("b", [])] })]
+                      { Index = 2
+                        Left = []
+                        Current =
+                            Node ("c1", [Node ("f", []); Node ("d2", [Node ("e", [])])])
+                        Right = [Node ("g", []); Node ("b", [])] })]
 
             let act =
                 TreeZipper.next root
@@ -56,10 +57,10 @@ let treeZipperTests =
 
             let exp =
                 [("root",
-                  Some { ListZipper.Index = 0
-                         ListZipper.Left = []
-                         ListZipper.Current = Node ("one", [Node ("two", []); Node ("three", [])])
-                         ListZipper.Right = [] })]
+                  Some { Index = 0
+                         Left = []
+                         Current = Node ("one", [Node ("two", []); Node ("three", [])])
+                         Right = [] })]
 
             Assert.Equal("", exp, act)
     ]
