@@ -1,17 +1,20 @@
-module FsharpMyExtension.TwoDSeq
+namespace FsharpMyExtension.Collections
+type TwoDSeq<'a, 'b> =
+    {
+        Get: int -> int -> 'a
+        Set: int -> int -> 'b -> unit
+        Length1: int
+        Length2: int
+    }
 
-module TwoDOp =
-    type T<'a,'b> =
-        {
-            Get: int -> int -> 'a
-            Set: int -> int -> 'b -> unit
-            Length1: int
-            Length2: int
-        }
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module TwoDSeq =
     let iteri f x =
         for i = 0 to x.Length1 - 1 do
             for j = 0 to x.Length2 - 1 do
                 f i j <| x.Get i j
+
     let map f t = iteri (fun i j x -> t.Set i j (f x)) t
 
     let iterFoldi f st t =
@@ -21,11 +24,13 @@ module TwoDOp =
                 let st' = f st (i, j) (t.Get i j)
                 st <- st'
         st
+
     let mapFoldi f st t =
         iterFoldi (fun st (i,j) x ->
             let c, st = f st (i,j) x
             t.Set i j c
             st ) st t
+
     module Parallel =
         let iter f x =
             // Array.Parallel.init x.Length1 (fun i ->

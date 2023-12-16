@@ -1,19 +1,15 @@
 [<RequireQualifiedAccessAttribute>]
 module FsharpMyExtension.Collections.Array2D
 
-open FsharpMyExtension.TwoDSeq
-let private toT (xss:_ [,]) = {
-    TwoDOp.T.Get = Array2D.get xss
-    TwoDOp.T.Set = Array2D.set xss
-    TwoDOp.T.Length1 = Array2D.length1 xss
-    TwoDOp.T.Length2 = Array2D.length2 xss
+let private toT (xss:_ [,]) : TwoDSeq<_, _> = {
+    Get = Array2D.get xss
+    Set = Array2D.set xss
+    Length1 = Array2D.length1 xss
+    Length2 = Array2D.length2 xss
 }
 
-let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
-let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
-
-
-
+let iterFoldi f st = toT >> TwoDSeq.iterFoldi f st
+let mapFoldi f st = toT >> TwoDSeq.mapFoldi f st
 
 open FsharpMyExtension
 
@@ -191,9 +187,9 @@ assert
     |> (=) xss
 
 module Parallel =
-    let iteri f = toT >> TwoDOp.Parallel.iter f
-    let map f = toT >> TwoDOp.Parallel.map f
-    let mapi f = toT >> TwoDOp.Parallel.mapi f
+    let iteri f = toT >> TwoDSeq.Parallel.iter f
+    let map f = toT >> TwoDSeq.Parallel.map f
+    let mapi f = toT >> TwoDSeq.Parallel.mapi f
     let toArrayArray xss =
         let h = Array2D.length1 xss
         let w = Array2D.length2 xss

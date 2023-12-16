@@ -1,20 +1,22 @@
 [<RequireQualifiedAccess>]
 module FsharpMyExtension.Bitmap
-open FsharpMyExtension.TwoDSeq
 open System.Drawing
-let private toT (bmp:Bitmap) = {
-    TwoDOp.T.Get = fun i j -> bmp.GetPixel(i,j)
-    TwoDOp.T.Set = fun i j x -> bmp.SetPixel(i,j, x)
-    TwoDOp.T.Length1 = bmp.Width
-    TwoDOp.T.Length2 = bmp.Height
+
+open FsharpMyExtension.Collections
+
+let private toT (bmp: Bitmap) : TwoDSeq<_, _> = {
+    Get = fun i j -> bmp.GetPixel(i, j)
+    Set = fun i j x -> bmp.SetPixel(i, j, x)
+    Length1 = bmp.Width
+    Length2 = bmp.Height
 }
-let iteri f = toT >> TwoDOp.iteri f
-let map f = toT >> TwoDOp.map f
-let iterFoldi f st = toT >> TwoDOp.iterFoldi f st
-let mapFoldi f st = toT >> TwoDOp.mapFoldi f st
+let iteri f = toT >> TwoDSeq.iteri f
+let map f = toT >> TwoDSeq.map f
+let iterFoldi f st = toT >> TwoDSeq.iterFoldi f st
+let mapFoldi f st = toT >> TwoDSeq.mapFoldi f st
 
 /// not working
-let iteriP f = toT >> TwoDOp.Parallel.iter f
+let iteriP f = toT >> TwoDSeq.Parallel.iter f
 
 // https://github.com/thomerow/png2bmp32/blob/master/ImageConverter.cs#L95
 let mapP f (bmp:Bitmap) =
