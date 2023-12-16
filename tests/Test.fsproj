@@ -27,6 +27,7 @@
     <Compile Include="ResultExtTests.fs" />
     <Compile Include="EnvironmentExtTests.fs" />
     <Compile Include="EnumTests.fs" />
+    <Compile Include="Commons.Tests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />

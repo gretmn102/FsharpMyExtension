@@ -13,10 +13,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers/Pair.fs" />
+    <Compile Include="Commons.fs" />
     <Compile Include="Enum.fs" />
     <Compile Include="Containers/Either.fs" />
     <Compile Include="Result.fs" />
-    <Compile Include="Library1.fs" />
     <Compile Include="Show.fs" />
     <Compile Include="Containers/List.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Containers/List1.fs" />

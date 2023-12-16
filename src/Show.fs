@@ -1,7 +1,6 @@
 namespace FsharpMyExtension
 
 module Show =
-    open FSharpExt
     type String = char seq
     type ShowS = String -> String
 
@@ -59,7 +58,6 @@ module Show =
         [0..10] |> List.map f |> List.forall id
 
 module ShowList =
-    open FSharpExt
     type String = char list
     type ShowS = String -> String
 

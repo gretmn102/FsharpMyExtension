@@ -1,6 +1,5 @@
 ﻿[<RequireQualifiedAccess>]
 module FsharpMyExtension.Map
-open FsharpMyExtension.FSharpExt
 
 let chooseFold mapping state =
     Map.fold (fun (m, (st:'State)) (k:'Key) (v:'Value) ->

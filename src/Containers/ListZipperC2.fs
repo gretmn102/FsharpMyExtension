@@ -1,5 +1,4 @@
 namespace FsharpMyExtension.ListZipperCircle2
-open FsharpMyExtension.FSharpExt
 
 type Place = Middle | EndR | EndL
 type 'a LZC = {

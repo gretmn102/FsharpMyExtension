@@ -1,5 +1,5 @@
 ﻿module FsharpMyExtension.Tree
-open FsharpMyExtension.FSharpExt
+
 type Tree<'a> = Node of 'a * Tree<'a> list
 module Tree =
     let singleton x = Node(x, [])

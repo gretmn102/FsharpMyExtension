@@ -1,6 +1,6 @@
 [<RequireQualifiedAccessAttribute>]
 module FsharpMyExtension.Array2D
-open FsharpMyExtension.FSharpExt
+
 open FsharpMyExtension.TwoDSeq
 let private toT (xss:_ [,]) = {
     TwoDOp.T.Get = Array2D.get xss

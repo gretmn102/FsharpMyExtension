@@ -1,5 +1,4 @@
 namespace FsharpMyExtension
-open FsharpMyExtension.FSharpExt
 
 type List1<'a> = 'a * 'a list
 module List1 =
