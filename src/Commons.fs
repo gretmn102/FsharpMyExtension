@@ -52,11 +52,11 @@ module Commons =
     let mapSnd = Pair.mapSnd
     let mapPair = Pair.mapPair
     let mapBoth = Pair.mapBoth
-    let on f g x = f x, g x
+    let on f g x = Pair.on f g x
 
     let cond p f g x = if p x then f x else g x
-    let comma x y = x, y
-    let swap (x, y) = y, x
+    let comma x y = Pair.create x y
+    let swap pair = Pair.swap pair
 
     let s = fun f g x -> f x (g x)
     let s' = fun g f x -> f x (g x)
