@@ -1,6 +1,5 @@
-module FsharpMyExtension.Collections.LazyListZipper
+namespace FsharpMyExtension.Collections
 open FsharpMyExtension.ListZipper
-open FsharpMyExtension.Collections
 
 type LazyListZipper<'Error, 'a> =
     {
