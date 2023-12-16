@@ -10,6 +10,9 @@
 /// И таких строк может быть куча. Конечно, можно их запихнуть в Map и оттуда доставать необходимое, что значительно сократит время, но можно еще сократить через общие вхождения символов. В нашем примере это будет "**fir**" и "**fir**mest"; "**sec**" и "**sec**ond", то есть теперь достаточно сопоставить два варианта:
 ///
 module FsharpMyExtension.StringsMatcher
+open FsharpMyExtension
+open FsharpMyExtension.Collections
+
 // type Dic<'Key, 'Value> when 'Key : comparison =
 //     | DicValue of 'Value * Map<'Key, Dic2<'Key, 'Value>>
 //     | Dic of Map<'Key, Dic<'Key, 'Value>>
@@ -211,7 +214,6 @@ let runOnListGreedy m =
         | [] -> last
     f None m
 
-open FsharpMyExtension
 // OPTIMIZE
 let rec runOnSeqNotGreedy m (xs:_ seq) =
     if Seq.isEmpty xs then None
