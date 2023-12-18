@@ -1,9 +1,9 @@
 ﻿namespace FsharpMyExtension.Collections
 
-type ListZ<'a> = { Index:int; Left:'a list; Current:'a; Right:'a list }
+type ListZipper<'a> = { Index:int; Left:'a list; Current:'a; Right:'a list }
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
-module ListZ =
+module ListZipper =
     let singleton x = { Index = 0; Left = []; Current = x; Right = [] }
     let isSingleton x =
         List.isEmpty x.Right && List.isEmpty x.Left
@@ -74,10 +74,10 @@ module ListZ =
             Right   = List.concat lst.Right
             Index   = lst.Index
         }
-    let set x (lz:ListZ<_>) = { lz with Current = x }
+    let set x (lz:ListZipper<_>) = { lz with Current = x }
     let hole lst = lst.Current
-    let update f (lz:ListZ<_>) = { lz with Current = f lz.Current }
-    let updateFold f (st:'State) (lz:ListZ<_>) =
+    let update f (lz:ListZipper<_>) = { lz with Current = f lz.Current }
+    let updateFold f (st:'State) (lz:ListZipper<_>) =
         let x, (st:'State) = f st lz.Current
         { lz with Current = x }, st
 
@@ -152,7 +152,7 @@ module ListZ =
             Index = lz.Index
         }
 
-    let mapStartMidEnd start mid fend (lz:_ ListZ) =
+    let mapStartMidEnd start mid fend (lz:_ ListZipper) =
         let firstMap xs =
             let rec loop acc = function
                 | [x] ->
@@ -203,11 +203,11 @@ module ListZ =
                 prevs next lz
             )
 
-    let insertAfter x (lst:ListZ<_>) =
+    let insertAfter x (lst:ListZipper<_>) =
         { lst with Current = x
                    Right = lst.Current::lst.Right
                    Index = lst.Index + 1 }
-    let insertBefore x (lst:ListZ<_>) =
+    let insertBefore x (lst:ListZipper<_>) =
         { lst with Current = x
                    Left = lst.Current::lst.Left
                    Index = lst.Index }

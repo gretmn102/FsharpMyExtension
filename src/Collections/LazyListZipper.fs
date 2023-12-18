@@ -3,7 +3,7 @@ namespace FsharpMyExtension.Collections
 type LazyListZipper<'Error, 'a> =
     {
         SrcList: Lazy<LazyList<Result<'a, 'Error>>>
-        State: ListZ<'a>
+        State: ListZipper<'a>
     }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -17,14 +17,14 @@ module LazyListZipper =
     let create x src =
         {
             SrcList = src
-            State = ListZ.singleton x
+            State = ListZipper.singleton x
         }
 
     let hole (llz: LazyListZipper<'Error,_>) =
-        ListZ.hole llz.State
+        ListZipper.hole llz.State
 
     let next (llz: LazyListZipper<'Error,_>) =
-        match ListZ.next llz.State with
+        match ListZipper.next llz.State with
         | Some lz ->
             { llz with
                 State = lz }
@@ -37,13 +37,13 @@ module LazyListZipper =
                     { llz with
                         SrcList = lazy xs.Value
                         State =
-                            ListZ.insertAfter x llz.State }
+                            ListZipper.insertAfter x llz.State }
                     |> Ok
                 | Error x -> Error (NextResult.Error x)
             | LazyList.Empty -> Error NextResult.EndOfList
 
     let prev (llz: LazyListZipper<'Error,_>) =
-        match ListZ.prev llz.State with
+        match ListZipper.prev llz.State with
         | Some lz ->
             { llz with
                 State = lz }

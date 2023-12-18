@@ -4,14 +4,14 @@ open FsharpMyExtension.Collections
 type Place = Middle | EndR | EndL
 
 type 'a LZC = {
-    State: Place * ListZ<'a>
+    State: Place * ListZipper<'a>
 }
 [<CompilationRepresentationAttribute(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module LZC =
     open FsharpMyExtension
 
-    let toList (lz:_ LZC) = lz.State |> snd |> ListZ.toList
+    let toList (lz:_ LZC) = lz.State |> snd |> ListZipper.toList
     let isEndR' lz =
         List.isEmpty lz.Left
     let isEndL' lz =
@@ -20,12 +20,12 @@ module LZC =
     let lzc x = { State = x }
 
     let ofList xs =
-        { State = Middle, ListZ.ofList xs }
+        { State = Middle, ListZipper.ofList xs }
     let bind (f: _ -> _ LZC) lst = lst.State |> f
 
     let isSingletone (lzc:_ LZC) =
         lzc.State |> snd
-        |> ListZ.isSingleton
+        |> ListZipper.isSingleton
 
     let map f lst = lst.State |> f |> lzc
     let update' f = map (snd >> f)
@@ -34,23 +34,23 @@ module LZC =
     let endL x = x |> cond isEndL' (comma EndL) (comma Middle)
 
     let next lz =
-        let toStart x = ListZ.toStart x |> endR
+        let toStart x = ListZipper.toStart x |> endR
         lz |> update' (fun xs ->
-            ListZ.next xs
+            ListZipper.next xs
             |> Option.map endR
             |> Option.defaultWith (fun () -> toStart xs))
 
     let prev lz =
-        let toEnd = ListZ.toEnd >> endL
+        let toEnd = ListZipper.toEnd >> endL
         lz |> update' (fun xs ->
-            ListZ.prev xs
+            ListZipper.prev xs
             |> Option.map endL
             |> Option.defaultWith (fun () -> toEnd xs))
 
     let removeR lz =
         let _, lz = lz.State
 
-        ListZ.removeR lz
+        ListZipper.removeR lz
         |> Option.map (fun x ->
             if List.isEmpty lz.Left then
                 lzc (Middle, x) |> next
@@ -60,7 +60,7 @@ module LZC =
     let removeL lz =
         let _, lz = lz.State
 
-        ListZ.removeL lz
+        ListZipper.removeL lz
         |> Option.map (fun x ->
             if List.isEmpty lz.Right then
                 lzc (Middle, x) |> prev
@@ -72,12 +72,12 @@ module LZC =
         |> until (fst >> (>) 1)
             (fun (i, lzc) -> i - 1, next lzc)
         |> snd
-    let hole lst = lst.State |> (snd >> ListZ.hole)
+    let hole lst = lst.State |> (snd >> ListZipper.hole)
     let pos lst = lst.State |> fst
     let update'' f = map (mapSnd f)
-    let update f = update'' (ListZ.update f)
+    let update f = update'' (ListZipper.update f)
     let set x = update (k x)
-    let insertAfter x = update'' (ListZ.insertAfter x)
-    let insertBefore x = update'' (ListZ.insertBefore x)
+    let insertAfter x = update'' (ListZipper.insertAfter x)
+    let insertBefore x = update'' (ListZipper.insertBefore x)
 
 

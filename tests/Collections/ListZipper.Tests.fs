@@ -1,33 +1,33 @@
-module FsharpMyExtension.Collections.ListZ.Tests
+module FsharpMyExtension.Collections.ListZipper.Tests
 open Fuchu
 
 open FsharpMyExtension.Collections
 
 [<Tests>]
 let RemoveRTest =
-    let next = ListZ.next >> Option.get
-    let rem = ListZ.removeR >> Option.get
+    let next = ListZipper.next >> Option.get
+    let rem = ListZipper.removeR >> Option.get
     testList "RemoveRTest" [
         testCase "base case" <| fun () ->
-            Assert.Equal("", None, ListZ.ofList [1] |> ListZ.removeR)
+            Assert.Equal("", None, ListZipper.ofList [1] |> ListZipper.removeR)
         testCase "remove first elem of two" <| fun () ->
             let x, y = 1, 2
-            let act = ListZ.ofList [x;y] |> rem
-            Assert.Equal("", ListZ.ofList [y], act)
+            let act = ListZipper.ofList [x;y] |> rem
+            Assert.Equal("", ListZipper.ofList [y], act)
         testCase "remove second elem of two" <| fun () ->
             let x, y = 1, 2
-            let act = ListZ.ofList [x;y] |> next |> rem
-            Assert.Equal("", ListZ.ofList [x], act)
+            let act = ListZipper.ofList [x;y] |> next |> rem
+            Assert.Equal("", ListZipper.ofList [x], act)
         testCase "remove 2/3" <| fun () ->
             let x, y, z = 1, 2, 3
-            let act = ListZ.ofList [x;y;z] |> next |> rem
-            let e = ListZ.ofList [x;z] |> next
+            let act = ListZipper.ofList [x;y;z] |> next |> rem
+            let e = ListZipper.ofList [x;z] |> next
             Assert.Equal("", e, act)
         testCase "remove 3/3" <| fun () ->
             let x, y, z = 1, 2, 3
             let act =
-                ListZ.ofList [x;y;z] |> next |> next |> rem
-            let e = ListZ.ofList [x;y] |> next
+                ListZipper.ofList [x;y;z] |> next |> next |> rem
+            let e = ListZipper.ofList [x;y] |> next
             Assert.Equal("", e, act)
     ]
 
@@ -36,12 +36,12 @@ let mapiTest =
     testList "mapiTest" [
         testCase "base" <| fun () ->
             let input = [0..9]
-            let lz = ListZ.ofList input
+            let lz = ListZipper.ofList input
             let act =
                 lz
-                |> ListZ.next |> Option.get
-                |> ListZ.mapi (fun i x -> i)
-                |> ListZ.toList
+                |> ListZipper.next |> Option.get
+                |> ListZipper.mapi (fun i x -> i)
+                |> ListZipper.toList
             Assert.Equal("", input, act)
     ]
 
@@ -49,15 +49,15 @@ let mapiTest =
 let mapStartMidEndTest =
     testList "mapStartMidEndTest" [
         testCase "base" <| fun () ->
-            let lz = ListZ.ofList [1..4]
+            let lz = ListZipper.ofList [1..4]
             let act =
                 lz
-                |> ListZ.next |> Option.get
-                |> ListZ.mapStartMidEnd
+                |> ListZipper.next |> Option.get
+                |> ListZipper.mapStartMidEnd
                     (fun isCurrent x -> -1)
                     (fun isCurrent x  -> 0)
                     (fun isCurrent x -> 1)
-                |> ListZ.toList
+                |> ListZipper.toList
             let exp = [-1; 0; 0; 1]
             Assert.Equal("", exp, act)
     ]

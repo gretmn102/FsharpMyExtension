@@ -1,7 +1,7 @@
 namespace FsharpMyExtension.Collections.TreeZipper
 open FsharpMyExtension.Collections
 
-type 'a Crumb = 'a * 'a Tree ListZ option
+type 'a Crumb = 'a * 'a Tree ListZipper option
 type 'a Breadcrumbs = 'a Crumb list
 type 'a TreeZipper = 'a Breadcrumbs
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -11,7 +11,7 @@ module TreeZipper =
         let xs =
             if List.isEmpty xs then None
             else
-                Some <| ListZ.ofList xs
+                Some <| ListZipper.ofList xs
         [x, xs]
 
     let down (tz: 'a TreeZipper): 'a TreeZipper option =
@@ -19,11 +19,11 @@ module TreeZipper =
         | (x, lz) :: xs ->
             lz
             |> Option.map (fun lz ->
-                let (Node(y, ys)) = ListZ.hole lz
+                let (Node(y, ys)) = ListZipper.hole lz
                 if List.isEmpty ys then
-                    (y, None)::(x, ListZ.removeR lz )::xs
+                    (y, None)::(x, ListZipper.removeR lz )::xs
                 else
-                    (y, Some <| ListZ.ofList ys)::(x, ListZ.removeR lz )::xs
+                    (y, Some <| ListZipper.ofList ys)::(x, ListZipper.removeR lz )::xs
             )
         | [] ->
             failwith "empty TreeZipper"
@@ -33,13 +33,13 @@ module TreeZipper =
         | (x, lz)::(y, lz')::xs ->
             let lz =
                 lz
-                |> Option.map ListZ.toList
+                |> Option.map ListZipper.toList
                 |> Option.defaultValue []
 
             let lz =
                 lz'
-                |> Option.map (ListZ.insertAfter (Node(x, lz)))
-                |> Option.defaultWith (fun () -> ListZ.singleton (Node(x, lz)))
+                |> Option.map (ListZipper.insertAfter (Node(x, lz)))
+                |> Option.defaultWith (fun () -> ListZipper.singleton (Node(x, lz)))
 
             (y, Some lz)::xs
         | xs ->
@@ -50,7 +50,7 @@ module TreeZipper =
         | (x, lz)::xs ->
             lz
             |> Option.bind
-                (ListZ.next
+                (ListZipper.next
                     >> Option.map (fun lz -> (x, Some lz) :: xs)
                 )
         | [] -> None
@@ -62,8 +62,8 @@ module TreeZipper =
 
             let lz =
                 lz
-                |> Option.map (ListZ.insertAfter y)
-                |> Option.defaultWith (fun () -> ListZ.singleton y)
+                |> Option.map (ListZipper.insertAfter y)
+                |> Option.defaultWith (fun () -> ListZipper.singleton y)
 
             (x, Some lz)::xs
         | [] ->
@@ -78,7 +78,7 @@ module TreeZipper =
         match tz with
         | [x, xs] ->
             let xs =
-                xs |> Option.map ListZ.toList
+                xs |> Option.map ListZipper.toList
                 |> Option.defaultValue []
             Node(x, xs)
         | x -> up x |> toTree
