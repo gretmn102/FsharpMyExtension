@@ -1,4 +1,4 @@
-module FsharpMyExtension.ColorExt
+module FsharpMyExtension.Graphics.Color
 open System.Drawing
 
 module HexOrNameParser =
