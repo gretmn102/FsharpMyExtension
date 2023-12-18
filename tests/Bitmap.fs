@@ -1,4 +1,4 @@
-module Bitmap
+module FsharpMyExtension.Grahics.Bitmap.Tests
 open Fuchu
 open System.Drawing
 
@@ -21,8 +21,8 @@ let MapPTest =
                 use bmp = xss |> Array2D.toBitmap
                 g fn bmp
                 bmp |> Array2D.ofBitmapSlow
-            let exp = f Bitmap.map
-            let act = f (fun f b -> Bitmap.mapP f b |> ignore)
+            let exp = f map
+            let act = f (fun f b -> mapP f b |> ignore)
             Assert.Equal("", exp, act)
         // testCase "speed test" <| fun () ->
         //     let xss =
@@ -41,8 +41,8 @@ let MapPTest =
         //         else None
         //     let path = @"e:\temp\dalek___doctor_who_by_stickeesbiz-d6fqn80.png"
         //     let path = @"e:\temp\12-Доктор-Доктор-(DW)-Таймлорды-Doctor-Who-4088222.jpeg"
-        //     let exp () = f (fun x y -> Bitmap.map x y; true) path
-        //     let act () = f Bitmap.mapP path
+        //     let exp () = f (fun x y -> map x y; true) path
+        //     let act () = f mapP path
         //     exp () |> ignore
         //     act () |> ignore
         //     let arr () = Array2D.ofBitmapFast (new Bitmap (path))

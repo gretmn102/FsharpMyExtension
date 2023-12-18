@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module FsharpMyExtension.Bitmap
+module FsharpMyExtension.Grahics.Bitmap
 open System.Drawing
 
 open FsharpMyExtension.Collections
