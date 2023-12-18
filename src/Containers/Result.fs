@@ -35,21 +35,23 @@ module Result =
 
     let builder = Builder()
 
-[<RequireQualifiedAccess>]
-module List =
-    let travResult (fn: 'a -> Result<'b, 'Error>) (xs:'a list): Result<'b list, 'Error> =
-        let rec f acc = function
-            | x::xs ->
-                match fn x with
-                | Ok x -> f (x::acc) xs
-                | Error x -> Error x
-            | [] -> Ok (List.rev acc)
-        f [] xs
+[<AutoOpen>]
+module ResultExtensions =
+    [<RequireQualifiedAccess>]
+    module List =
+        let travResult (fn: 'a -> Result<'b, 'Error>) (xs:'a list): Result<'b list, 'Error> =
+            let rec f acc = function
+                | x::xs ->
+                    match fn x with
+                    | Ok x -> f (x::acc) xs
+                    | Error x -> Error x
+                | [] -> Ok (List.rev acc)
+            f [] xs
 
-    let seqResult (xs: Result<'Ok, 'Error> list) =
-        travResult id xs
+        let seqResult (xs: Result<'Ok, 'Error> list) =
+            travResult id xs
 
-    let partitionResults (xs: Result<'Ok, 'Error> list) =
-        xs
-        |> List.partition (Result.isOk)
-        |> fun (xs, ys) -> List.map Result.getError xs, List.map Result.get ys
+        let partitionResults (xs: Result<'Ok, 'Error> list) =
+            xs
+            |> List.partition (Result.isOk)
+            |> fun (xs, ys) -> List.map Result.getError xs, List.map Result.get ys
