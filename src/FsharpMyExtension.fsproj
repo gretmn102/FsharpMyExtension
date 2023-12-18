@@ -23,7 +23,7 @@
     <Compile Include="Collections/List.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/List1.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/Array.fs" />
-    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LZ.fs" />
+    <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ListZipper.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyList.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/LazyListZipper.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Collections/ListZipperC.fs" />
