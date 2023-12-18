@@ -1,4 +1,4 @@
-module FsharpMyExtension.Scheduler
+module FsharpMyExtension.Control.Scheduler
 
 type JobId = System.DateTime
 
