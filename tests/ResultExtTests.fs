@@ -1,5 +1,4 @@
-module FsharpMyExtension.ResultExt.Tests
-open FsharpMyExtension.ResultExt
+module FsharpMyExtension.Containers.Result.Tests
 open Fuchu
 
 [<Tests>]
@@ -7,7 +6,7 @@ let Tests =
     testList "Tests" [
         testCase "Ok _" <| fun () ->
             let act =
-                Result.builder {
+                builder {
                     let! x = Ok 2
                     let! y = Ok 1
                     if x < y then
@@ -22,7 +21,7 @@ let Tests =
 
         testCase "Error _" <| fun () ->
             let act =
-                Result.builder {
+                builder {
                     let! x = Ok 0
                     let! y = Ok 1
                     if x < y then

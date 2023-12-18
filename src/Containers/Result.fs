@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.ResultExt
+namespace FsharpMyExtension.Containers
 
 module Result =
     let isOk (result: Result<'Ok, 'Error>) =
