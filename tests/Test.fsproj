@@ -19,6 +19,7 @@
     <Compile Include="Collections\LazyTree.Tests.fs" />
     <Compile Include="Containers\Either.Tests.fs" />
     <Compile Include="Containers\EitherExtensions.Tests.fs" />
+    <Compile Include="Containers\Result.Tests.fs" />
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />
     <Compile Include="ArrayArray.Tests.fs" />
@@ -33,7 +34,6 @@
     <Compile Include="Int32ExtTests.fs" />
     <Compile Include="BencodeTests.fs" />
     <Compile Include="TaskExtTests.fs" />
-    <Compile Include="ResultExtTests.fs" />
     <Compile Include="EnvironmentExtTests.fs" />
     <Compile Include="EnumTests.fs" />
     <Compile Include="Commons.Tests.fs" />
