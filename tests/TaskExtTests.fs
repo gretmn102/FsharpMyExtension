@@ -1,4 +1,4 @@
-module FsharpMyExtension.TaskExt.Tests
+module FsharpMyExtension.Control.Task.Tests
 open FsharpMyExtension
 open Fuchu
 open System.Threading.Tasks
@@ -6,8 +6,8 @@ open System.Threading.Tasks
 open Helpers
 
 [<Tests>]
-let ``TaskExt.runSync`` =
-    testList "TaskExt.runSync" [
+let ``Task.runSync`` =
+    testList "Task.runSync" [
         testCase "base" <| fun () ->
             let count = 10
             let tasks =

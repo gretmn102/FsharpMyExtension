@@ -1,4 +1,4 @@
-module FsharpMyExtension.TaskExt
+module FsharpMyExtension.Control.Task
 open System.Threading.Tasks
 
 let continueWith (next: 'a -> 'b) (task: Task<'a>) : Task<'b> =
