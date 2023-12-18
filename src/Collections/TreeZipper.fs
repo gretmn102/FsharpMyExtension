@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.Collections.TreeZipper
+namespace FsharpMyExtension.Collections
 open FsharpMyExtension.Collections
 
 type 'a TreeZipperCrumb = 'a * 'a Tree ListZipper option

@@ -1,9 +1,7 @@
-module TreeZipperTest
+module FsharpMyExtension.Collections.TreeZipper.Tests
 open Fuchu
 
-open FsharpMyExtension
 open FsharpMyExtension.Collections
-open FsharpMyExtension.Collections.TreeZipper
 
 [<Tests>]
 let treeZipperTests =
@@ -20,7 +18,7 @@ let treeZipperTests =
                 Node("g", [])
             ])
 
-        let root = TreeZipper.ofTree sample
+        let root = ofTree sample
 
         testCase "next, down, up" <| fun () ->
             let exp =
@@ -34,25 +32,25 @@ let treeZipperTests =
                         Right = [Node ("g", []); Node ("b", [])] })]
 
             let act =
-                TreeZipper.next root
-                |> Option.bind TreeZipper.down
-                |> Option.map (TreeZipper.update (fun x -> x + "1"))
-                |> Option.bind TreeZipper.down
-                |> Option.map (TreeZipper.update (fun x -> x + "2"))
-                |> Option.map TreeZipper.up
-                |> Option.map TreeZipper.up
+                next root
+                |> Option.bind down
+                |> Option.map (update (fun x -> x + "1"))
+                |> Option.bind down
+                |> Option.map (update (fun x -> x + "2"))
+                |> Option.map up
+                |> Option.map up
 
             Assert.Equal("", exp, act)
 
         testCase "append, down" <| fun () ->
-            let appendAndDown x = TreeZipper.append x >> TreeZipper.down >> Option.get
+            let appendAndDown x = append x >> down >> Option.get
 
             let act =
-                [("root", None)]
+                ["root", None]
                 |> appendAndDown "one"
-                |> TreeZipper.append "two"
-                |> TreeZipper.append "three"
-                |> TreeZipper.up
+                |> append "two"
+                |> append "three"
+                |> up
 
             let exp =
                 [("root",
