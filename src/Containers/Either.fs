@@ -81,7 +81,7 @@ module Either =
         | Ok x -> Right x
         | Error x -> Left x
 
-module Operators =
+module EitherOperators =
     let (<*>) x f = Either.ap f x
     let (>>=) x f = Either.bind f x
     let (>=>) f g x = Either.bind g (f x)
