@@ -94,66 +94,68 @@ module EitherOperators =
         p1 >>= fun x -> p2 |>> fun y -> x, y
     let (<|>) p1 p2 = Either.orElse p1 p2
 
-[<RequireQualifiedAccess>]
-module List =
-    let travEither (fn: 'a -> Either<'b,'c>) (xs:'a list) : Either<'b, 'c list> =
-        let rec f acc = function
-            | x::xs ->
-                match fn x with
-                | Right x -> f (x::acc) xs
-                | Left x -> Left x
-            | [] -> Right (List.rev acc)
-        f [] xs
-
-    let seqEither xs =
-        travEither id xs
-
-    let partitionEithers xs =
-        xs
-        |> List.partition (Either.isLeft)
-        |> fun (xs, ys) -> List.map Either.getLeft xs, List.map Either.get ys
-
-[<RequireQualifiedAccess>]
-module Seq =
-    let travEither fn (xs : _ seq) =
-        let rec f acc (xs:System.Collections.Generic.IEnumerator<_>) =
-            if xs.MoveNext() then
-                xs.Current |> fn |> function
-                    | Right x -> f (x :: acc) xs
+[<AutoOpen>]
+module EitherExtensions =
+    [<RequireQualifiedAccess>]
+    module List =
+        let travEither (fn: 'a -> Either<'b,'c>) (xs:'a list) : Either<'b, 'c list> =
+            let rec f acc = function
+                | x::xs ->
+                    match fn x with
+                    | Right x -> f (x::acc) xs
                     | Left x -> Left x
-            else List.rev acc |> Right
-        f [] <| xs.GetEnumerator()
+                | [] -> Right (List.rev acc)
+            f [] xs
 
-    let seqEither xs = travEither id xs
-    // open FsharpMyExtension.FSharpExt
-    // let partitionEithers (xs : _ seq) =
-    //     let xs = xs.GetEnumerator()
-    //     let rec f acc =
-    //         if xs.MoveNext() then
-    //             xs.Current |> function
-    //                 | Right x -> f (mapSnd (List.cons x) acc)
-    //                 | Left x  -> f (mapFst (List.cons x) acc)
-    //         else mapPair List.rev List.rev acc
-    //     f ([],[])
+        let seqEither xs =
+            travEither id xs
 
-[<RequireQualifiedAccess>]
-module Option =
-    let ofEither x = x |> Either.either (fun _ -> None) Some
-    let travEither (f : 'a -> Either<'c, 'b>) (x:Option<'a>) =
-        match x with
-        | Some x ->
-            // f x |> Either.map Some
-            match f x with
-            | Right x -> Right(Some x)
-            | Left x -> Left x
-        | None -> Right None
-    let seqEither x = travEither id x
+        let partitionEithers xs =
+            xs
+            |> List.partition (Either.isLeft)
+            |> fun (xs, ys) -> List.map Either.getLeft xs, List.map Either.get ys
 
-[<RequireQualifiedAccess>]
-module Result =
-    let ofEither = function
-        | Right x -> Ok x
-        | Left x -> Error x
-    let toEither = function
-        | Ok x -> Right x
-        | Error x -> Left x
+    [<RequireQualifiedAccess>]
+    module Seq =
+        let travEither fn (xs : _ seq) =
+            let rec f acc (xs:System.Collections.Generic.IEnumerator<_>) =
+                if xs.MoveNext() then
+                    xs.Current |> fn |> function
+                        | Right x -> f (x :: acc) xs
+                        | Left x -> Left x
+                else List.rev acc |> Right
+            f [] <| xs.GetEnumerator()
+
+        let seqEither xs = travEither id xs
+        // open FsharpMyExtension.FSharpExt
+        // let partitionEithers (xs : _ seq) =
+        //     let xs = xs.GetEnumerator()
+        //     let rec f acc =
+        //         if xs.MoveNext() then
+        //             xs.Current |> function
+        //                 | Right x -> f (mapSnd (List.cons x) acc)
+        //                 | Left x  -> f (mapFst (List.cons x) acc)
+        //         else mapPair List.rev List.rev acc
+        //     f ([],[])
+
+    [<RequireQualifiedAccess>]
+    module Option =
+        let ofEither x = x |> Either.either (fun _ -> None) Some
+        let travEither (f : 'a -> Either<'c, 'b>) (x:Option<'a>) =
+            match x with
+            | Some x ->
+                // f x |> Either.map Some
+                match f x with
+                | Right x -> Right(Some x)
+                | Left x -> Left x
+            | None -> Right None
+        let seqEither x = travEither id x
+
+    [<RequireQualifiedAccess>]
+    module Result =
+        let ofEither = function
+            | Right x -> Ok x
+            | Left x -> Error x
+        let toEither = function
+            | Ok x -> Right x
+            | Error x -> Left x
