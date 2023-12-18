@@ -1,9 +1,9 @@
 namespace FsharpMyExtension.Collections.TreeZipper
 open FsharpMyExtension.Collections
 
-type 'a Crumb = 'a * 'a Tree ListZipper option
-type 'a Breadcrumbs = 'a Crumb list
-type 'a TreeZipper = 'a Breadcrumbs
+type 'a TreeZipperCrumb = 'a * 'a Tree ListZipper option
+type 'a TreeZipperBreadcrumbs = 'a TreeZipperCrumb list
+type 'a TreeZipper = 'a TreeZipperBreadcrumbs
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module TreeZipper =
