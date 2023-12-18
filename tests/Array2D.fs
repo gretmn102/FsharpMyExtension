@@ -4,7 +4,6 @@ open System.Drawing
 
 open FsharpMyExtension
 open FsharpMyExtension.Containers
-open FsharpMyExtension.Containers.Either
 
 open Helpers
 

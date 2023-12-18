@@ -85,6 +85,8 @@ module ShowReq =
         |> show
 
 module HtmlNode =
+    open FsharpMyExtension.Containers
+
     let isMatchRaw r (node:HtmlAgilityPack.HtmlNode) =
         let bind next = function
             | None -> next()
@@ -115,8 +117,6 @@ module HtmlNode =
                         | _ -> false
                     else false
             else false)
-
-    open FsharpMyExtension.Containers.Either
 
     let tryIsMatch xpath =
         Parser.run xpath |> Either.map isMatchRaw

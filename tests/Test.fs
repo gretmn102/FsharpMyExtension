@@ -5,7 +5,7 @@ module ParserXpath =
 
     open FsharpMyExtension
     open FsharpMyExtension.HtmlAgilityPackExt
-    open FsharpMyExtension.Containers.Either
+    open FsharpMyExtension.Containers
     open FsharpMyExtension.XPathLimited
     open FsharpMyExtension.FParsecExt
 
