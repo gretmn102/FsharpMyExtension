@@ -1,6 +1,5 @@
-module Tests.Show
+module FsharpMyExtension.Serialization.Serializers.ShowList.Tests
 open Fuchu
-open FsharpMyExtension.ShowList
 
 type Item =
     {

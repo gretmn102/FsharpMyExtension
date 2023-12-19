@@ -23,7 +23,7 @@ module Bencode =
         Bencode.List
 
     module Show =
-        open ShowList
+        open FsharpMyExtension.Serialization.Serializers.ShowList
 
         let showEnd =
             showChar 'e'
@@ -64,7 +64,7 @@ module Bencode =
                 showDictionary show xs
 
     let serialize x =
-        Show.show x |> ShowList.show
+        Show.show x |> FsharpMyExtension.Serialization.Serializers.ShowList.show
 
     module Parser =
         open FParsec

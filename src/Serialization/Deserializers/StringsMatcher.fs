@@ -101,7 +101,8 @@ module Serializator =
     let upChar = '↑'
     let downChar = '↓'
 
-    open FsharpMyExtension.ShowList
+    open FsharpMyExtension.Serialization.Serializers.ShowList
+
     let serialize (dic:Container<_,_>) =
         let rec f (dic:Container<_,_>) =
             dic

@@ -1,4 +1,6 @@
-namespace FsharpMyExtension
+namespace FsharpMyExtension.Serialization.Serializers
+
+open FsharpMyExtension.Commons
 
 module Show =
     type String = char seq

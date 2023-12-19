@@ -39,7 +39,8 @@ module Parser =
     let run str = runEither res str
 
 module ShowReq =
-    open FsharpMyExtension.ShowList
+    open FsharpMyExtension.Serialization.Serializers.ShowList
+
     let star x : ShowS =
         x
         |> Option.map showString
