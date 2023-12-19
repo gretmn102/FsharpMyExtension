@@ -1,5 +1,5 @@
 [<RequireQualifiedAccessAttribute>]
-module FsharpMyExtension.Regex
+module FsharpMyExtension.Serialization.Serializers.Regex
 
 let create (pattern: string) =
     System.Text.RegularExpressions.Regex(pattern)
