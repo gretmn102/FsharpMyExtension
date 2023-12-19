@@ -1,4 +1,4 @@
-module FsharpMyExtension.XPathLimited
+module FsharpMyExtension.Serialization.DataFormats.XPathLimited
 open FsharpMyExtension
 
 type Req = {
