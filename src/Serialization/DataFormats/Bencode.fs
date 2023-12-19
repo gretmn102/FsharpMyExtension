@@ -1,4 +1,4 @@
-namespace FsharpMyExtension
+namespace FsharpMyExtension.Serialization.DataFormats
 
 /// https://en.wikipedia.org/wiki/Bencode
 [<RequireQualifiedAccess>]
