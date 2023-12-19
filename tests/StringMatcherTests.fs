@@ -1,7 +1,6 @@
-module StringsMatcherTest
+module FsharpMyExtension.Serialization.Deserializers.StringsMatcher.Tests
 open Fuchu
 
-open FsharpMyExtension.StringsMatcher
 open FsharpMyExtension.Containers
 
 [<Tests>]
@@ -237,7 +236,7 @@ let runOnListGreedyTest2 =
 open FParsec
 
 open FsharpMyExtension.Serialization.Deserializers.FParsec
-open FsharpMyExtension.StringsMatcher.FParsec
+open FsharpMyExtension.Serialization.Deserializers.StringsMatcher.FParsec
 
 [<Tests>]
 let keywordsLTest =
@@ -368,8 +367,8 @@ let pcharFromDicTest =
     ]
 
 module Serializator =
-    open FsharpMyExtension.StringsMatcher
-    open FsharpMyExtension.StringsMatcher.Serializator
+    open FsharpMyExtension.Serialization.Deserializers.StringsMatcher
+    open FsharpMyExtension.Serialization.Deserializers.StringsMatcher.Serializator
 
     [<Tests>]
     let serializatorTest =

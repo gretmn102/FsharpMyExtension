@@ -9,7 +9,7 @@
 /// ```
 /// И таких строк может быть куча. Конечно, можно их запихнуть в Map и оттуда доставать необходимое, что значительно сократит время, но можно еще сократить через общие вхождения символов. В нашем примере это будет "**fir**" и "**fir**mest"; "**sec**" и "**sec**ond", то есть теперь достаточно сопоставить два варианта:
 ///
-module FsharpMyExtension.StringsMatcher
+module FsharpMyExtension.Serialization.Deserializers.StringsMatcher
 open FsharpMyExtension
 open FsharpMyExtension.Collections
 
