@@ -3,9 +3,9 @@ open Fuchu
 open FParsec
 
 open FsharpMyExtension
-open FsharpMyExtension.HtmlAgilityPackExt
 open FsharpMyExtension.Containers
 open FsharpMyExtension.Serialization.Deserializers.FParsec
+open FsharpMyExtension.Serialization.DataFormats.HtmlAgilityPackExt
 
 [<Tests>]
 let ExecTest =

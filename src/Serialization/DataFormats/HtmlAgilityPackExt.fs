@@ -1,4 +1,4 @@
-﻿namespace FsharpMyExtension.HtmlAgilityPackExt
+﻿namespace FsharpMyExtension.Serialization.DataFormats.HtmlAgilityPackExt
 open HtmlAgilityPack
 
 module HtmlDocument =
@@ -10,6 +10,7 @@ module HtmlDocument =
         let d = HtmlAgilityPack.HtmlDocument()
         d.Load(path)
         d
+
 module HtmlNode =
     let createNode html = HtmlNode.CreateNode html
     let getAttVal name (node:HtmlNode) = node.GetAttributeValue(name, null)

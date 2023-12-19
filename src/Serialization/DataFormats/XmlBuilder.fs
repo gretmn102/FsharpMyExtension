@@ -66,7 +66,7 @@ module Node =
         sprintNodePre doctypeXhtml
 
     open HtmlAgilityPack
-    open FsharpMyExtension.HtmlAgilityPackExt
+    open FsharpMyExtension.Serialization.DataFormats.HtmlAgilityPackExt
 
     /// Осторожно, некоторая информация теряется при переносе, например:
     /// ```html
