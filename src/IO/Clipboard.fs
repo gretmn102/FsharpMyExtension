@@ -1,4 +1,4 @@
-module Clipboard
+module FsharpMyExtension.IO.Clipboard
 
 let getText() = TextCopy.ClipboardService.GetText()
 let setText = TextCopy.ClipboardService.SetText
