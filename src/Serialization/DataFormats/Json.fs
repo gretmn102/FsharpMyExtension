@@ -1,4 +1,4 @@
-namespace FsharpMyExtension
+namespace FsharpMyExtension.Serialization.DataFormats
 [<RequireQualifiedAccess>]
 module Json =
     open Newtonsoft.Json

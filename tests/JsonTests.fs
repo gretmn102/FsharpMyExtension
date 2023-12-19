@@ -1,6 +1,5 @@
-module JsonTests
+module FsharpMyExtension.Serialization.DataFormats.Tests
 open Fuchu
-open FsharpMyExtension
 
 type T = { Id: string; Y: string }
 
