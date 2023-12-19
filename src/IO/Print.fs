@@ -1,4 +1,4 @@
-module Print
+module FsharpMyExtension.IO.Print
 open FsharpMyExtension.Primitives
 
 let reader () =
