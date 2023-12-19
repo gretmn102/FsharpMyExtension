@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.XmlBuilder
+namespace FsharpMyExtension.Serialization.DataFormats.XmlBuilder
 
 type Att = string * string
 type Node =
