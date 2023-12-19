@@ -1,7 +1,7 @@
-module FsharpMyExtension.File
+module FsharpMyExtension.IO.File
 open System.IO
 
-open FsharpMyExtension.IO
+open FsharpMyExtension.Commons
 
 /// * Если на диске существует `dir + fileName`, тогда `dir + changeFileName fileName 0`
 /// * Если и он существует, тогда `dir + changeFileName fileName 1`
@@ -43,4 +43,3 @@ let moveUniq src = splitOnDirAndFilename >> moveUniqS src
 let copyUniq src = splitOnDirAndFilename >> copyUniqS src
 let writeAllTextUniq path = writeAllTextUniqS (splitOnDirAndFilename path)
 let writeAllSeqUniq path = writeAllSeqUniqS (splitOnDirAndFilename path)
-
