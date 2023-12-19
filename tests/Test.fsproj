@@ -20,6 +20,7 @@
     <Compile Include="Containers\Either.Tests.fs" />
     <Compile Include="Containers\EitherExtensions.Tests.fs" />
     <Compile Include="Containers\Result.Tests.fs" />
+    <Compile Include="IO\Path.Tests.fs" />
     <Compile Include="ShowTests.fs" />
     <Compile Include="Array2D.fs" />
     <Compile Include="ArrayArray.Tests.fs" />

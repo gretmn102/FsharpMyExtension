@@ -1,6 +1,8 @@
 module FsharpMyExtension.File
 open System.IO
 
+open FsharpMyExtension.IO
+
 /// * Если на диске существует `dir + fileName`, тогда `dir + changeFileName fileName 0`
 /// * Если и он существует, тогда `dir + changeFileName fileName 1`
 /// * ...

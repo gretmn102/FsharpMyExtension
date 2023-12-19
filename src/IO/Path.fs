@@ -1,6 +1,7 @@
-module FsharpMyExtension.Path
+module FsharpMyExtension.IO.Path
 open System.IO
 
+open FsharpMyExtension.Commons
 open FsharpMyExtension.Primitives
 
 let changeFileNameWithoutExt fname path =
