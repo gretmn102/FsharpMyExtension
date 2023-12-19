@@ -1,10 +1,8 @@
-module FParsecExtTests
+module FsharpMyExtension.Serialization.Deserializers.FParsec.Tests
 open Fuchu
-open FsharpMyExtension
-open FsharpMyExtension.Containers
-open FsharpMyExtension.FParsecExt
-
 open FParsec
+
+open FsharpMyExtension.Containers
 
 [<Tests>]
 let pbigintTests =

@@ -12,7 +12,7 @@ module Parser =
     open FParsec
 
     open FsharpMyExtension
-    open FsharpMyExtension.FParsecExt
+    open FsharpMyExtension.Serialization.Deserializers.FParsec
 
     let pname = (pchar '*' >>% None) <|> (manySatisfy (isNoneOf " []=") |>> Some)
     let pval = pchar '=' >>. pchar ''' >>. manySatisfy ((<>) ''') .>> pchar '''

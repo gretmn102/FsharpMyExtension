@@ -1,4 +1,4 @@
-module FsharpMyExtension.FParsecExt
+module FsharpMyExtension.Serialization.Deserializers.FParsec
 open FParsec
 
 open FsharpMyExtension.Containers

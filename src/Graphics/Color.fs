@@ -4,7 +4,7 @@ open System.Drawing
 module HexOrNameParser =
     open FParsec
 
-    open FsharpMyExtension
+    open FsharpMyExtension.Serialization.Deserializers.FParsec
 
     type 'Result Parser = Primitives.Parser<'Result, unit>
 
@@ -41,7 +41,7 @@ module HexOrNameParser =
             | Result.Error errMsg -> fail errMsg
 
     let parse str =
-        FParsecExt.runResult (phexColor <|> ptryGetNameColor) str
+        runResult (phexColor <|> ptryGetNameColor) str
 
 let fromHexOrName rawHexOrName =
     HexOrNameParser.parse rawHexOrName

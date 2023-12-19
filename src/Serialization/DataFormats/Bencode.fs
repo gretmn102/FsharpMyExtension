@@ -68,7 +68,7 @@ module Bencode =
 
     module Parser =
         open FParsec
-        open FParsecExt
+        open FsharpMyExtension.Serialization.Deserializers.FParsec
 
         type Parser<'T> = Parser<'T, unit>
 
@@ -104,4 +104,4 @@ module Bencode =
             parser
 
     let deserialize raw =
-        FParsecExt.runResult Parser.parser raw
+        FsharpMyExtension.Serialization.Deserializers.FParsec.runResult Parser.parser raw

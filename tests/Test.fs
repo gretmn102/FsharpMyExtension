@@ -7,7 +7,7 @@ module ParserXpath =
     open FsharpMyExtension.HtmlAgilityPackExt
     open FsharpMyExtension.Containers
     open FsharpMyExtension.XPathLimited
-    open FsharpMyExtension.FParsecExt
+    open FsharpMyExtension.Serialization.Deserializers.FParsec
 
     [<Tests>]
     let ExecTest =

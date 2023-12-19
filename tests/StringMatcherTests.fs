@@ -236,7 +236,7 @@ let runOnListGreedyTest2 =
 
 open FParsec
 
-open FsharpMyExtension.FParsecExt
+open FsharpMyExtension.Serialization.Deserializers.FParsec
 open FsharpMyExtension.StringsMatcher.FParsec
 
 [<Tests>]
