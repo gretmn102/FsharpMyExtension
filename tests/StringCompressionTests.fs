@@ -1,6 +1,5 @@
-module StringCompressionTests
+module FsharpMyExtension.Primitives.String.Compression.Tests
 open Fuchu
-open FsharpMyExtension.StringCompression
 
 [<Tests>]
 let stringCompressionTests =
