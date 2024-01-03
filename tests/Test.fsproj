@@ -17,13 +17,13 @@
     <Compile Include="Collections\ListZipperC2.Tests.fs" />
     <Compile Include="Collections\Seq.Tests.fs" />
     <Compile Include="Collections\LazyTree.Tests.fs" />
+    <Compile Include="Collections\Array2D.Tests.fs" />
     <Compile Include="Containers\Either.Tests.fs" />
     <Compile Include="Containers\EitherExtensions.Tests.fs" />
     <Compile Include="Containers\Result.Tests.fs" />
     <Compile Include="IO\Path.Tests.fs" />
     <Compile Include="Serialization\DataFormats\LimitedXPath.Tests.fs" />
     <Compile Include="ShowTests.fs" />
-    <Compile Include="Array2D.fs" />
     <Compile Include="ArrayArray.Tests.fs" />
     <Compile Include="Bitmap.fs" />
     <Compile Include="StringMatcherTests.fs" />
