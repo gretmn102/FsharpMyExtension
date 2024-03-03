@@ -29,7 +29,7 @@
     <Compile Include="StringMatcherTests.fs" />
     <Compile Include="TreeZipperTest.fs" />
     <Compile Include="FParsecExtTests.fs" />
-    <Compile Include="ColorExtTests.fs" />
+    <Compile Include="Graphics\Color.Tests.fs" />
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="JsonTests.fs" />
     <Compile Include="StringExtTests.fs" />
