@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="Helpers.fs" />
     <Compile Include="Primitives\DateTime.Tests.fs" />
+    <Compile Include="Primitives\Enum.Tests.fs" />
     <Compile Include="Collections\List.Tests.fs" />
     <Compile Include="Collections\Array.Tests.fs" />
     <Compile Include="Collections\ListZipper.Tests.fs" />
@@ -37,7 +38,6 @@
     <Compile Include="Serialization/DataFormats/Bencode.Tests.fs" />
     <Compile Include="TaskExtTests.fs" />
     <Compile Include="EnvironmentExtTests.fs" />
-    <Compile Include="EnumTests.fs" />
     <Compile Include="Commons.Tests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
