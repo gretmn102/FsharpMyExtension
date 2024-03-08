@@ -37,7 +37,7 @@
     <Compile Include="Int32ExtTests.fs" />
     <Compile Include="Serialization/DataFormats/Bencode.Tests.fs" />
     <Compile Include="TaskExtTests.fs" />
-    <Compile Include="EnvironmentExtTests.fs" />
+    <Compile Include="EnvironmentExt.Tests.fs" />
     <Compile Include="Commons.Tests.fs" />
     <Compile Include="Test.fs" />
   </ItemGroup>
