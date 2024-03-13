@@ -29,7 +29,7 @@
     <Compile Include="Graphics\Bitmap.Tests.fs" />
     <Compile Include="StringMatcherTests.fs" />
     <Compile Include="TreeZipperTest.fs" />
-    <Compile Include="FParsecExtTests.fs" />
+    <Compile Include="Serialization\Deserializers\FParsec.Tests.fs" />
     <Compile Include="Graphics\Color.Tests.fs" />
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="JsonTests.fs" />
