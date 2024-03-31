@@ -34,7 +34,7 @@
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="JsonTests.fs" />
     <Compile Include="StringExtTests.fs" />
-    <Compile Include="Int32ExtTests.fs" />
+    <Compile Include="Primitives/Numeric/Int32.Tests.fs" />
     <Compile Include="Serialization/DataFormats/Bencode.Tests.fs" />
     <Compile Include="TaskExtTests.fs" />
     <Compile Include="EnvironmentExt.Tests.fs" />
