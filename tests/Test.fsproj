@@ -25,7 +25,7 @@
     <Compile Include="Containers\Result.Tests.fs" />
     <Compile Include="IO\Path.Tests.fs" />
     <Compile Include="Serialization\DataFormats\LimitedXPath.Tests.fs" />
-    <Compile Include="ShowTests.fs" />
+    <Compile Include="Serialization\Serializers\Show.Tests.fs" />
     <Compile Include="Graphics\Bitmap.Tests.fs" />
     <Compile Include="StringMatcherTests.fs" />
     <Compile Include="TreeZipperTest.fs" />
