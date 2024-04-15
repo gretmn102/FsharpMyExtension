@@ -33,7 +33,7 @@
     <Compile Include="Graphics\Color.Tests.fs" />
     <Compile Include="StringCompressionTests.fs" />
     <Compile Include="Serialization/DataFormats/Json.Tests.fs" />
-    <Compile Include="StringExtTests.fs" />
+    <Compile Include="Primitives/String.Tests.fs" />
     <Compile Include="Primitives/Numeric/Int32.Tests.fs" />
     <Compile Include="Serialization/DataFormats/Bencode.Tests.fs" />
     <Compile Include="TaskExtTests.fs" />
