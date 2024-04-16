@@ -31,7 +31,7 @@
     <Compile Include="TreeZipperTest.fs" />
     <Compile Include="Serialization\Deserializers\FParsec.Tests.fs" />
     <Compile Include="Graphics\Color.Tests.fs" />
-    <Compile Include="StringCompressionTests.fs" />
+    <Compile Include="Primitives/String.Compression.Tests.fs" />
     <Compile Include="Serialization/DataFormats/Json.Tests.fs" />
     <Compile Include="Primitives/String.Tests.fs" />
     <Compile Include="Primitives/Numeric/Int32.Tests.fs" />
