@@ -36,7 +36,7 @@
     <Compile Include="Primitives/String.Tests.fs" />
     <Compile Include="Primitives/Numeric/Int32.Tests.fs" />
     <Compile Include="Serialization/DataFormats/Bencode.Tests.fs" />
-    <Compile Include="TaskExtTests.fs" />
+    <Compile Include="Control/Task.Tests.fs" />
     <Compile Include="EnvironmentExt.Tests.fs" />
     <Compile Include="Commons.Tests.fs" />
     <Compile Include="Test.fs" />
