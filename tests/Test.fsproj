@@ -23,6 +23,7 @@
     <Compile Include="Containers\Either.Tests.fs" />
     <Compile Include="Containers\EitherExtensions.Tests.fs" />
     <Compile Include="Containers\Result.Tests.fs" />
+    <Compile Include="Containers\Option.Tests.fs" />
     <Compile Include="IO\Path.Tests.fs" />
     <Compile Include="Serialization\DataFormats\LimitedXPath.Tests.fs" />
     <Compile Include="Serialization\Serializers\Show.Tests.fs" />
