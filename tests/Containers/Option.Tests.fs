@@ -18,9 +18,9 @@ module Seq =
             testCase "lazyness test" <| fun () ->
                 let counter = ref 0
                 let xs = seq{
-                    yield Some 1; incr counter;
-                    yield None; incr counter;
-                    yield Some 3; incr counter; }
+                    yield Some 1; counter.Value <- counter.Value + 1;
+                    yield None; counter.Value <- counter.Value + 1;
+                    yield Some 3; counter.Value <- counter.Value + 1; }
                 seqOpt xs |> ignore
-                Assert.Equal("", 1, !counter)
+                Assert.Equal("", 1, counter.Value)
         ]

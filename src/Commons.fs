@@ -28,12 +28,12 @@ module Commons =
     assert
         let x = ref 0
         while' (fun () ->
-            if !x < 10 then
-                incr x
+            if x.Value < 10 then
+                x.Value <- x.Value + 1
                 true
             else false
             )
-        !x = 10
+        x.Value = 10
     let flip f x y = f y x
     assert
         let f b s = if b then sprintf "view: %s" s else sprintf "not view"

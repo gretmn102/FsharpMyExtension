@@ -48,10 +48,10 @@ module SeqTests =
     let testLaziness =
         testCase "lazyness test" <| fun () ->
             let counter = ref 0
-            seq{ yield Right 1; incr counter;
-                 yield Left -1; incr counter;
-                 yield Right 3; incr counter; } |> Seq.seqEither |> ignore
-            Assert.Equal("", 1, !counter)
+            seq{ yield Right 1; counter.Value <- counter.Value + 1;
+                 yield Left -1; counter.Value <- counter.Value + 1;
+                 yield Right 3; counter.Value <- counter.Value + 1; } |> Seq.seqEither |> ignore
+            Assert.Equal("", 1, counter.Value)
 
 module OptionTests =
     [<Tests>]

@@ -164,7 +164,7 @@ module Serializator =
                     (c, Dic(word, xs))
                 | None ->
                     (c, Dic(word, Map.empty))
-        pref := many1Map p2
+        pref.Value <- many1Map p2
         p
     let deserialize str =
         let emptyState = { PrevIndent = System.Text.StringBuilder() }

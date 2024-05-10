@@ -94,7 +94,7 @@ module Bencode =
             let parser, refParser =
                 createParserForwardedToRef()
 
-            refParser :=
+            refParser.Value <-
                 choice [
                     pstring |>> Bencode.String
                     pint |>> Bencode.Int

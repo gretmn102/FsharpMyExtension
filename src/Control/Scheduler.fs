@@ -86,7 +86,7 @@ let startAsync (scheduler: Scheduler<'JobType>) (msTimeout: int) exec =
     let cancelToken = ref false
 
     async {
-        while not !cancelToken do
+        while not cancelToken.Value do
             match scheduler.PeekJob () with
             | Some job ->
                 if System.DateTime.Now >= job.Time then

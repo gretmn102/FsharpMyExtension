@@ -73,7 +73,7 @@ let takeWhileRest p =
     /// faster then `takeWhileRest`?
     let takeWhileRest2 pred =
         let finished = ref true
-        List.partition (pred >> fun r -> !finished && (finished := r; r))
+        List.partition (pred >> fun r -> finished.Value && (finished.Value <- r; r))
     // assert
     //     let sw f =
     //         let s = System.Diagnostics.Stopwatch()
