@@ -119,6 +119,12 @@ let chunkBySize (chunkSize: int) (str: string) =
 
         arr
 
+let truncate count (s: string) =
+    if s.Length <= count then
+        s
+    else
+        s.[0..count + 1]
+
 module Compression =
     open System.IO
     open System.IO.Compression
