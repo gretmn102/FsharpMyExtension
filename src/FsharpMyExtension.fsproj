@@ -49,6 +49,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/File.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Clipboard.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="IO/Print.fs" />
+    <Compile Include="IO/MemoryFileSystem.fs" />
     <Compile Include="Serialization/Serializers/Show.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/Deserializers/Regex.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/Deserializers/FParsec.fs" />
