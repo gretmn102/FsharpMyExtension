@@ -1,8 +1,10 @@
 module FsharpMyExtension.IO.MemoryFileSystem
 
-type MemoryFileSystem =
-    | Directory of Map<string, MemoryFileSystem>
+type Entity =
+    | Directory of Map<string, Entity>
     | File of string
+
+type MemoryFileSystem = Map<string, Entity>
 
 let rec create (pathFragments: string list) content =
     Directory (
@@ -18,7 +20,6 @@ let rec create (pathFragments: string list) content =
 type WriteFileError =
     | IsDirectory
     | PathFragmentsIsEmpty
-    | FileSystemStartAsFile
 
 let writeFile
     (pathFragments: string list)
@@ -31,7 +32,6 @@ let writeFile
             match Map.tryFind fileName dir with
             | None | Some (File _) ->
                 Map.add fileName (File content) dir
-                |> Directory
                 |> Ok
             | Some (Directory _) ->
                 Error WriteFileError.IsDirectory
@@ -39,26 +39,20 @@ let writeFile
             match Map.tryFind pathFragment dir with
             | None | Some (File _) ->
                 Map.add pathFragment (create restPathFragments content) dir
-                |> Directory
                 |> Ok
             | Some (Directory subDir) ->
                 loop restPathFragments subDir
                 |> Result.map (fun x ->
-                    Directory (Map.add pathFragment x dir)
+                    Map.add pathFragment (Directory x) dir
                 )
         | [] ->
             Error WriteFileError.PathFragmentsIsEmpty
 
-    match fileSystem with
-    | Directory dir ->
-        loop pathFragments dir
-    | File _ ->
-        Error WriteFileError.FileSystemStartAsFile
+    loop pathFragments fileSystem
 
 [<RequireQualifiedAccess>]
 type ReadFileError =
     | PathFragmentsIsEmpty
-    | FileSystemStartAsFile
     | FileNotFound
     | IsDirectory
 
@@ -81,15 +75,11 @@ let readFile (pathFragments: string list) (fileSystem: MemoryFileSystem) =
         | [] ->
             Error ReadFileError.PathFragmentsIsEmpty
 
-    match fileSystem with
-    | Directory dir ->
-        loop pathFragments dir
-    | File _ -> Error ReadFileError.FileSystemStartAsFile
+    loop pathFragments fileSystem
 
 [<RequireQualifiedAccess>]
 type RemoveError =
     | PathFragmentsIsEmpty
-    | FileSystemStartAsFile
     | EntityNotFound
 
 let remove (pathFragments: string list) (fileSystem: MemoryFileSystem) =
@@ -114,7 +104,4 @@ let remove (pathFragments: string list) (fileSystem: MemoryFileSystem) =
         | [] ->
             Error RemoveError.PathFragmentsIsEmpty
 
-    match fileSystem with
-    | Directory dir ->
-        loop pathFragments dir
-    | File _ -> Error RemoveError.FileSystemStartAsFile
+    loop pathFragments fileSystem

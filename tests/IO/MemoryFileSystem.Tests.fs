@@ -23,9 +23,9 @@ let ``IO.MemoryFileSystem.writeFile`` =
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map [
+                    (Map [
                         "lumi.md", Directory Map.empty
-                    ]))
+                    ])
                 )
                 (Error WriteFileError.IsDirectory)
                 ""
@@ -33,7 +33,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
             Expect.equal
                 (writeFile
                     [] "Парень по имени Lumi"
-                    (Directory Map.empty)
+                    Map.empty
                 )
                 (Error WriteFileError.PathFragmentsIsEmpty)
                 ""
@@ -41,87 +41,80 @@ let ``IO.MemoryFileSystem.writeFile`` =
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Directory Map.empty))
-                (Ok <| Directory (Map [
+                    Map.empty)
+                (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
-                ]))
+                ])
                 ""
         testCase "create and write file in not empty directory" <| fun () ->
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map ["somefile", File "some content"])))
-                (Ok <| Directory (Map [
+                    (Map ["somefile", File "some content"]))
+                (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
                     "somefile", File "some content"
-                ]))
+                ])
                 ""
         testCase "rewrite one directory file" <| fun () ->
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map ["lumi.md", File "empty"])))
-                (Ok <| Directory (Map [
+                    (Map ["lumi.md", File "empty"]))
+                (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
-                ]))
-                ""
-        testCase "rewrite just file" <| fun () ->
-            Expect.equal
-                (writeFile
-                    ["lumi.md"] "Парень по имени Lumi"
-                    (File "empty"))
-                (Error WriteFileError.FileSystemStartAsFile)
+                ])
                 ""
         testCase "rewrite one subdirectory file" <| fun () ->
             Expect.equal
                 (writeFile
                     ["users"; "lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map [
+                    (Map [
                         "users", Directory (Map [
                             "lumi.md", File "empty"
                         ])
-                    ]))
+                    ])
                 )
-                (Ok <| Directory (Map [
+                (Ok <| Map [
                     "users", Directory (Map [
                         "lumi.md", File "Парень по имени Lumi"
                     ])
-                ]))
+                ])
                 ""
         testCase "create discord/users/lumi.md in discord/index.md" <| fun () ->
             Expect.equal
                 (writeFile
                     ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "index.md", File ""
                         ])
-                    ]))
+                    ])
                 )
-                (Ok <| Directory (Map [
+                (Ok <| Map [
                     "discord", Directory (Map [
                         "index.md", File ""
                         "users", Directory (Map [
                             "lumi.md", File "Парень по имени Lumi"
                         ])
                     ])
-                ]))
+                ])
                 ""
         testCase "create discord/users/lumi.md in discord" <| fun () ->
             Expect.equal
                 (writeFile
                     ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory Map.empty
-                    ]))
+                    ])
                 )
-                (Ok <| Directory (Map [
+                (Ok <| Map [
                     "discord", Directory (Map [
                         "users", Directory (Map [
                             "lumi.md", File "Парень по имени Lumi"
                         ])
                     ])
-                ]))
+                ])
                 ""
     ]
 
@@ -132,9 +125,9 @@ let ``IO.MemoryFileSystem.readFile`` =
             Expect.equal
                 (readFile
                     ["lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "lumi.md", File "Парень по имени Lumi"
-                    ]))
+                    ])
                 )
                 (Ok "Парень по имени Lumi")
                 ""
@@ -142,13 +135,13 @@ let ``IO.MemoryFileSystem.readFile`` =
             Expect.equal
                 (readFile
                     ["discord"; "users"; "lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "users", Directory (Map [
                                 "lumi.md", File "Парень по имени Lumi"
                             ])
                         ])
-                    ]))
+                    ])
                 )
                 (Ok "Парень по имени Lumi")
                 ""
@@ -156,29 +149,21 @@ let ``IO.MemoryFileSystem.readFile`` =
             Expect.equal
                 (readFile
                     ["discord"; "users"; "lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory Map.empty
-                    ]))
+                    ])
                 )
                 (Error ReadFileError.FileNotFound)
-                ""
-        testCase "FileSystemStartAsFile error" <| fun () ->
-            Expect.equal
-                (readFile
-                    ["discord"; "users"; "lumi.md"]
-                    (File "")
-                )
-                (Error ReadFileError.FileSystemStartAsFile)
                 ""
         testCase "try read directory" <| fun () ->
             Expect.equal
                 (readFile
                     ["discord"; "users"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "users", Directory Map.empty
                         ])
-                    ]))
+                    ])
                 )
                 (Error ReadFileError.IsDirectory)
                 ""
@@ -191,9 +176,9 @@ let ``IO.MemoryFileSystem.remove`` =
             Expect.equal
                 (remove
                     ["lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "lumi.md", File "Парень по имени Lumi"
-                    ]))
+                    ])
                 )
                 (Ok (Directory Map.empty))
                 ""
@@ -201,13 +186,13 @@ let ``IO.MemoryFileSystem.remove`` =
             Expect.equal
                 (remove
                     ["discord"; "users"; "lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "users", Directory (Map [
                                 "lumi.md", File "Парень по имени Lumi"
                             ])
                         ])
-                    ]))
+                    ])
                 )
                 (Ok <| Directory (Map [
                     "discord", Directory (Map [
@@ -219,14 +204,14 @@ let ``IO.MemoryFileSystem.remove`` =
             Expect.equal
                 (remove
                     ["discord"; "users"; "lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "users", Directory (Map [
                                 "index.md", File ""
                                 "lumi.md", File "Парень по имени Lumi"
                             ])
                         ])
-                    ]))
+                    ])
                 )
                 (Ok <| Directory (Map [
                     "discord", Directory (Map [
@@ -240,29 +225,21 @@ let ``IO.MemoryFileSystem.remove`` =
             Expect.equal
                 (remove
                     ["discord"; "users"; "lumi.md"]
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory Map.empty
-                    ]))
+                    ])
                 )
                 (Error RemoveError.EntityNotFound)
-                ""
-        testCase "FileSystemStartAsFile error" <| fun () ->
-            Expect.equal
-                (remove
-                    ["discord"; "users"; "lumi.md"]
-                    (File "")
-                )
-                (Error RemoveError.FileSystemStartAsFile)
                 ""
         testCase "PathFragmentsIsEmpty error" <| fun () ->
             Expect.equal
                 (remove
                     []
-                    (Directory (Map [
+                    (Map [
                         "discord", Directory (Map [
                             "users", Directory Map.empty
                         ])
-                    ]))
+                    ])
                 )
                 (Error RemoveError.PathFragmentsIsEmpty)
                 ""
