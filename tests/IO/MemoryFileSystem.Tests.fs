@@ -19,6 +19,24 @@ let ``IO.MemoryFileSystem.create`` =
 [<Tests>]
 let ``IO.MemoryFileSystem.writeFile`` =
     testList "IO.MemoryFileSystem.writeFile" [
+        testCase "is directory error" <| fun () ->
+            Expect.equal
+                (writeFile
+                    ["lumi.md"] "Парень по имени Lumi"
+                    (Directory (Map [
+                        "lumi.md", Directory Map.empty
+                    ]))
+                )
+                (Error WriteFileError.IsDirectory)
+                ""
+        testCase "empty path error" <| fun () ->
+            Expect.equal
+                (writeFile
+                    [] "Парень по имени Lumi"
+                    (Directory Map.empty)
+                )
+                (Error WriteFileError.PathFragmentsIsEmpty)
+                ""
         testCase "create and write file in empty directory" <| fun () ->
             Expect.equal
                 (writeFile
