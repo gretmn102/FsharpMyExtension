@@ -58,6 +58,7 @@
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/DataFormats/XmlBuilder.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/DataFormats/Json.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Serialization/DataFormats/Bencode.fs" />
+    <Compile Include="Graphics/Primitives.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Graphics/Bitmap.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Graphics/Color.fs" />
     <Compile Condition="'$(FABLE_COMPILER)' != 'true'" Include="Combinatorics.fs" />
