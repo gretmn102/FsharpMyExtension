@@ -18,44 +18,39 @@ let rec create (pathFragments: string list) content =
 type WriteFileError =
     | IsDirectory
     | PathFragmentsIsEmpty
-    | NotImplementedYet
+    | FileSystemStartAsFile
 
 let writeFile
     (pathFragments: string list)
     content
     (fileSystem: MemoryFileSystem)
     : Result<MemoryFileSystem, WriteFileError> =
-    let rec loop pathFragments fileSystem =
+    let rec loop pathFragments dir =
         match pathFragments with
         | [fileName] ->
-            match fileSystem with
-            | Directory dir ->
-                match Map.tryFind fileName dir with
-                | None | Some (File _) ->
-                    Map.add fileName (File content) dir
-                    |> Directory
-                    |> Ok
-                | Some (Directory _) ->
-                    Error WriteFileError.IsDirectory
-            | File _ ->
-                Map.add fileName (File content) Map.empty
+            match Map.tryFind fileName dir with
+            | None | Some (File _) ->
+                Map.add fileName (File content) dir
                 |> Directory
                 |> Ok
+            | Some (Directory _) ->
+                Error WriteFileError.IsDirectory
         | pathFragment::restPathFragments ->
-            match fileSystem with
-            | Directory dir ->
-                match Map.tryFind pathFragment dir with
-                | None | Some (File _) ->
-                    Map.add pathFragment (create restPathFragments content) dir
-                    |> Directory
-                    |> Ok
-                | Some (Directory _ as subDir) ->
-                    loop restPathFragments subDir
-                    |> Result.map (fun x ->
-                        Directory (Map.add pathFragment x dir)
-                    )
-            | File _ ->
-                failwith "не должно случиться?"
+            match Map.tryFind pathFragment dir with
+            | None | Some (File _) ->
+                Map.add pathFragment (create restPathFragments content) dir
+                |> Directory
+                |> Ok
+            | Some (Directory subDir) ->
+                loop restPathFragments subDir
+                |> Result.map (fun x ->
+                    Directory (Map.add pathFragment x dir)
+                )
         | [] ->
             Error WriteFileError.PathFragmentsIsEmpty
-    loop pathFragments fileSystem
+
+    match fileSystem with
+    | Directory dir ->
+        loop pathFragments dir
+    | File _ ->
+        Error WriteFileError.FileSystemStartAsFile

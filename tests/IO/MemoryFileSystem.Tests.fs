@@ -52,9 +52,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
                     (File "empty"))
-                (Ok <| Directory (Map [
-                    "lumi.md", File "Парень по имени Lumi"
-                ]))
+                (Error WriteFileError.FileSystemStartAsFile)
                 ""
         testCase "rewrite one subdirectory file" <| fun () ->
             Expect.equal
