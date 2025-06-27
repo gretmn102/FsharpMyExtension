@@ -85,3 +85,36 @@ let readFile (pathFragments: string list) (fileSystem: MemoryFileSystem) =
     | Directory dir ->
         loop pathFragments dir
     | File _ -> Error ReadFileError.FileSystemStartAsFile
+
+[<RequireQualifiedAccess>]
+type RemoveError =
+    | PathFragmentsIsEmpty
+    | FileSystemStartAsFile
+    | EntityNotFound
+
+let remove (pathFragments: string list) (fileSystem: MemoryFileSystem) =
+    let rec loop pathFragments dir =
+        match pathFragments with
+        | [pathFragment] ->
+            if Map.containsKey pathFragment dir then
+                Map.remove pathFragment dir
+                |> Directory
+                |> Ok
+            else
+                Error RemoveError.EntityNotFound
+        | pathFragment::restPathFragments ->
+            match Map.tryFind pathFragment dir with
+            | None | Some (File _) ->
+                Error RemoveError.EntityNotFound
+            | Some (Directory subDir) ->
+                loop restPathFragments subDir
+                |> Result.map (fun x ->
+                    Directory (Map.add pathFragment x dir)
+                )
+        | [] ->
+            Error RemoveError.PathFragmentsIsEmpty
+
+    match fileSystem with
+    | Directory dir ->
+        loop pathFragments dir
+    | File _ -> Error RemoveError.FileSystemStartAsFile

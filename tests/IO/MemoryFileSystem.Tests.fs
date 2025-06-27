@@ -183,3 +183,87 @@ let ``IO.MemoryFileSystem.readFile`` =
                 (Error ReadFileError.IsDirectory)
                 ""
     ]
+
+[<Tests>]
+let ``IO.MemoryFileSystem.remove`` =
+    testList "IO.MemoryFileSystem.remove" [
+        testCase "remove lumi.md" <| fun () ->
+            Expect.equal
+                (remove
+                    ["lumi.md"]
+                    (Directory (Map [
+                        "lumi.md", File "Парень по имени Lumi"
+                    ]))
+                )
+                (Ok (Directory Map.empty))
+                ""
+        testCase "remove discord/users/lumi.md" <| fun () ->
+            Expect.equal
+                (remove
+                    ["discord"; "users"; "lumi.md"]
+                    (Directory (Map [
+                        "discord", Directory (Map [
+                            "users", Directory (Map [
+                                "lumi.md", File "Парень по имени Lumi"
+                            ])
+                        ])
+                    ]))
+                )
+                (Ok <| Directory (Map [
+                    "discord", Directory (Map [
+                        "users", Directory Map.empty
+                    ])
+                ]))
+                ""
+        testCase "remove discord/users/lumi.md with index.md" <| fun () ->
+            Expect.equal
+                (remove
+                    ["discord"; "users"; "lumi.md"]
+                    (Directory (Map [
+                        "discord", Directory (Map [
+                            "users", Directory (Map [
+                                "index.md", File ""
+                                "lumi.md", File "Парень по имени Lumi"
+                            ])
+                        ])
+                    ]))
+                )
+                (Ok <| Directory (Map [
+                    "discord", Directory (Map [
+                        "users", Directory (Map [
+                            "index.md", File ""
+                        ])
+                    ])
+                ]))
+                ""
+        testCase "remove unexist file error" <| fun () ->
+            Expect.equal
+                (remove
+                    ["discord"; "users"; "lumi.md"]
+                    (Directory (Map [
+                        "discord", Directory Map.empty
+                    ]))
+                )
+                (Error RemoveError.EntityNotFound)
+                ""
+        testCase "FileSystemStartAsFile error" <| fun () ->
+            Expect.equal
+                (remove
+                    ["discord"; "users"; "lumi.md"]
+                    (File "")
+                )
+                (Error RemoveError.FileSystemStartAsFile)
+                ""
+        testCase "PathFragmentsIsEmpty error" <| fun () ->
+            Expect.equal
+                (remove
+                    []
+                    (Directory (Map [
+                        "discord", Directory (Map [
+                            "users", Directory Map.empty
+                        ])
+                    ]))
+                )
+                (Error RemoveError.PathFragmentsIsEmpty)
+                ""
+    ]
