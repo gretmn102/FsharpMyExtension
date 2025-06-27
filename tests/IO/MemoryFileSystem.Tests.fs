@@ -124,3 +124,62 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 ]))
                 ""
     ]
+
+[<Tests>]
+let ``IO.MemoryFileSystem.readFile`` =
+    testList "IO.MemoryFileSystem.readFile" [
+        testCase "read lumi.md" <| fun () ->
+            Expect.equal
+                (readFile
+                    ["lumi.md"]
+                    (Directory (Map [
+                        "lumi.md", File "Парень по имени Lumi"
+                    ]))
+                )
+                (Ok "Парень по имени Lumi")
+                ""
+        testCase "read discord/users/lumi.md" <| fun () ->
+            Expect.equal
+                (readFile
+                    ["discord"; "users"; "lumi.md"]
+                    (Directory (Map [
+                        "discord", Directory (Map [
+                            "users", Directory (Map [
+                                "lumi.md", File "Парень по имени Lumi"
+                            ])
+                        ])
+                    ]))
+                )
+                (Ok "Парень по имени Lumi")
+                ""
+        testCase "read unexist file error" <| fun () ->
+            Expect.equal
+                (readFile
+                    ["discord"; "users"; "lumi.md"]
+                    (Directory (Map [
+                        "discord", Directory Map.empty
+                    ]))
+                )
+                (Error ReadFileError.FileNotFound)
+                ""
+        testCase "FileSystemStartAsFile error" <| fun () ->
+            Expect.equal
+                (readFile
+                    ["discord"; "users"; "lumi.md"]
+                    (File "")
+                )
+                (Error ReadFileError.FileSystemStartAsFile)
+                ""
+        testCase "try read directory" <| fun () ->
+            Expect.equal
+                (readFile
+                    ["discord"; "users"]
+                    (Directory (Map [
+                        "discord", Directory (Map [
+                            "users", Directory Map.empty
+                        ])
+                    ]))
+                )
+                (Error ReadFileError.IsDirectory)
+                ""
+    ]

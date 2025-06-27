@@ -54,3 +54,34 @@ let writeFile
         loop pathFragments dir
     | File _ ->
         Error WriteFileError.FileSystemStartAsFile
+
+[<RequireQualifiedAccess>]
+type ReadFileError =
+    | PathFragmentsIsEmpty
+    | FileSystemStartAsFile
+    | FileNotFound
+    | IsDirectory
+
+let readFile (pathFragments: string list) (fileSystem: MemoryFileSystem) =
+    let rec loop pathFragments dir =
+        match pathFragments with
+        | [pathFragment] ->
+            match Map.tryFind pathFragment dir with
+            | Some entity ->
+                match entity with
+                | File content -> Ok content
+                | Directory _ -> Error ReadFileError.IsDirectory
+            | None -> Error ReadFileError.FileNotFound
+        | pathFragment::restPathFragments ->
+            match Map.tryFind pathFragment dir with
+            | None | Some (File _) ->
+                Error ReadFileError.FileNotFound
+            | Some (Directory dir) ->
+                loop restPathFragments dir
+        | [] ->
+            Error ReadFileError.PathFragmentsIsEmpty
+
+    match fileSystem with
+    | Directory dir ->
+        loop pathFragments dir
+    | File _ -> Error ReadFileError.FileSystemStartAsFile
