@@ -22,33 +22,43 @@ type WriteFileError =
     | PathFragmentsIsEmpty
 
 let writeFile
-    (pathFragments: string list)
+    (pathFragments: string[])
     content
     (fileSystem: MemoryFileSystem)
     : Result<MemoryFileSystem, WriteFileError> =
-    let rec loop pathFragments dir =
-        match pathFragments with
-        | [fileName] ->
+    let rec loop pathFragments pathFragmentsIndex dir =
+        let pathFragmentsLength = Array.length pathFragments
+        let isLast = pathFragmentsIndex = pathFragmentsLength - 1
+        if isLast then
+            let fileName = pathFragments[pathFragmentsIndex]
             match Map.tryFind fileName dir with
             | None | Some (File _) ->
                 Map.add fileName (File content) dir
                 |> Ok
             | Some (Directory _) ->
                 Error WriteFileError.IsDirectory
-        | pathFragment::restPathFragments ->
+        else
+            let pathFragment = pathFragments[pathFragmentsIndex]
             match Map.tryFind pathFragment dir with
             | None | Some (File _) ->
+                let restPathFragments =
+                    Array.sub
+                        pathFragments
+                        (pathFragmentsIndex + 1)
+                        (Array.length pathFragments - (pathFragmentsIndex + 1))
+                    |> List.ofArray
                 Map.add pathFragment (create restPathFragments content) dir
                 |> Ok
             | Some (Directory subDir) ->
-                loop restPathFragments subDir
+                loop pathFragments (pathFragmentsIndex + 1) subDir
                 |> Result.map (fun x ->
                     Map.add pathFragment (Directory x) dir
                 )
-        | [] ->
-            Error WriteFileError.PathFragmentsIsEmpty
 
-    loop pathFragments fileSystem
+    if Array.isEmpty pathFragments then
+        Error WriteFileError.PathFragmentsIsEmpty
+    else
+        loop pathFragments 0 fileSystem
 
 [<RequireQualifiedAccess>]
 type ReadFileError =

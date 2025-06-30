@@ -22,7 +22,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "is directory error" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["lumi.md"] "Парень по имени Lumi"
+                    [|"lumi.md"|] "Парень по имени Lumi"
                     (Map [
                         "lumi.md", Directory Map.empty
                     ])
@@ -32,7 +32,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "empty path error" <| fun () ->
             Expect.equal
                 (writeFile
-                    [] "Парень по имени Lumi"
+                    [||] "Парень по имени Lumi"
                     Map.empty
                 )
                 (Error WriteFileError.PathFragmentsIsEmpty)
@@ -40,7 +40,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "create and write file in empty directory" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["lumi.md"] "Парень по имени Lumi"
+                    [|"lumi.md"|] "Парень по имени Lumi"
                     Map.empty)
                 (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
@@ -49,7 +49,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "create and write file in not empty directory" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["lumi.md"] "Парень по имени Lumi"
+                    [|"lumi.md"|] "Парень по имени Lumi"
                     (Map ["somefile", File "some content"]))
                 (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
@@ -59,7 +59,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "rewrite one directory file" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["lumi.md"] "Парень по имени Lumi"
+                    [|"lumi.md"|] "Парень по имени Lumi"
                     (Map ["lumi.md", File "empty"]))
                 (Ok <| Map [
                     "lumi.md", File "Парень по имени Lumi"
@@ -68,7 +68,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "rewrite one subdirectory file" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["users"; "lumi.md"] "Парень по имени Lumi"
+                    [|"users"; "lumi.md"|] "Парень по имени Lumi"
                     (Map [
                         "users", Directory (Map [
                             "lumi.md", File "empty"
@@ -84,7 +84,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "create discord/users/lumi.md in discord/index.md" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
+                    [|"discord"; "users"; "lumi.md"|] "Парень по имени Lumi"
                     (Map [
                         "discord", Directory (Map [
                             "index.md", File ""
@@ -103,7 +103,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
         testCase "create discord/users/lumi.md in discord" <| fun () ->
             Expect.equal
                 (writeFile
-                    ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
+                    [|"discord"; "users"; "lumi.md"|] "Парень по имени Lumi"
                     (Map [
                         "discord", Directory Map.empty
                     ])
