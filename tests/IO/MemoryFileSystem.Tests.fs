@@ -9,10 +9,10 @@ let ``IO.MemoryFileSystem.create`` =
         testCase "base case" <| fun () ->
             Expect.equal
                 (create ["discord"; "users"; "lumi.md"] "Парень по имени Lumi")
-                (Directory (
-                    Map ["discord", Directory (
-                        Map ["users", Directory (
-                            Map ["lumi.md", File "Парень по имени Lumi"])])]))
+                (Entity.Directory (
+                    Map ["discord", Entity.Directory (
+                        Map ["users", Entity.Directory (
+                            Map ["lumi.md", Entity.File "Парень по имени Lumi"])])]))
                 ""
     ]
 
@@ -24,7 +24,7 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
                     (Map [
-                        "lumi.md", Directory Map.empty
+                        "lumi.md", Entity.Directory Map.empty
                     ])
                 )
                 (Error WriteFileError.IsDirectory)
@@ -43,26 +43,26 @@ let ``IO.MemoryFileSystem.writeFile`` =
                     ["lumi.md"] "Парень по имени Lumi"
                     Map.empty)
                 (Ok <| Map [
-                    "lumi.md", File "Парень по имени Lumi"
+                    "lumi.md", Entity.File "Парень по имени Lumi"
                 ])
                 ""
         testCase "create and write file in not empty directory" <| fun () ->
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Map ["somefile", File "some content"]))
+                    (Map ["somefile", Entity.File "some content"]))
                 (Ok <| Map [
-                    "lumi.md", File "Парень по имени Lumi"
-                    "somefile", File "some content"
+                    "lumi.md", Entity.File "Парень по имени Lumi"
+                    "somefile", Entity.File "some content"
                 ])
                 ""
         testCase "rewrite one directory file" <| fun () ->
             Expect.equal
                 (writeFile
                     ["lumi.md"] "Парень по имени Lumi"
-                    (Map ["lumi.md", File "empty"]))
+                    (Map ["lumi.md", Entity.File "empty"]))
                 (Ok <| Map [
-                    "lumi.md", File "Парень по имени Lumi"
+                    "lumi.md", Entity.File "Парень по имени Lumi"
                 ])
                 ""
         testCase "rewrite one subdirectory file" <| fun () ->
@@ -70,14 +70,14 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 (writeFile
                     ["users"; "lumi.md"] "Парень по имени Lumi"
                     (Map [
-                        "users", Directory (Map [
-                            "lumi.md", File "empty"
+                        "users", Entity.Directory (Map [
+                            "lumi.md", Entity.File "empty"
                         ])
                     ])
                 )
                 (Ok <| Map [
-                    "users", Directory (Map [
-                        "lumi.md", File "Парень по имени Lumi"
+                    "users", Entity.Directory (Map [
+                        "lumi.md", Entity.File "Парень по имени Lumi"
                     ])
                 ])
                 ""
@@ -86,16 +86,16 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 (writeFile
                     ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
                     (Map [
-                        "discord", Directory (Map [
-                            "index.md", File ""
+                        "discord", Entity.Directory (Map [
+                            "index.md", Entity.File ""
                         ])
                     ])
                 )
                 (Ok <| Map [
-                    "discord", Directory (Map [
-                        "index.md", File ""
-                        "users", Directory (Map [
-                            "lumi.md", File "Парень по имени Lumi"
+                    "discord", Entity.Directory (Map [
+                        "index.md", Entity.File ""
+                        "users", Entity.Directory (Map [
+                            "lumi.md", Entity.File "Парень по имени Lumi"
                         ])
                     ])
                 ])
@@ -105,13 +105,13 @@ let ``IO.MemoryFileSystem.writeFile`` =
                 (writeFile
                     ["discord"; "users"; "lumi.md"] "Парень по имени Lumi"
                     (Map [
-                        "discord", Directory Map.empty
+                        "discord", Entity.Directory Map.empty
                     ])
                 )
                 (Ok <| Map [
-                    "discord", Directory (Map [
-                        "users", Directory (Map [
-                            "lumi.md", File "Парень по имени Lumi"
+                    "discord", Entity.Directory (Map [
+                        "users", Entity.Directory (Map [
+                            "lumi.md", Entity.File "Парень по имени Lumi"
                         ])
                     ])
                 ])
@@ -126,7 +126,7 @@ let ``IO.MemoryFileSystem.readFile`` =
                 (readFile
                     ["lumi.md"]
                     (Map [
-                        "lumi.md", File "Парень по имени Lumi"
+                        "lumi.md", Entity.File "Парень по имени Lumi"
                     ])
                 )
                 (Ok "Парень по имени Lumi")
@@ -136,9 +136,9 @@ let ``IO.MemoryFileSystem.readFile`` =
                 (readFile
                     ["discord"; "users"; "lumi.md"]
                     (Map [
-                        "discord", Directory (Map [
-                            "users", Directory (Map [
-                                "lumi.md", File "Парень по имени Lumi"
+                        "discord", Entity.Directory (Map [
+                            "users", Entity.Directory (Map [
+                                "lumi.md", Entity.File "Парень по имени Lumi"
                             ])
                         ])
                     ])
@@ -150,7 +150,7 @@ let ``IO.MemoryFileSystem.readFile`` =
                 (readFile
                     ["discord"; "users"; "lumi.md"]
                     (Map [
-                        "discord", Directory Map.empty
+                        "discord", Entity.Directory Map.empty
                     ])
                 )
                 (Error ReadFileError.FileNotFound)
@@ -160,13 +160,14 @@ let ``IO.MemoryFileSystem.readFile`` =
                 (readFile
                     ["discord"; "users"]
                     (Map [
-                        "discord", Directory (Map [
-                            "users", Directory Map.empty
+                        "discord", Entity.Directory (Map [
+                            "users", Entity.Directory Map.empty
                         ])
                     ])
                 )
                 (Error ReadFileError.IsDirectory)
                 ""
+        // todo: add one of the path fragments hits a file error
     ]
 
 [<Tests>]
@@ -177,26 +178,26 @@ let ``IO.MemoryFileSystem.remove`` =
                 (remove
                     ["lumi.md"]
                     (Map [
-                        "lumi.md", File "Парень по имени Lumi"
+                        "lumi.md", Entity.File "Парень по имени Lumi"
                     ])
                 )
-                (Ok (Directory Map.empty))
+                (Ok (Entity.Directory Map.empty))
                 ""
         testCase "remove discord/users/lumi.md" <| fun () ->
             Expect.equal
                 (remove
                     ["discord"; "users"; "lumi.md"]
                     (Map [
-                        "discord", Directory (Map [
-                            "users", Directory (Map [
-                                "lumi.md", File "Парень по имени Lumi"
+                        "discord", Entity.Directory (Map [
+                            "users", Entity.Directory (Map [
+                                "lumi.md", Entity.File "Парень по имени Lumi"
                             ])
                         ])
                     ])
                 )
-                (Ok <| Directory (Map [
-                    "discord", Directory (Map [
-                        "users", Directory Map.empty
+                (Ok <| Entity.Directory (Map [
+                    "discord", Entity.Directory (Map [
+                        "users", Entity.Directory Map.empty
                     ])
                 ]))
                 ""
@@ -205,18 +206,18 @@ let ``IO.MemoryFileSystem.remove`` =
                 (remove
                     ["discord"; "users"; "lumi.md"]
                     (Map [
-                        "discord", Directory (Map [
-                            "users", Directory (Map [
-                                "index.md", File ""
-                                "lumi.md", File "Парень по имени Lumi"
+                        "discord", Entity.Directory (Map [
+                            "users", Entity.Directory (Map [
+                                "index.md", Entity.File ""
+                                "lumi.md", Entity.File "Парень по имени Lumi"
                             ])
                         ])
                     ])
                 )
-                (Ok <| Directory (Map [
-                    "discord", Directory (Map [
-                        "users", Directory (Map [
-                            "index.md", File ""
+                (Ok <| Entity.Directory (Map [
+                    "discord", Entity.Directory (Map [
+                        "users", Entity.Directory (Map [
+                            "index.md", Entity.File ""
                         ])
                     ])
                 ]))
@@ -226,7 +227,7 @@ let ``IO.MemoryFileSystem.remove`` =
                 (remove
                     ["discord"; "users"; "lumi.md"]
                     (Map [
-                        "discord", Directory Map.empty
+                        "discord", Entity.Directory Map.empty
                     ])
                 )
                 (Error RemoveError.EntityNotFound)
@@ -236,8 +237,8 @@ let ``IO.MemoryFileSystem.remove`` =
                 (remove
                     []
                     (Map [
-                        "discord", Directory (Map [
-                            "users", Directory Map.empty
+                        "discord", Entity.Directory (Map [
+                            "users", Entity.Directory Map.empty
                         ])
                     ])
                 )

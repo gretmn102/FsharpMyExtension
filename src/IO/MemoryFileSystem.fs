@@ -1,5 +1,6 @@
 module FsharpMyExtension.IO.MemoryFileSystem
 
+[<RequireQualifiedAccess>]
 type Entity =
     | Directory of Map<string, Entity>
     | File of string
@@ -7,11 +8,11 @@ type Entity =
 type MemoryFileSystem = Map<string, Entity>
 
 let rec create (pathFragments: string list) content =
-    Directory (
+    Entity.Directory (
         match pathFragments with
         | [] -> failwith "pathFragments is empty!"
         | [fileName] ->
-            Map [fileName, File content]
+            Map [fileName, Entity.File content]
         | pathFragment::pathFragments ->
             Map [pathFragment, create pathFragments content]
     )
@@ -30,20 +31,20 @@ let writeFile
         match pathFragments with
         | [fileName] ->
             match Map.tryFind fileName dir with
-            | None | Some (File _) ->
-                Map.add fileName (File content) dir
+            | None | Some (Entity.File _) ->
+                Map.add fileName (Entity.File content) dir
                 |> Ok
-            | Some (Directory _) ->
+            | Some (Entity.Directory _) ->
                 Error WriteFileError.IsDirectory
         | pathFragment::restPathFragments ->
             match Map.tryFind pathFragment dir with
-            | None | Some (File _) ->
+            | None | Some (Entity.File _) ->
                 Map.add pathFragment (create restPathFragments content) dir
                 |> Ok
-            | Some (Directory subDir) ->
+            | Some (Entity.Directory subDir) ->
                 loop restPathFragments subDir
                 |> Result.map (fun x ->
-                    Map.add pathFragment (Directory x) dir
+                    Map.add pathFragment (Entity.Directory x) dir
                 )
         | [] ->
             Error WriteFileError.PathFragmentsIsEmpty
@@ -63,14 +64,14 @@ let readFile (pathFragments: string list) (fileSystem: MemoryFileSystem) =
             match Map.tryFind pathFragment dir with
             | Some entity ->
                 match entity with
-                | File content -> Ok content
-                | Directory _ -> Error ReadFileError.IsDirectory
+                | Entity.File content -> Ok content
+                | Entity.Directory _ -> Error ReadFileError.IsDirectory
             | None -> Error ReadFileError.FileNotFound
         | pathFragment::restPathFragments ->
             match Map.tryFind pathFragment dir with
-            | None | Some (File _) ->
+            | None | Some (Entity.File _) ->
                 Error ReadFileError.FileNotFound
-            | Some (Directory dir) ->
+            | Some (Entity.Directory dir) ->
                 loop restPathFragments dir
         | [] ->
             Error ReadFileError.PathFragmentsIsEmpty
@@ -88,18 +89,18 @@ let remove (pathFragments: string list) (fileSystem: MemoryFileSystem) =
         | [pathFragment] ->
             if Map.containsKey pathFragment dir then
                 Map.remove pathFragment dir
-                |> Directory
+                |> Entity.Directory
                 |> Ok
             else
                 Error RemoveError.EntityNotFound
         | pathFragment::restPathFragments ->
             match Map.tryFind pathFragment dir with
-            | None | Some (File _) ->
+            | None | Some (Entity.File _) ->
                 Error RemoveError.EntityNotFound
-            | Some (Directory subDir) ->
+            | Some (Entity.Directory subDir) ->
                 loop restPathFragments subDir
                 |> Result.map (fun x ->
-                    Directory (Map.add pathFragment x dir)
+                    Entity.Directory (Map.add pathFragment x dir)
                 )
         | [] ->
             Error RemoveError.PathFragmentsIsEmpty
