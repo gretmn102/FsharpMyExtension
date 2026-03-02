@@ -59,6 +59,20 @@ let initViaFsi () =
     |> Fake.Core.Context.setExecutionContext
 
     Target.initEnvironment ()
+
+let findPackPath dir =
+    let packPathPattern =
+        dir </> "*.nupkg"
+
+    !! packPathPattern
+    |> Seq.truncate 2
+    |> List.ofSeq
+    |> function
+        | [nupkgPath] -> nupkgPath
+        | [] ->
+            failwithf "'%s' not found" packPathPattern
+        | nupkgPaths ->
+            failwithf "More than one *.nupkg found: '%A'" nupkgPaths
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
@@ -115,14 +129,36 @@ Target.create "Pack" (fun _ ->
     |> dotnet (sprintf "pack %s -o \"%s\"" commonBuildArgs deployDir)
 )
 
-Target.create "PushToGitlab" (fun _ ->
-    let packPathPattern = sprintf "%s/*.nupkg" deployDir
-    let packPath =
-        !! packPathPattern |> Seq.tryExactlyOne
-        |> Option.defaultWith (fun () -> failwithf "'%s' not found" packPathPattern)
+Target.create "PushToGitlabLocal" (fun _ ->
+    let path = findPackPath deployDir
+    let source = "gitlab"
+    "."
+    |> dotnet (
+        String.concat " " [
+            "nuget"
+            "push"
+            $"--source {source}"
+            "--skip-duplicate"
+            $"{path}"
+        ]
+    )
+)
 
-    deployDir
-    |> dotnet (sprintf "nuget push -s %s %s" "gitlab" packPath)
+Target.create "PushToGitlab" (fun _ ->
+    let path = findPackPath deployDir
+    let source = "https://gitlab.com/api/v4/projects/28574921/packages/nuget/index.json"
+    let apiKey = Environment.environVarOrFail "GITLAB_DEPLOY_TOKEN"
+    "."
+    |> dotnet (
+        String.concat " " [
+            "nuget"
+            "push"
+            $"--source {source}"
+            $"--api-key {apiKey}"
+            "--skip-duplicate"
+            $"{path}"
+        ]
+    )
 )
 
 Target.create "BuildTests" (fun _ ->
@@ -158,7 +194,8 @@ open Fake.Core.TargetOperators
 "Clean"
   ==> "Meta"
   ==> "Pack"
-  ==> "PushToGitlab"
+"Pack" ==> "PushToGitlab"
+"Pack" ==> "PushToGitlabLocal"
 
 "BuildTests"
 
