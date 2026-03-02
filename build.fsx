@@ -1,10 +1,10 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
-#r "nuget: Fake.Core.Target, 6.1.4"
-#r "nuget: Fake.Core.ReleaseNotes, 6.1.4"
-#r "nuget: Fake.IO.FileSystem, 6.1.4"
-#r "nuget: Fake.DotNet.Cli, 6.1.4"
+#r "nuget: Fake.Core.Target, 6.0"
+#r "nuget: Fake.Core.ReleaseNotes, 6.0"
+#r "nuget: Fake.IO.FileSystem, 6.0"
+#r "nuget: Fake.DotNet.Cli, 6.0"
 
 open Fake.Core
 open Fake.IO
