@@ -361,7 +361,7 @@ let pcharFromDicTest =
                     "^"
                     "Expecting: label"
                     ""
-                ] |> String.concat "\r\n"
+                ] |> String.concat System.Environment.NewLine
             Assert.Equal("", Left exp, act)
         )
     ]

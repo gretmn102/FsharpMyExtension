@@ -70,7 +70,11 @@ let changeExtTests =
     testList "changeExtTests" [
         testCase "base" <| fun () ->
             let input = @"E:\Project\SmallTask\sandbox3.fsx"
-            let exp = @"E:\Project\SmallTask\sandbox3.txt"
+            let exp =
+                if System.Environment.OSVersion.Platform = System.PlatformID.Unix then
+                    @"/E:\Project\SmallTask\sandbox3.txt"
+                else
+                    @"E:\Project\SmallTask\sandbox3.txt"
             let act = changeExt ".txt" input
 
             Assert.Equal("", exp, act)
