@@ -164,4 +164,10 @@ open Fake.Core.TargetOperators
 
 "RunTestsNet461"
 
-Target.runOrDefault "Deploy"
+try
+    Target.runOrDefault "Deploy"
+    0
+with e ->
+    eprintfn "%A" e.Message
+    1
+|> exit
