@@ -41,3 +41,10 @@ let ofDigits =
         )
         (0, 0)
     >> fst
+
+let zeroPad length (number: int) =
+    let stringNumber = number.ToString()
+    let digitsCount = stringNumber.Length
+    let diff = length - digitsCount
+    let zeros = if diff > 0 then String.replicate diff "0" else ""
+    zeros + stringNumber
