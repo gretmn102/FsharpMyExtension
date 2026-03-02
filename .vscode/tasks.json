@@ -17,6 +17,19 @@
             "problemMatcher": []
         },
         {
+            "label": "RunTestsNetcoreapp3.1",
+            "type": "shell",
+            "options": { "env": {"DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"} },
+            "command": "dotnet",
+            "args": [
+                "fsi",
+                "build.fsx",
+                "-t",
+                "RunTestsNetcoreapp3.1"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "DeployNet461",
             "type": "shell",
             "command": "build",
