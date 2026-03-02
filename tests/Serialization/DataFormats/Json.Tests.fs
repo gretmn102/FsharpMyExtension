@@ -26,7 +26,7 @@ module SerializeOptionTests =
     ]
 
     let jsonExp =
-        String.concat "\r\n" [
+        String.concat System.Environment.NewLine [
             "["
             "  {"
             "    \"Opt\": null"
