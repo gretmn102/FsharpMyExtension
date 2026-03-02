@@ -135,6 +135,11 @@ Target.create "RunTestsNet461" (fun _ ->
     |> dotnet (sprintf "run %s -f net461" commonBuildArgs)
 )
 
+Target.create "RunTestsNetcoreapp3.1" (fun _ ->
+    testsProjDir
+    |> dotnet (sprintf "run %s -f netcoreapp3.1" commonBuildArgs)
+)
+
 Target.create "FableBuild" (fun _ ->
     mainProjDir
     |> dotnet "fable -o bin/fable"
