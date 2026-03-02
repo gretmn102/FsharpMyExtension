@@ -1,6 +1,7 @@
 module FsharpMyExtension.Primitives.Numeric.Int32.Tests
 open Fuchu
-open FsharpMyExtension
+
+open Helpers
 
 [<Tests>]
 let getLengthTests =
@@ -56,4 +57,15 @@ let digitsSplitAndJoinTests =
         test [3; 1; 4; 5; 6; 1]
         test [1; 6; 4; 6; 2; 4; 4; 9]
         test [8; 9; 4; 0; 9; 9; 6]
+    ]
+
+[<Tests>]
+let ``Primitives.Numeric.Int32.zeroPad`` =
+    testList "Primitives.Numeric.Int32.zeroPad" [
+        testCase "0 100 = 100" <| fun () ->
+            Expect.equal (zeroPad 0 100) "100" ""
+        testCase "1 1 = 1" <| fun () ->
+            Expect.equal (zeroPad 1 1) "1" ""
+        testCase "2 9 = 09" <| fun () ->
+            Expect.equal (zeroPad 2 9) "09" ""
     ]
