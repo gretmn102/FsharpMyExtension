@@ -1,3 +1,9 @@
+## 2.0.0-prerelease.10
+
+* feat(Primitives.Numeric.Int32): add `zeroPad` (#16)
+* feat(IO): add memory file system (#9)
+* feat: add `truncate` to `Primitives.String`
+
 ## 2.0.0-prerelease.9
 * restructure the entire project
 
