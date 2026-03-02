@@ -1,9 +1,10 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
-#r "paket: groupref build //"
-#load "./.fake/build.fsx/intellisense.fsx"
-#r "netstandard"
+#r "nuget: Fake.Core.Target, 5.20.4"
+#r "nuget: Fake.Core.ReleaseNotes, 5.20.4"
+#r "nuget: Fake.IO.FileSystem, 5.20.4"
+#r "nuget: Fake.DotNet.Cli, 5.20.4"
 
 open Fake.Core
 open Fake.IO
@@ -48,9 +49,20 @@ module XmlText =
         let node = doc.CreateElement("root")
         node.InnerText <- rawText
         node.InnerXml
+
+let initViaFsi () =
+    System.Environment.GetCommandLineArgs()
+    |> Array.skip 2 // skip fsi.exe; build.fsx
+    |> Array.toList
+    |> Fake.Core.Context.FakeExecutionContext.Create false __SOURCE_FILE__
+    |> Fake.Core.Context.RuntimeContext.Fake
+    |> Fake.Core.Context.setExecutionContext
+
+    Target.initEnvironment ()
 // --------------------------------------------------------------------------------------
 // Targets
 // --------------------------------------------------------------------------------------
+initViaFsi ()
 
 Target.create "Clean" (fun _ ->
     let cleanBinAndObj projectPath =
