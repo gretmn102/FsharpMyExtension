@@ -1,3 +1,7 @@
+## 2.0.0-prerelease.11
+
+* chore(dependencies)!: soften package versions (#18)
+
 ## 2.0.0-prerelease.10
 
 * feat(Primitives.Numeric.Int32): add `zeroPad` (#16)
