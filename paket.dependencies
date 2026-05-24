@@ -3,14 +3,14 @@ storage: none
 source https://api.nuget.org/v3/index.json
 framework: net461, netstandard2.0
 
-nuget FParsec = 1.1.1
-nuget FSharp.Core = 4.7.2
-nuget HtmlAgilityPack = 1.11.24
-nuget Newtonsoft.Json = 12.0.3
-nuget Newtonsoft.Json.Bson = 1.0.2
-nuget TextCopy = 4.2
-nuget System.Drawing.Common = 4.7
-nuget dotenv.net
+nuget FParsec >= 1.1.1 lowest_matching: true
+nuget FSharp.Core >= 4.7.2 lowest_matching: true
+nuget HtmlAgilityPack >= 1.11.24 lowest_matching: true
+nuget Newtonsoft.Json >= 12.0.3 lowest_matching: true
+nuget Newtonsoft.Json.Bson >= 1.0.2 lowest_matching: true
+nuget TextCopy >= 4.2 lowest_matching: true
+nuget System.Drawing.Common >= 4.7 lowest_matching: true
+nuget dotenv.net >= 3.1.2 lowest_matching: true
 
 group Tests
     strategy: min
@@ -18,5 +18,17 @@ group Tests
     source https://api.nuget.org/v3/index.json
     framework: net461, netcoreapp3.1
 
-    nuget FSharp.Core = 4.7.2
-    nuget Fuchu
+    nuget FSharp.Core >= 4.7.2 lowest_matching: true
+    nuget Fuchu >= 1.1 lowest_matching: true
+
+group Build
+    source https://api.nuget.org/v3/index.json
+    framework: netstandard2.0
+    storage: none
+    strategy: min
+
+    nuget FSharp.Core >= 5.0.2 lowest_matching: true
+    nuget Fake.Core.ReleaseNotes >= 5.20.4 lowest_matching: true
+    nuget Fake.Core.Target >= 5.20.4 lowest_matching: true
+    nuget Fake.DotNet.Cli >= 5.20.4 lowest_matching: true
+    nuget Fake.IO.FileSystem >= 5.20.4 lowest_matching: true
