@@ -1,4 +1,4 @@
-namespace FsharpMyExtension.Grahics
+namespace FsharpMyExtension.Graphics
 
 type Size =
     {

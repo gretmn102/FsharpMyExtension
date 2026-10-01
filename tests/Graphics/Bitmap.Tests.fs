@@ -1,4 +1,4 @@
-module FsharpMyExtension.Grahics.Bitmap.Tests
+module FsharpMyExtension.Graphics.Bitmap.Tests
 open Fuchu
 open System.Drawing
 
