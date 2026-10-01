@@ -1,7 +1,7 @@
 module FsharpMyExtension.Graphics.Size.Tests
 open Fuchu
 
-open FsharpMyExtension.Grahics
+open FsharpMyExtension.Graphics
 
 open Helpers
 
