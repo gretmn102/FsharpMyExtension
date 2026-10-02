@@ -67,3 +67,7 @@ let changeExt ext path =
         ext
     |]
     |> System.String.Concat
+
+[<AutoOpen>]
+module Operators =
+    let (</>) x y = Path.Combine(x, y)
